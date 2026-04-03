@@ -1,0 +1,6 @@
+@PayItOff.Api_HostAddress = http://localhost:5180
+
+GET {{PayItOff.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

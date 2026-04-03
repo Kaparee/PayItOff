@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="PayItOff.Api/PayItOff.Api.csproj" />
+    <Project Path="PayItOff.Application/PayItOff.Application.csproj" />
+    <Project Path="PayItOff.Domain/PayItOff.Domain.csproj" />
+    <Project Path="PayItOff.Infrastructure/PayItOff.Infrastructure.csproj" />
+  </Folder>
+</Solution>
