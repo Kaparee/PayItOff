@@ -4,5 +4,7 @@
     <Project Path="PayItOff.Application/PayItOff.Application.csproj" />
     <Project Path="PayItOff.Domain/PayItOff.Domain.csproj" />
     <Project Path="PayItOff.Infrastructure/PayItOff.Infrastructure.csproj" />
+    <Project Path="PayItOff.MauiClient/PayItOff.MauiClient.csproj" />
+    <Project Path="PayItOff.Shared/PayItOff.Shared.csproj" />
   </Folder>
 </Solution>
