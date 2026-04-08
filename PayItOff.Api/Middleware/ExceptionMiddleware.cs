@@ -40,6 +40,7 @@ public class ExceptionMiddleware
                     UserAlreadyExistsException => (int)HttpStatusCode.Conflict, // 409
                     InvalidPasswordException => (int)HttpStatusCode.BadRequest, // 400
                     UserNotActiveOrVerifiedException => (int)HttpStatusCode.BadRequest, // 400
+                    GroupNotFoundException => (int)HttpStatusCode.NotFound,
                     _ => (int)HttpStatusCode.BadRequest
                 };
                 await context.Response.WriteAsync(JsonSerializer.Serialize(new { Error = domainEx.Message }, _jsonOptions));

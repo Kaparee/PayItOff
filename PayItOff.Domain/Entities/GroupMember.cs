@@ -5,8 +5,8 @@ namespace PayItOff.Domain.Entities
     public class GroupMember
     {
         public int Id { get; private set; }
-        public User User { get; private set; }
-        public Group Group { get; private set; }
+        public User? User { get; private set; }
+        public Group? Group { get; private set; }
         public int UserId { get; private set; }
         public int GroupId { get; private set; }
         public bool IsFavorite { get; private set; }

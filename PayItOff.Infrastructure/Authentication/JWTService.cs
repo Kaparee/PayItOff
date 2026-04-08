@@ -6,7 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace PayItOff.Application.Services
+namespace PayItOff.Infrastructure.Authentication
 {
     public class JWTService : IJWTService
     {

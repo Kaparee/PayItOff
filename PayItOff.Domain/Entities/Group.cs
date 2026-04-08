@@ -3,8 +3,8 @@ namespace PayItOff.Domain.Entities
     public class Group
     {
         public int Id { get; private set; }
-        public string Name { get; private set; }
-        public string AvatarUrl { get; private set; }
+        public string Name { get; private set; } = string.Empty;
+        public string AvatarUrl { get; private set; } = string.Empty;
         public DateTime CreatedAt { get; private set; }
         public DateTime UpdatedAt { get; private set; }
         public DateTime? DeletedAt { get; private set; }

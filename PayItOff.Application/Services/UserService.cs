@@ -34,7 +34,7 @@ public class UserService : IUserService
         var validationResult = await _validator.ValidateAsync(request);
         if (!validationResult.IsValid) throw new ValidationException(validationResult.Errors);
 
-        var existingUser = await _userRepository.GetByEmailAsync(request.Email);
+        var existingUser = await _userRepository.GetUserByEmailAsync(request.Email);
         if (existingUser != null) throw new UserAlreadyExistsException("Email", request.Email);
 
         string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
@@ -50,27 +50,31 @@ public class UserService : IUserService
             request.IBAN
         );
 
-        await _userRepository.AddAsync(user);
-
-        await _unitOfWork.SaveChangesAsync();
-
-        var backendUrl = _configuration["AppUrls:BackendUrl"];
+        await _unitOfWork.BeginTransactionAsync();
         try
         {
+
+            await _userRepository.AddAsync(user);
+
+            await _unitOfWork.SaveChangesAsync();
+
+            var backendUrl = _configuration["AppUrls:BackendUrl"];
             await _emailService.SendEmailAsync(user.Email, "Witaj w PayItOff!", $"<h1>Cześć {user.Nickname}!</h1><p>Dzięki za rejestrację.<br/>Aby zweryfikować konto, kliknij tutaj -> <a href=\"{backendUrl}/api/User/verify?verificationToken={user.VerificationToken}\">Link</a></p>");
+            await _unitOfWork.CommitAsync();
         }
         catch
         {
-            throw new Exception("Błąd przy wysyłaniu maila!");
+            await _unitOfWork.RollbackAsync();
+            throw new Exception("Serwis pocztowy chwilowo niedostępny. Spróbuj ponownie później.");
         }
     }
 
     public async Task<LoginResponse> LoginAsync(LoginRequest request)
     {
         var user = await _userRepository.GetUserByEmailOrNicknameAsync(request.EmailOrNickname);
-        if(user is null) { throw new UserNotFoundException(); }
-        if(!BCrypt.Net.BCrypt.Verify(request.Password, user.PassHash)) { throw new InvalidPasswordException(); }
-        if(!user.IsActive || !user.IsVerified) { throw new UserNotActiveOrVerifiedException(); }
+        if (user is null) { throw new UserNotFoundException(); }
+        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PassHash)) { throw new InvalidPasswordException(); }
+        if (!user.IsActive || !user.IsVerified) { throw new UserNotActiveOrVerifiedException(); }
 
         var token = _jwtService.GenerateToken(user);
 

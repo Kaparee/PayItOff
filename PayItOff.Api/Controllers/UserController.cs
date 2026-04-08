@@ -9,6 +9,7 @@ namespace PayItOff.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class UserController : ControllerBase
 {
     private readonly IUserService _service;
@@ -31,9 +32,9 @@ public class UserController : ControllerBase
         return Ok(result);
     }
 
-    //"email": "jp134960@stud.ur.edu.pl",
+    //"email": "jakub@plocica.com",
     //"password": "JakubPlocica123!",
-    //"nickname": "Kaparee",
+    //"nickname": "JakubPlocica",
     //"name": "Jakub",
     //"surname": "Płocica"
 

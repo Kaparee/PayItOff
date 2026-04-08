@@ -14,7 +14,7 @@ public class UserRepository : IUserRepository
         _context = context;
     }
 
-    public async Task<User?> GetByEmailAsync(string email)
+    public async Task<User?> GetUserByEmailAsync(string email)
     {
         return await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
     }
@@ -33,12 +33,18 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetUserByEmailOrNicknameAsync(string eon)
     {
         return await _context.Users
-            //.Where(x => x.IsActive == true && x.IsVerified == true)
+            .AsNoTracking()
+            .Where(x => x.DeletedAt == null)
             .FirstOrDefaultAsync(x => x.Email == eon || x.Nickname == eon);
     }
 
     public async Task<User?> GetUserByVerificationTokenAsync(string token)
     {
         return await _context.Users.FirstOrDefaultAsync(x => x.VerificationToken == token);
+    }
+
+    public async Task<User?> GetUserByIdAsync(int userId)
+    {
+        return await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
     }
 }
