@@ -1,26 +1,88 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:PayItOff.MauiClient.ViewModels"
              x:Class="PayItOff.MauiClient.Views.LoginPage"
-             Title="Zaloguj się">
+             x:DataType="viewmodels:LoginViewModel"
+             BackgroundColor="{StaticResource MainBackground}">
 
-    <VerticalStackLayout Spacing="20" Padding="30" VerticalOptions="Center">
+    <ContentPage.Resources>
+        <Style x:Key="BaseEntryBorderStyle" TargetType="Border">
+            <Setter Property="Stroke" Value="{StaticResource Border}" />
+            <Setter Property="StrokeThickness" Value="1" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 12" />
+            <Setter Property="BackgroundColor" Value="{StaticResource SurfaceDark}" />
+            <Setter Property="Padding" Value="15,0" />
+        </Style>
 
-        <Label Text="PayItOff" FontSize="32" HorizontalOptions="Center" FontAttributes="Bold" />
+        <Style x:Key="PasswordEntryBorderStyle" TargetType="Border" BasedOn="{StaticResource BaseEntryBorderStyle}">
+            <Style.Triggers>
+                <DataTrigger TargetType="Border" Binding="{Binding HasError}" Value="True">
+                    <Setter Property="Stroke">
+                        <Setter.Value>
+                            <SolidColorBrush Color="{StaticResource StatusRed}" />
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="StrokeThickness" Value="2" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </ContentPage.Resources>
 
-        <Entry Placeholder="Email lub Nickname" 
-               Text="{Binding EmailOrNickname}" />
+    <ScrollView>
+        <VerticalStackLayout Spacing="25" Padding="30" VerticalOptions="Center" MaximumWidthRequest="1000">
 
-        <Entry Placeholder="Hasło" 
-               IsPassword="True"
-               Text="{Binding Password}" />
+            <Label Text="PayItOff!" Style="{StaticResource Headline}" Margin="0,0,0,20" />
 
-        <Button Text="Zaloguj" 
-                Command="{Binding LoginCommand}" />
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Adres E-Mail lub Nazwa Użytkownika"
+                       TextColor="{StaticResource TextSubtle}"
+                       Margin="10, 0" />
+                <Border Style="{StaticResource BaseEntryBorderStyle}">
+                    <Entry Text="{Binding EmailOrNickname}"
+                           Placeholder="Wpisz email lub nickname..."
+                           Margin="0" />
+                </Border>
+            </VerticalStackLayout>
 
-        <ActivityIndicator IsRunning="{Binding IsBusy}" 
-                           IsVisible="{Binding IsBusy}" 
-                           HorizontalOptions="Center" />
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Hasło" TextColor="{StaticResource TextSubtle}" Margin="10, 0" />
+                <Border Style="{StaticResource PasswordEntryBorderStyle}">
+                    <Grid ColumnDefinitions="*, Auto">
 
-    </VerticalStackLayout>
+                        <Entry Grid.Column="0"
+                           Text="{Binding Password}"
+                           IsPassword="{Binding IsPasswordHidden}"
+                           Placeholder="••••••••"
+                           ReturnCommand="{Binding LoginCommand}"
+                           ReturnType="Done"
+                           Margin="0" />
+
+                        <Button Grid.Column="1"
+                            Text="{Binding PasswordIcon}"
+                            Command="{Binding TogglePasswordVisibilityCommand}"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource TextMain}"
+                            FontSize="18"
+                            Padding="0"
+                            HeightRequest="45"
+                            WidthRequest="45"
+                            VerticalOptions="Center" /> 
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                   IsVisible="{Binding IsBusy}"
+                   Color="{StaticResource PrimaryViolet}" />
+
+            <Button Text="Zaloguj się"
+                    Command="{Binding LoginCommand}" />
+
+            <Button Text="Nie masz konta? Zarejestruj się"
+                    BackgroundColor="Transparent"
+                    Command="{Binding GoToRegisterCommand}"
+                    TextColor="{StaticResource BrandViolet}" />
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

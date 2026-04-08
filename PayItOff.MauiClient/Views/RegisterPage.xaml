@@ -1,16 +1,162 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:viewModels="clr-namespace:PayItOff.MauiClient.ViewModels"
+             xmlns:viewmodels="clr-namespace:PayItOff.MauiClient.ViewModels"
              x:Class="PayItOff.MauiClient.Views.RegisterPage"
-             Title="Rejestracja">
-    <VerticalStackLayout Spacing="15" Padding="30" VerticalOptions="Center">
-        <Entry Text="{Binding Email}" Placeholder="Email" Keyboard="Email" />
-        <Entry Text="{Binding Password}" Placeholder="Hasło" IsPassword="True" />
-        <Entry Text="{Binding Nickname}" Placeholder="Nickname" />
-        <Entry Text="{Binding Name}" Placeholder="Imię" />
-        <Entry Text="{Binding Surname}" Placeholder="Nazwisko" />
+             x:DataType="viewmodels:RegisterViewModel"
+             Title="Rejestracja"
+             BackgroundColor="{StaticResource MainBackground}">
+            <ContentPage.Resources>
+                <Style x:Key="BaseEntryBorderStyle" TargetType="Border">
+                    <Setter Property="Stroke" Value="{StaticResource Border}" />
+                    <Setter Property="StrokeThickness" Value="1" />
+                    <Setter Property="StrokeShape" Value="RoundRectangle 12" />
+                    <Setter Property="BackgroundColor" Value="{StaticResource SurfaceDark}" />
+                    <Setter Property="Padding" Value="15,0" />
+                </Style>
 
-        <Button Text="Zarejestruj" Command="{Binding RegisterCommand}" />
-    </VerticalStackLayout>
+                <Style x:Key="PasswordEntryBorderStyle" TargetType="Border" BasedOn="{StaticResource BaseEntryBorderStyle}">
+                    <Style.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding HasError}" Value="True">
+                            <Setter Property="Stroke">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="{StaticResource StatusRed}" />
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="StrokeThickness" Value="2" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="15" Padding="30" VerticalOptions="Center">
+
+            <Label Text="Stwórz konto" Style="{StaticResource Headline}" HorizontalOptions="Center" Margin="0,0,0,10" />
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Email" TextColor="{StaticResource TextSubtle}" Margin="10,0" />
+                <Border Style="{StaticResource BaseEntryBorderStyle}">
+                    <Entry Text="{Binding Email}" Placeholder="email@przyklad.pl" Keyboard="Email" />
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Nazwa użytkownika (Nick)" TextColor="{StaticResource TextSubtle}" Margin="10,0" />
+                <Border Style="{StaticResource BaseEntryBorderStyle}">
+                    <Entry Text="{Binding Nickname}" Placeholder="TwojNick" />
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Imię" TextColor="{StaticResource TextSubtle}" Margin="10,0" />
+                <Border Style="{StaticResource BaseEntryBorderStyle}">
+                    <Entry Text="{Binding Name}" Placeholder="Jan" />
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Nazwisko" TextColor="{StaticResource TextSubtle}" Margin="10,0" />
+                <Border Style="{StaticResource BaseEntryBorderStyle}">
+                    <Entry Text="{Binding Surname}" Placeholder="Kowalski" />
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Hasło" TextColor="{StaticResource TextSubtle}" Margin="10,10,0,0" />
+                <Label Text="Min. 8 znaków, wielka litera, cyfra i znak specjalny" FontSize="10" TextColor="{StaticResource TextSubtle}" Margin="10,0,0,5" />
+
+                <Border Style="{StaticResource PasswordEntryBorderStyle}">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <Entry Grid.Column="0"
+                           Text="{Binding Password}"
+                           IsPassword="{Binding IsPasswordHidden}"
+                           Placeholder="••••••••"
+                           ReturnCommand="{Binding RegisterCommand}"
+                           ReturnType="Done"
+                           Margin="0" />
+
+                        <Button Grid.Column="1"
+                            Text="{Binding PasswordIcon}"
+                            Command="{Binding TogglePasswordVisibilityCommand}"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource TextMain}"
+                            FontSize="18"
+                            Padding="0"
+                            HeightRequest="45"
+                            WidthRequest="45"
+                            VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Numer telefonu" TextColor="{StaticResource TextSubtle}" Margin="10,0" />
+                <Border Style="{StaticResource BaseEntryBorderStyle}">
+                    <Entry Text="{Binding PhoneNumber}"
+               Placeholder="+48 123 456 789"
+               Keyboard="Telephone" />
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Numer konta (IBAN)" TextColor="{StaticResource TextSubtle}" Margin="10,0" />
+                <Border Style="{StaticResource BaseEntryBorderStyle}">
+                    <Entry Text="{Binding IBAN}"
+               Placeholder="PL 00 0000 0000..."
+               Keyboard="Text" />
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="10" Margin="0,0,0,20" HorizontalOptions="Center">
+                <Border Stroke="#7F00FF"
+                    StrokeThickness="2"
+                    HeightRequest="120"
+                    WidthRequest="120"
+                    HorizontalOptions="Center">
+
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding PickAvatarCommand}" />
+                    </Border.GestureRecognizers>
+
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="60" />
+                    </Border.StrokeShape>
+
+                    <Grid>
+                        <BoxView Color="#2B2B3D" CornerRadius="60" />
+
+                        <Label Text="+"
+                           TextColor="#7F00FF"
+                           FontSize="40"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           IsVisible="{Binding IsAvatarPlaceholderVisible}" />
+
+                        <Image Source="{Binding AvatarPreviewSource}"
+                           Aspect="AspectFill"
+                           IsVisible="{Binding IsAvatarImageVisible}" />
+                    </Grid>
+                </Border>
+
+                <Label Text="Kliknij, aby wybrać zdjęcie"
+                   TextColor="#7F00FF"
+                   FontSize="12"
+                   HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <Button Text="Zarejestruj się"
+                    Command="{Binding RegisterCommand}"
+                    Margin="0,20,0,0" />
+
+            <Button Text="Masz już konto? Zaloguj się"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource BrandViolet}"
+                    Command="{Binding GoToLoginCommand}" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" HorizontalOptions="Center" Color="{StaticResource BrandViolet}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

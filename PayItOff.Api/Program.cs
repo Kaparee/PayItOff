@@ -11,6 +11,7 @@ using PayItOff.Domain.Interfaces;
 using PayItOff.Infrastructure.Authentication;
 using PayItOff.Infrastructure.Persistence;
 using PayItOff.Infrastructure.Repositories;
+using PayItOff.Infrastructure.Services;
 using PayItOff.Shared.Requests;
 using System.Text;
 
@@ -77,6 +78,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IJWTService, JWTService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<IFileService, FileService>();
 
 // Validators
 builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
@@ -92,6 +94,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<ExceptionMiddleware>();
+
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();

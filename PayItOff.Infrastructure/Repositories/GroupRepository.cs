@@ -18,9 +18,10 @@ public class GroupRepository : IGroupRepository
     public async Task<List<Group?>> GetUserGroupsAsync(int userId)
     {
         return await _context.GroupMembers
-            .Where(m => m.UserId == userId)
-            .OrderByDescending(m => m.IsFavorite)
-            .Select(m => m.Group)
+            .Where(x => x.UserId == userId)
+            .OrderByDescending(x => x.IsFavorite)
+            .Select(x => x.Group)
+            .Where(x => x!.DeletedAt == null)
             .ToListAsync();
     }
 
@@ -33,5 +34,12 @@ public class GroupRepository : IGroupRepository
     {
         _context.Groups.Update(group);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<Group?> GetGroupInfoByIdAsync(int groupId)
+    {
+        return await _context.Groups
+            .Where(x => x.Id == groupId && x.DeletedAt == null)
+            .FirstOrDefaultAsync();
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using PayItOff.Application.Interfaces;
+using PayItOff.Application.Services;
 using PayItOff.Shared.Requests;
 
 namespace PayItOff.Api.Controllers;
@@ -12,23 +13,24 @@ namespace PayItOff.Api.Controllers;
 [Authorize]
 public class UserController : ControllerBase
 {
-    private readonly IUserService _service;
+    private readonly IUserService _userService;
 
-    public UserController(IUserService service) { _service = service; }
+    public UserController(IUserService userService) { _userService = userService; }
 
     [HttpPost("register")]
     [AllowAnonymous]
-    public async Task<IActionResult> Create([FromBody] RegisterRequest request)
+    public async Task<IActionResult> Register([FromForm] RegisterRequest request, IFormFile? avatar)
     {
-        await _service.RegisterAsync(request);
+        await _userService.RegisterAsync(request, avatar);
         return Ok();
     }
+
 
     [HttpPost("login")]
     [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var result = await _service.LoginAsync(request);
+        var result = await _userService.LoginAsync(request);
         return Ok(result);
     }
 
@@ -42,7 +44,7 @@ public class UserController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Verify([FromQuery] string verificationToken)
     {
-        await _service.VerifyUserAsync(verificationToken);
+        await _userService.VerifyUserAsync(verificationToken);
         return Ok("Konto zostało zweryfikowane. Możesz się zalogować.");
     }
 }

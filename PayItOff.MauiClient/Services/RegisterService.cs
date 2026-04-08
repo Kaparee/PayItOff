@@ -1,5 +1,4 @@
 ﻿using System.Net.Http.Json;
-using System.Text.Json;
 using PayItOff.Shared.Requests;
 
 namespace PayItOff.MauiClient.Services;
@@ -7,16 +6,36 @@ namespace PayItOff.MauiClient.Services;
 public class RegisterService
 {
     private readonly HttpClient _httpClient;
-    private const string BaseUrl = "http://localhost:5180/api/User"; // Zmień na swój port!
 
     public RegisterService(HttpClient httpClient)
     {
         _httpClient = httpClient;
     }
-
-    public async Task<bool> RegisterAsync(RegisterRequest request)
+    public async Task<bool> RegisterAsync(RegisterRequest request, FileResult? avatarFile)
     {
-        var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/register", request);
+        using var content = new MultipartFormDataContent();
+
+        content.Add(new StringContent(request.Email ?? ""), "Email");
+        content.Add(new StringContent(request.Password ?? ""), "Password");
+        content.Add(new StringContent(request.Nickname ?? ""), "Nickname");
+        content.Add(new StringContent(request.Name ?? ""), "Name");
+        content.Add(new StringContent(request.Surname ?? ""), "Surname");
+
+        if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+            content.Add(new StringContent(request.PhoneNumber), "PhoneNumber");
+
+        if (!string.IsNullOrWhiteSpace(request.IBAN))
+            content.Add(new StringContent(request.IBAN), "IBAN");
+
+        if (avatarFile != null)
+        {
+            var fileStream = await avatarFile.OpenReadAsync();
+            var streamContent = new StreamContent(fileStream);
+
+            content.Add(streamContent, "avatar", avatarFile.FileName);
+        }
+
+        var response = await _httpClient.PostAsync($"User/register", content);
 
         if (response.IsSuccessStatusCode)
         {
@@ -24,7 +43,6 @@ public class RegisterService
         }
 
         var errorContent = await response.Content.ReadAsStringAsync();
-
         throw new Exception($"Błąd serwera: {errorContent}");
     }
 }

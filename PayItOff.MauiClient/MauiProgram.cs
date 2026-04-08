@@ -10,37 +10,34 @@ namespace PayItOff.MauiClient
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
-            builder
-                .UseMauiApp<App>()
-                .ConfigureFonts(fonts =>
-                {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                });
-            builder.Services.AddSingleton<HttpClient>();
-            // Services
-            builder.Services.AddTransient<AuthHandler>();
-            builder.Services.AddSingleton<RegisterService>();
-            builder.Services.AddHttpClient<AuthService>();
+            builder.UseMauiApp<App>();
 
-            builder.Services.AddHttpClient<AuthService>(client =>
+            string baseUrl = DeviceInfo.Platform == DevicePlatform.Android
+                ? "http://10.0.2.2:5180/api/"
+                : "http://localhost:5180/api/";
+
+
+            builder.Services.AddTransient<AuthHandler>();
+
+            builder.Services.AddHttpClient("PayItOffApi", client =>
             {
-                client.BaseAddress = new Uri("http://localhost:5180/api/");
+                client.BaseAddress = new Uri(baseUrl);
             })
             .AddHttpMessageHandler<AuthHandler>();
 
-            //ViewModels
+            builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("PayItOffApi"));
+
+            // Services
+            builder.Services.AddSingleton<RegisterService>();
+            builder.Services.AddScoped<AuthService>();
+
+            // ViewModels
             builder.Services.AddTransient<RegisterViewModel>();
             builder.Services.AddTransient<LoginViewModel>();
 
-            //Views
+            // Views
             builder.Services.AddTransient<RegisterPage>();
             builder.Services.AddTransient<LoginPage>();
-
-
-#if DEBUG
-            builder.Logging.AddDebug();
-#endif
 
             return builder.Build();
         }

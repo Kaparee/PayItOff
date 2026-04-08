@@ -1,5 +1,6 @@
 ﻿using BCrypt.Net;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using PayItOff.Application.Interfaces;
 using PayItOff.Domain.Entities;
@@ -18,8 +19,9 @@ public class UserService : IUserService
     private readonly IJWTService _jwtService;
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
+    private readonly IFileService _fileService;
 
-    public UserService(IUserRepository userRepository, IUnitOfWork unitOfWork, IValidator<RegisterRequest> validator, IJWTService jwtService, IEmailService emailService, IConfiguration configuration)
+    public UserService(IUserRepository userRepository, IUnitOfWork unitOfWork, IValidator<RegisterRequest> validator, IJWTService jwtService, IEmailService emailService, IConfiguration configuration, IFileService fileService)
     {
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
@@ -27,9 +29,10 @@ public class UserService : IUserService
         _jwtService = jwtService;
         _emailService = emailService;
         _configuration = configuration;
+        _fileService = fileService;
     }
 
-    public async Task RegisterAsync(RegisterRequest request)
+    public async Task RegisterAsync(RegisterRequest request, IFormFile? avatar = null)
     {
         var validationResult = await _validator.ValidateAsync(request);
         if (!validationResult.IsValid) throw new ValidationException(validationResult.Errors);
@@ -39,6 +42,16 @@ public class UserService : IUserService
 
         string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
+        if (!string.IsNullOrWhiteSpace(request.IBAN))
+        {
+            request.IBAN = request.IBAN.Replace(" ", "").ToUpper();
+        }
+
+        var savedFileName = await _fileService.SaveAvatarAsync(avatar);
+        if (savedFileName != null)
+        {
+            request.AvatarUrl = savedFileName;
+        }
 
         var user = User.Register(
             request.Email,
@@ -46,6 +59,7 @@ public class UserService : IUserService
             request.Nickname,
             request.Name,
             request.Surname,
+            request.AvatarUrl,
             request.PhoneNumber,
             request.IBAN
         );

@@ -8,7 +8,6 @@ namespace PayItOff.MauiClient.Services;
 public class AuthService
 {
     private readonly HttpClient _httpClient;
-    private const string BaseUrl = "http://localhost:5180/api/User";
 
     public AuthService(HttpClient httpClient)
     {
@@ -17,7 +16,7 @@ public class AuthService
 
     public async Task<bool> LoginAsync(LoginRequest request)
     {
-        var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/login", request);
+        var response = await _httpClient.PostAsJsonAsync($"User/login", request);
 
         if (response.IsSuccessStatusCode)
         {

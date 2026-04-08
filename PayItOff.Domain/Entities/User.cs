@@ -8,7 +8,7 @@ namespace PayItOff.Domain.Entities
 		public string Nickname { get; private set; } = null!;
 		public string Name { get; private set; } = null!;
 		public string Surname { get; private set; } = null!;
-		public string AvatarUrl { get; private set; } = null!;
+		public string? AvatarUrl { get; private set; }
 		public string? PhoneNumber { get; private set; }
 		public string? IBAN { get; private set; }
 		public NotificationsSettings NotificationsSettings { get; private set; } = null!;
@@ -39,7 +39,7 @@ namespace PayItOff.Domain.Entities
 			Nickname = nickname;
 			Name = name;
 			Surname = surname;
-			AvatarUrl = avatarUrl;
+			AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? "default-avatar.jpg" : avatarUrl;
 			NotificationsSettings = notificationsSettings ?? new NotificationsSettings();
 			VerificationToken = Guid.NewGuid().ToString();
 			PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? null : phoneNumber;
@@ -49,10 +49,9 @@ namespace PayItOff.Domain.Entities
 			IsActive = true;
 			IsVerified = false;
 		}
-		public static User Register(string email, string passHash, string nickname, string name, string surname, string? phoneNumber, string? iban)
+		public static User Register(string email, string passHash, string nickname, string name, string surname, string? avatarUrl, string? phoneNumber, string? iban)
 		{
-			string avatarUrl = "default_avatar.jpg";
-			return new User(email, passHash, nickname, name, surname, avatarUrl, new NotificationsSettings(), phoneNumber, iban);
+			return new User(email, passHash, nickname, name, surname, avatarUrl!, new NotificationsSettings(), phoneNumber, iban);
 		}
 
 		public void ConfirmVerification(string token)

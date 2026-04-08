@@ -37,7 +37,7 @@ public class GroupService : IGroupService
 
         var group = Group.Create(
             request.Name,
-            request.AvatarUrl
+            request.AvatarUrl!
         );
 
         var groupMember = GroupMember.CreateOwner(
@@ -73,5 +73,11 @@ public class GroupService : IGroupService
         }).ToList();
 
         return response;
+    }
+
+    public async Task InviteUserAsync(InviteUserRequest request)
+    {
+        var user = await _userRepository.GetUserByIdAsync(request.UserId);
+        if (user is null) { throw new UserNotFoundException(); }
     }
 }
