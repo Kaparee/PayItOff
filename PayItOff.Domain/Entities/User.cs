@@ -3,15 +3,15 @@ namespace PayItOff.Domain.Entities
 	public class User
 	{
 		public int Id { get; private set; }
-		public string Email { get; private set; }
-		public string PassHash { get; private set; }
-		public string Nickname { get; private set; }
-		public string Name { get; private set; }
-		public string Surname { get; private set; }
-		public string AvatarUrl { get; private set; }
+		public string Email { get; private set; } = null!;
+		public string PassHash { get; private set; } = null!;
+		public string Nickname { get; private set; } = null!;
+		public string Name { get; private set; } = null!;
+		public string Surname { get; private set; } = null!;
+		public string AvatarUrl { get; private set; } = null!;
 		public string? PhoneNumber { get; private set; }
 		public string? IBAN { get; private set; }
-		public NotificationsSettings NotificationsSettings { get; private set; }
+		public NotificationsSettings NotificationsSettings { get; private set; } = null!;
 		public string? VerificationToken { get; private set; }
 		public DateTime? VerifiedAt { get; private set; }
 		public string? PasswordResetToken { get; private set; }

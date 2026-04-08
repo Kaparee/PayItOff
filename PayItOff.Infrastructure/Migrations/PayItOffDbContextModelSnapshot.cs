@@ -735,36 +735,31 @@ namespace PayItOff.Infrastructure.Migrations
                 {
                     b.OwnsOne("PayItOff.Domain.Entities.NotificationsSettings", "NotificationsSettings", b1 =>
                         {
-                            b1.Property<int>("UserId")
-                                .HasColumnType("integer");
+                            b1.Property<int>("UserId");
 
-                            b1.Property<bool>("DailySummary")
-                                .HasColumnType("boolean");
+                            b1.Property<bool>("DailySummary");
 
-                            b1.Property<bool>("NotifyOnExpenseAdded")
-                                .HasColumnType("boolean");
+                            b1.Property<bool>("NotifyOnExpenseAdded");
 
-                            b1.Property<bool>("NotifyOnExpenseChanged")
-                                .HasColumnType("boolean");
+                            b1.Property<bool>("NotifyOnExpenseChanged");
 
-                            b1.Property<bool>("NotifyOnFriendRemoved")
-                                .HasColumnType("boolean");
+                            b1.Property<bool>("NotifyOnFriendRemoved");
 
-                            b1.Property<bool>("NotifyOnGroupJoined")
-                                .HasColumnType("boolean");
+                            b1.Property<bool>("NotifyOnGroupJoined");
 
-                            b1.Property<bool>("NotifyOnGroupRemoved")
-                                .HasColumnType("boolean");
+                            b1.Property<bool>("NotifyOnGroupRemoved");
 
-                            b1.Property<bool>("NotifyOnTransferConfirmed")
-                                .HasColumnType("boolean");
+                            b1.Property<bool>("NotifyOnTransferConfirmed");
 
-                            b1.Property<bool>("ReceiveEmail")
-                                .HasColumnType("boolean");
+                            b1.Property<bool>("ReceiveEmail");
 
                             b1.HasKey("UserId");
 
                             b1.ToTable("Users");
+
+                            b1
+                                .ToJson("NotificationsSettings")
+                                .HasColumnType("jsonb");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");

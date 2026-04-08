@@ -43,14 +43,6 @@ namespace PayItOff.Infrastructure.Migrations
                     AvatarUrl = table.Column<string>(type: "text", nullable: false),
                     PhoneNumber = table.Column<string>(type: "text", nullable: true),
                     IBAN = table.Column<string>(type: "text", nullable: true),
-                    NotificationsSettings_ReceiveEmail = table.Column<bool>(type: "boolean", nullable: false),
-                    NotificationsSettings_DailySummary = table.Column<bool>(type: "boolean", nullable: false),
-                    NotificationsSettings_NotifyOnGroupJoined = table.Column<bool>(type: "boolean", nullable: false),
-                    NotificationsSettings_NotifyOnExpenseAdded = table.Column<bool>(type: "boolean", nullable: false),
-                    NotificationsSettings_NotifyOnGroupRemoved = table.Column<bool>(type: "boolean", nullable: false),
-                    NotificationsSettings_NotifyOnFriendRemoved = table.Column<bool>(type: "boolean", nullable: false),
-                    NotificationsSettings_NotifyOnExpenseChanged = table.Column<bool>(type: "boolean", nullable: false),
-                    NotificationsSettings_NotifyOnTransferConfirmed = table.Column<bool>(type: "boolean", nullable: false),
                     VerificationToken = table.Column<string>(type: "text", nullable: true),
                     VerifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     PasswordResetToken = table.Column<string>(type: "text", nullable: true),
@@ -61,7 +53,8 @@ namespace PayItOff.Infrastructure.Migrations
                     IsVerified = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    NotificationsSettings = table.Column<string>(type: "jsonb", nullable: false)
                 },
                 constraints: table =>
                 {

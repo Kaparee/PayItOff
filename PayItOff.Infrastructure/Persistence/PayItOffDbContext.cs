@@ -38,7 +38,7 @@ namespace PayItOff.Infrastructure.Persistence
 
             modelBuilder.Entity<User>(builder =>
             {
-                builder.OwnsOne(u => u.NotificationsSettings);
+                builder.OwnsOne(u => u.NotificationsSettings).ToJson();
 
                 builder.HasIndex(u => u.Email).IsUnique();
                 builder.HasIndex(u => u.Nickname).IsUnique();

@@ -3,12 +3,12 @@
     x:Class="PayItOff.MauiClient.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:PayItOff.MauiClient"
+    xmlns:views="clr-namespace:PayItOff.MauiClient.Views"
     Title="PayItOff.MauiClient">
 
     <ShellContent
         Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
+        ContentTemplate="{DataTemplate views:LoginPage}"
         Route="MainPage" />
 
 </Shell>

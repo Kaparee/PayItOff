@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:PayItOff.MauiClient.ViewModels"
+             x:Class="PayItOff.MauiClient.Views.RegisterPage"
+             Title="Rejestracja">
+    <VerticalStackLayout Spacing="15" Padding="30" VerticalOptions="Center">
+        <Entry Text="{Binding Email}" Placeholder="Email" Keyboard="Email" />
+        <Entry Text="{Binding Password}" Placeholder="Hasło" IsPassword="True" />
+        <Entry Text="{Binding Nickname}" Placeholder="Nickname" />
+        <Entry Text="{Binding Name}" Placeholder="Imię" />
+        <Entry Text="{Binding Surname}" Placeholder="Nazwisko" />
+
+        <Button Text="Zarejestruj" Command="{Binding RegisterCommand}" />
+    </VerticalStackLayout>
+</ContentPage>
