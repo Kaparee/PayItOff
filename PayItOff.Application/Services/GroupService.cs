@@ -75,7 +75,7 @@ public class GroupService : IGroupService
         return response;
     }
 
-    public async Task InviteUserAsync(InviteUserRequest request)
+    public async Task InviteUserAsync(GroupInviteUserRequest request)
     {
         var user = await _userRepository.GetUserByIdAsync(request.UserId);
         if (user is null) { throw new UserNotFoundException(); }

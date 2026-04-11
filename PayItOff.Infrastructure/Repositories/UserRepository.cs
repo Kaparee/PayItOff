@@ -27,7 +27,6 @@ public class UserRepository : IUserRepository
     public async Task UpdateAsync(User user)
     {
         _context.Users.Update(user);
-        await _context.SaveChangesAsync();
     }
 
     public async Task<User?> GetUserByEmailOrNicknameAsync(string eon)
@@ -46,5 +45,24 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetUserByIdAsync(int userId)
     {
         return await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
+    }
+
+    public async Task<bool> IsEmailTakenAsync(string email)
+    {
+        return await _context.Users.AnyAsync(x => x.Email == email);
+    }
+
+    public async Task<User?> GetUserByPasswordResetTokenAsync(string token)
+    {
+        return await _context.Users
+            .Where(x => x.PasswordResetToken == token && x.DeletedAt == null)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<User?> GetUserByEmailChangeTokenAsync(string token)
+    {
+        return await _context.Users
+            .Where(x => x.EmailChangeToken == token && x.DeletedAt == null)
+            .FirstOrDefaultAsync();
     }
 }

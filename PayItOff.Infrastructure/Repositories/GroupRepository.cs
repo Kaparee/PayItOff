@@ -33,7 +33,6 @@ public class GroupRepository : IGroupRepository
     public async Task UpdateAsync(Group group)
     {
         _context.Groups.Update(group);
-        await _context.SaveChangesAsync();
     }
 
     public async Task<Group?> GetGroupInfoByIdAsync(int groupId)

@@ -33,13 +33,12 @@ namespace PayItOff.Domain.Entities
 			if (string.IsNullOrWhiteSpace(nickname)) { throw new ArgumentException(nameof(nickname)); }
 			if (string.IsNullOrWhiteSpace(name)) { throw new ArgumentException(nameof(name)); }
 			if (string.IsNullOrWhiteSpace(surname)) { throw new ArgumentException(nameof(surname)); }
-			if (string.IsNullOrWhiteSpace(avatarUrl)) { throw new ArgumentException(nameof(avatarUrl)); }
 			Email = email;
 			PassHash = passHash;
 			Nickname = nickname;
 			Name = name;
 			Surname = surname;
-			AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? "default-avatar.jpg" : avatarUrl;
+			AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? "default-avatar.png" : avatarUrl;
 			NotificationsSettings = notificationsSettings ?? new NotificationsSettings();
 			VerificationToken = Guid.NewGuid().ToString();
 			PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? null : phoneNumber;
@@ -65,20 +64,11 @@ namespace PayItOff.Domain.Entities
 			UpdatedAt = DateTime.UtcNow;
 		}
 
-		public void UpdateNotifications(bool? receiveEmail = null, bool? dailySummary = null, bool? notifyOnGroupJoined = null, bool? notifyOnExpenseAdded = null, bool? notifyOnGroupRemoved = null, bool? notifyOnFriendRemoved = null, bool? notifyOnExpenseChanged = null, bool? notifyOnTransferConfirmed = null)
+		public void UpdateNotifications(NotificationsSettings newSettings)
 		{
-			NotificationsSettings = NotificationsSettings with
-			{
-				ReceiveEmail = receiveEmail ?? NotificationsSettings.ReceiveEmail,
-				DailySummary = dailySummary ?? NotificationsSettings.DailySummary,
-				NotifyOnGroupJoined = notifyOnGroupJoined ?? NotificationsSettings.NotifyOnGroupJoined,
-				NotifyOnExpenseAdded = notifyOnExpenseAdded ?? NotificationsSettings.NotifyOnExpenseAdded,
-				NotifyOnGroupRemoved = notifyOnGroupRemoved ?? NotificationsSettings.NotifyOnGroupRemoved,
-				NotifyOnFriendRemoved = notifyOnFriendRemoved ?? NotificationsSettings.NotifyOnFriendRemoved,
-				NotifyOnExpenseChanged = notifyOnExpenseChanged ?? NotificationsSettings.NotifyOnExpenseChanged,
-				NotifyOnTransferConfirmed = notifyOnTransferConfirmed ?? NotificationsSettings.NotifyOnTransferConfirmed
-			};
+			if (newSettings == null) { throw new ArgumentNullException(nameof(newSettings)); }
 
+			NotificationsSettings = newSettings;
 			UpdatedAt = DateTime.UtcNow;
 		}
 
@@ -100,23 +90,7 @@ namespace PayItOff.Domain.Entities
 
 		public void UpdateAvatar(string avatarUrl)
 		{
-			if (string.IsNullOrWhiteSpace(avatarUrl)) { throw new ArgumentException(nameof(avatarUrl)); }
-
-			AvatarUrl = avatarUrl;
-
-			UpdatedAt = DateTime.UtcNow;
-		}
-
-		public void UpdatePhoneNumber(string? phoneNumber)
-		{
-			PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? null : phoneNumber;
-
-			UpdatedAt = DateTime.UtcNow;
-		}
-
-		public void UpdateIBAN(string? iban)
-		{
-			IBAN = string.IsNullOrWhiteSpace(iban) ? null : iban;
+			AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? "default-avatar.png" : avatarUrl;
 
 			UpdatedAt = DateTime.UtcNow;
 		}
@@ -145,6 +119,14 @@ namespace PayItOff.Domain.Entities
 			PassHash = newPassHash;
 			PasswordResetToken = null;
 			ResetTokenExpiresAt = null;
+			UpdatedAt = DateTime.UtcNow;
+		}
+
+		public void ModifyPassword(string newPassHash)
+		{
+			if (string.IsNullOrWhiteSpace(newPassHash)) { throw new ArgumentException("Invalid new Password."); }
+
+			PassHash = newPassHash;
 			UpdatedAt = DateTime.UtcNow;
 		}
 

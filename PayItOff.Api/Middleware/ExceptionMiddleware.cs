@@ -36,11 +36,13 @@ public class ExceptionMiddleware
                 // Mapowanie: Wyjątek -> Kod HTTP
                 context.Response.StatusCode = domainEx switch
                 {
-                    UserNotFoundException => (int)HttpStatusCode.NotFound, // 404
-                    UserAlreadyExistsException => (int)HttpStatusCode.Conflict, // 409
-                    InvalidPasswordException => (int)HttpStatusCode.BadRequest, // 400
-                    UserNotActiveOrVerifiedException => (int)HttpStatusCode.BadRequest, // 400
-                    GroupNotFoundException => (int)HttpStatusCode.NotFound,
+                    InvalidPasswordException => (int)HttpStatusCode.BadRequest,  // 400
+                    UserNotActiveOrVerifiedException => (int)HttpStatusCode.BadRequest,  // 400
+                    UserNotFoundException => (int)HttpStatusCode.NotFound,  // 404
+                    GroupNotFoundException => (int)HttpStatusCode.NotFound,  // 404
+                    FriendInviteNotFoundException => (int)HttpStatusCode.NotFound,  // 404
+                    UserAlreadyExistsException => (int)HttpStatusCode.Conflict,  // 409
+                    FriendInvitationAlreadyExistsException => (int)HttpStatusCode.Conflict,  //409
                     _ => (int)HttpStatusCode.BadRequest
                 };
                 await context.Response.WriteAsync(JsonSerializer.Serialize(new { Error = domainEx.Message }, _jsonOptions));

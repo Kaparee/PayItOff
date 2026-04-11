@@ -1,6 +1,6 @@
 ﻿namespace PayItOff.Application.Interfaces;
 
-public interface IUnitOfWork : IDisposable
+public interface IUnitOfWork
 {
     Task BeginTransactionAsync();
     Task CommitAsync();

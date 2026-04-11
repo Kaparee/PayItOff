@@ -23,6 +23,5 @@ public class GroupMemberRepository : IGroupMemberRepository
     public async Task UpdateAsync(GroupMember groupMember)
     {
         _context.GroupMembers.Update(groupMember);
-        await _context.SaveChangesAsync();
     }
 }

@@ -3,8 +3,8 @@ namespace PayItOff.Domain.Entities
     public class Friend
     {
         public int Id { get; private set; }
-        public User Inviter { get; private set; }
-        public User Receiver { get; private set; }
+        public User? Inviter { get; private set; }
+        public User? Receiver { get; private set; }
         public int InviterId { get; private set; }
         public int ReceiverId { get; private set; }
         public DateTime SentAt { get; private set; }
@@ -28,8 +28,6 @@ namespace PayItOff.Domain.Entities
 
         public static Friend Invite(User inviter, User receiver)
         {
-            if (inviter == null) { throw new ArgumentNullException(nameof(inviter), "Error przy inviter"); }
-            if (receiver == null) { throw new ArgumentNullException(nameof(receiver), "Error przy receiver"); }
             if (inviter.Id == receiver.Id) throw new InvalidOperationException("You cannot invite yourself.");
 
             return new Friend(inviter, receiver);

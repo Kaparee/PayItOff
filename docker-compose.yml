@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:16-alpine
@@ -13,6 +11,40 @@ services:
       - "5442:5432"
     volumes:
       - payitoff_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payitoff_admin -d PayItOff"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - payitoff_network
+
+  api:
+    build:
+      context: .
+      dockerfile: PayItOff.Api/Dockerfile
+    container_name: payitoff_api
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=PayItOff;Username=payitoff_admin;Password=SuperSecretPassword123!
+      - JwtSettings__Secret=STRCzg4jjVMnMAK2CYUaLAigoAyL2E5EsI089Tw8HR6fkMIyMJl6aZT10PvEW5ar
+      - JwtSettings__Issuer=PayItOff
+      - JwtSettings__Audience=PayItOffUsers
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./PayItOff.Api/wwwroot/avatars:/app/wwwroot/avatars
+    networks:
+      - payitoff_network
+
+networks:
+  payitoff_network:
+    driver: bridge
 
 volumes:
   payitoff_data:

@@ -101,8 +101,6 @@ namespace PayItOff.Infrastructure.Persistence
 
             modelBuilder.Entity<Friend>(builder =>
             {
-                builder.HasIndex(f => new { f.InviterId, f.ReceiverId }).IsUnique();
-
                 builder.HasOne(f => f.Inviter).WithMany().HasForeignKey(f => f.InviterId).OnDelete(DeleteBehavior.Restrict);
                 builder.HasOne(f => f.Receiver).WithMany().HasForeignKey(f => f.ReceiverId).OnDelete(DeleteBehavior.Restrict);
             });
