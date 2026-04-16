@@ -12,10 +12,13 @@ namespace PayItOff.Api.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
+
     private int GetUserId()
         => int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
            ?? throw new UnauthorizedAccessException());
-    public UserController(IUserService userService) { _userService = userService; }
+
+    public UserController(IUserService userService)
+    { _userService = userService; }
 
     [HttpPost("register")]
     [AllowAnonymous]
@@ -24,7 +27,6 @@ public class UserController : ControllerBase
         await _userService.RegisterAsync(request, avatar);
         return Ok();
     }
-
 
     [HttpPost("login")]
     [AllowAnonymous]
@@ -68,8 +70,8 @@ public class UserController : ControllerBase
     [Route("request-email-change")]
     public async Task<IActionResult> RequestEmailChange(EmailRequest request)
     {
-       await _userService.RequestEmailChangeAsync(GetUserId(), request.NewEmail);
-       return Ok();
+        await _userService.RequestEmailChangeAsync(GetUserId(), request.NewEmail);
+        return Ok();
     }
 
     [AllowAnonymous]
@@ -124,6 +126,4 @@ public class UserController : ControllerBase
         await _userService.DeleteUserAsync(GetUserId());
         return NoContent();
     }
-
 }
-

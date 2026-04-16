@@ -38,10 +38,13 @@ public class ExceptionMiddleware
                 {
                     InvalidPasswordException => (int)HttpStatusCode.BadRequest,  // 400
                     UserNotActiveOrVerifiedException => (int)HttpStatusCode.BadRequest,  // 400
+                    InvalidUserInvitationException => (int)HttpStatusCode.BadRequest,  // 400
                     InvalidUserRoleException => (int)HttpStatusCode.Forbidden,  // 403
                     UserNotFoundException => (int)HttpStatusCode.NotFound,  // 404
                     GroupNotFoundException => (int)HttpStatusCode.NotFound,  // 404
                     FriendInviteNotFoundException => (int)HttpStatusCode.NotFound,  // 404
+                    InvitationNotFoundException => (int)HttpStatusCode.NotFound,  // 404
+                    GroupMemberNotFoundException => (int)HttpStatusCode.NotFound,  // 404
                     UserAlreadyExistsException => (int)HttpStatusCode.Conflict,  // 409
                     FriendInvitationAlreadyExistsException => (int)HttpStatusCode.Conflict,  //409
                     _ => (int)HttpStatusCode.BadRequest

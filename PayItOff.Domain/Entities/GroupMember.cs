@@ -127,5 +127,15 @@ namespace PayItOff.Domain.Entities
                 throw new Exception("Tu będzie exception dla złego statusu");
             }
         }
+
+        public void ReInvite(GroupMemberRole newRole)
+        {
+            Status = GroupMemberStatus.Pending;
+            Role = newRole;
+            InvitedAt = DateTime.UtcNow;
+            JoinedAt = null;
+            LeftAt = null;
+            IsFavorite = false;
+        }
     }
 }

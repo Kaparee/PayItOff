@@ -68,16 +68,17 @@ public class GroupService : IGroupService
 
     public async Task<List<GroupInfoResponse>> GetUserGroupsAsync(int userId)
     {
-        var groups = await _groupRepository.GetUserGroupsAsync(userId);
+        var members = await _groupRepository.GetUserGroupsAsync(userId);
 
         var baseUrl = _configuration["AppUrls:BackendUrl"];
 
-        var response = groups.Select(groups => new GroupInfoResponse
+        var response = members.Select(member => new GroupInfoResponse
         {
-            Id = groups!.Id,
-            Name = groups!.Name,
-            AvatarUrl = $"{baseUrl}/avatars/{groups.AvatarUrl ?? "default-avatar.png"}",
-            UpdatedAt = groups.UpdatedAt
+            Id = member.Group!.Id,
+            Name = member.Group!.Name,
+            AvatarUrl = $"{baseUrl}/avatars/{member.Group.AvatarUrl ?? "default-avatar.png"}",
+            UpdatedAt = member.Group.UpdatedAt,
+            IsFavorite = member.IsFavorite
         }).ToList();
 
         return response;

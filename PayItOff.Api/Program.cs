@@ -82,6 +82,7 @@ builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IFriendService, FriendService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IGroupMemberService, GroupMemberService>();
 
 // Validators
 builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();

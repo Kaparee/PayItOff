@@ -9,6 +9,11 @@ namespace PayItOff.Application.Interfaces
         Task InviteUserAsync(GroupInviteUserRequest request);
         Task AcceptInviteAsync(int userId, int invitationId);
         Task DeclineInviteAsync(int userId, int invitationId);
-        Task UpdateRoleAsync()
+        Task UpdateRoleAsync(int userId, GroupMemberUpdateRequest request);
+        Task SetGroupAsFavoriteAsync(int userId, int groupId);
+        Task LeaveGroupAsync(int userId, int groupId);
+        Task KickUserFromGroupAsync(int userId, int groupId, int targetUserId);
+        Task<List<PendingInvitationResponse>> GetPendingInvitationsAsync(int userId);
+        Task<List<GroupMemberResponse>> GetAllActiveGroupMembersAsync(int groupId);
     }
 }

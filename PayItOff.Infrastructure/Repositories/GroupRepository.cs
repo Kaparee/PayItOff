@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PayItOff.Domain.Entities;
+using PayItOff.Domain.Enums;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Infrastructure.Persistence;
 using PayItOff.Shared.Responses;
@@ -15,13 +16,13 @@ public class GroupRepository : IGroupRepository
         _context = context;
     }
 
-    public async Task<List<Group?>> GetUserGroupsAsync(int userId)
+    public async Task<List<GroupMember>> GetUserGroupsAsync(int userId)
     {
         return await _context.GroupMembers
-            .Where(x => x.UserId == userId)
+            .Include(x => x.Group)
+            .Where(x => x.UserId == userId && x.Status == GroupMemberStatus.Accepted)
+            .Where(x => x.Group!.DeletedAt == null)
             .OrderByDescending(x => x.IsFavorite)
-            .Select(x => x.Group)
-            .Where(x => x!.DeletedAt == null)
             .ToListAsync();
     }
 
