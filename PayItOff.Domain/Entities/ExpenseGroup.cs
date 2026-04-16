@@ -14,9 +14,9 @@ namespace PayItOff.Domain.Entities
 
         private ExpenseGroup(Expense expense, string name, decimal totalAmount)
         {
-            if(expense == null) { throw new ArgumentNullException(nameof(expense), "Nie może być null"); }
+            if (expense == null) { throw new ArgumentNullException(nameof(expense), "Nie może być null"); }
             if (string.IsNullOrWhiteSpace(name)) { throw new ArgumentException("Name cannot be empty", nameof(name)); }
-            if(totalAmount < 0 ) { throw new InvalidOperationException("Nie można mieć wydatku mniejszego od 0"); }
+            if (totalAmount < 0) { throw new InvalidOperationException("Nie można mieć wydatku mniejszego od 0"); }
 
             Expense = expense;
             ExpenseId = expense.Id;
@@ -31,7 +31,7 @@ namespace PayItOff.Domain.Entities
 
         public void Edit(string newName)
         {
-            if(string.IsNullOrWhiteSpace(newName)) { throw new ArgumentException("Name cannot be empty", nameof(newName)); }
+            if (string.IsNullOrWhiteSpace(newName)) { throw new ArgumentException("Name cannot be empty", nameof(newName)); }
             Name = newName;
         }
 
@@ -43,7 +43,7 @@ namespace PayItOff.Domain.Entities
 
         public void AddSplit(ExpenseSplit split)
         {
-            if(split == null) { throw new ArgumentNullException(nameof(split), "Nie może być null"); }
+            if (split == null) { throw new ArgumentNullException(nameof(split), "Nie może być null"); }
             _splits.Add(split);
         }
     }

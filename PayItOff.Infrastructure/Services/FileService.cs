@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
 using PayItOff.Application.Interfaces;
-using PayItOff.Domain.Exceptions;
 
 namespace PayItOff.Infrastructure.Services;
 

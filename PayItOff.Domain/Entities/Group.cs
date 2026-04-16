@@ -12,8 +12,8 @@ namespace PayItOff.Domain.Entities
         protected Group() { }
         private Group(string name, string avatarUrl)
         {
-            if(string.IsNullOrWhiteSpace(name)) { throw new ArgumentException(nameof(name)); }
-            if(string.IsNullOrWhiteSpace(avatarUrl)) { throw new ArgumentException(nameof(avatarUrl)); }
+            if (string.IsNullOrWhiteSpace(name)) { throw new ArgumentException(nameof(name)); }
+            if (string.IsNullOrWhiteSpace(avatarUrl)) { throw new ArgumentException(nameof(avatarUrl)); }
 
             Name = name;
             AvatarUrl = avatarUrl;

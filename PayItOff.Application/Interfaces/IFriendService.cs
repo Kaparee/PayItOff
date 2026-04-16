@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using PayItOff.Shared.Requests;
+﻿using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
-using System.Runtime.CompilerServices;
 
 namespace PayItOff.Application.Interfaces
 {

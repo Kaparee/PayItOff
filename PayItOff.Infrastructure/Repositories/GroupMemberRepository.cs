@@ -3,7 +3,6 @@ using PayItOff.Domain.Entities;
 using PayItOff.Domain.Enums;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Infrastructure.Persistence;
-using PayItOff.Shared.Responses;
 
 namespace PayItOff.Infrastructure.Repositories;
 
@@ -36,7 +35,7 @@ public class GroupMemberRepository : IGroupMemberRepository
     public async Task<bool> IsUserOwner(int userId, int groupId)
     {
         return await _context.GroupMembers
-            .Where(x => x.GroupId == groupId && x.UserId == userId && x.Status == GroupMemberStatus.Accepted&& x.Role == GroupMemberRole.Owner)
+            .Where(x => x.GroupId == groupId && x.UserId == userId && x.Status == GroupMemberStatus.Accepted && x.Role == GroupMemberRole.Owner)
             .AnyAsync();
     }
 

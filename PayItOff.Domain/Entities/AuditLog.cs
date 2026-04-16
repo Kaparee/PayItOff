@@ -18,9 +18,9 @@ namespace PayItOff.Domain.Entities
 
         private AuditLog(EntityType entityType, int entityId, User user, AuditLogAction action, string oldValues, string newValues)
         {
-            if(entityId == 0) { throw new InvalidOperationException("Nie można przypisać do Audytu id = 0"); }
+            if (entityId == 0) { throw new InvalidOperationException("Nie można przypisać do Audytu id = 0"); }
             if (user == null) { throw new ArgumentNullException(nameof(user), "Error przy user"); }
-            
+
             EntityType = entityType;
             EntityId = entityId;
             User = user;

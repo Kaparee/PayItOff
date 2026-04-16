@@ -1,7 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using PayItOff.MauiClient.Views;
-using PayItOff.MauiClient.Services;
+﻿using PayItOff.MauiClient.Services;
 using PayItOff.MauiClient.ViewModels;
+using PayItOff.MauiClient.Views;
 
 namespace PayItOff.MauiClient
 {

@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-
-namespace PayItOff.MauiClient
+﻿namespace PayItOff.MauiClient
 {
     public partial class App : Application
     {

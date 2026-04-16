@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
-namespace PayItOff.Shared.Responses
+﻿namespace PayItOff.Shared.Responses
 {
     public class FriendListResponse
     {

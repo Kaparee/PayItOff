@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Json;
-using PayItOff.Shared.Requests;
+﻿using PayItOff.Shared.Requests;
 
 namespace PayItOff.MauiClient.Services;
 

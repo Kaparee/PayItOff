@@ -1,7 +1,7 @@
 namespace PayItOff.Domain.Enums
 {
-    public enum EntityType 
-    { 
+    public enum EntityType
+    {
         Expenses = 1,
         Friends = 2,
         Groups = 3,

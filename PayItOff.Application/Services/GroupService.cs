@@ -89,7 +89,7 @@ public class GroupService : IGroupService
         var user = await _userRepository.GetUserByIdAsync(userId);
         var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId);
         var isOwnerOrAdmin = await _groupMemberRepository.IsUserOwnerOrAdmin(userId, request.GroupId);
-        if (!isOwnerOrAdmin) { throw new InvalidUserRoleException();  }
+        if (!isOwnerOrAdmin) { throw new InvalidUserRoleException(); }
 
         var savedFileName = await _fileService.SaveAvatarAsync(avatar);
 

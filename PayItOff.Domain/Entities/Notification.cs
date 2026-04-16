@@ -25,7 +25,7 @@ namespace PayItOff.Domain.Entities
             if (entityId == 0) { throw new InvalidOperationException("Nie można przypisać do Powiadomien id = 0"); }
             if (user == null) { throw new ArgumentNullException(nameof(user), "Error przy user"); }
             if (actor == null) { throw new ArgumentNullException(nameof(actor), "Error przy actor"); }
-            if(string.IsNullOrWhiteSpace(body)) { throw new ArgumentException(nameof(body)); }
+            if (string.IsNullOrWhiteSpace(body)) { throw new ArgumentException(nameof(body)); }
 
             User = user;
             Actor = actor;

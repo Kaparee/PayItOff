@@ -1,8 +1,4 @@
-﻿using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Org.BouncyCastle.Asn1.Ocsp;
-using Org.BouncyCastle.Asn1.X509;
+﻿using Microsoft.Extensions.Configuration;
 using PayItOff.Application.Interfaces;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Enums;
@@ -11,8 +7,6 @@ using PayItOff.Domain.Interfaces;
 using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
 using System.Data;
-using System.Numerics;
-using System.Xml.Linq;
 
 namespace PayItOff.Application.Services;
 
@@ -39,7 +33,7 @@ public class GroupMemberService : IGroupMemberService
         if (user is null) { throw new UserNotFoundException(); }
 
         var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId);
-        if(group is null) { throw new GroupNotFoundException(); }
+        if (group is null) { throw new GroupNotFoundException(); }
 
         var existingMember = await _groupMemberRepository.GetMemberAsync(request.GroupId, request.UserId);
 
@@ -100,9 +94,9 @@ public class GroupMemberService : IGroupMemberService
         var targetUser = await _groupMemberRepository.GetMemberAsync(request.GroupId, request.TargetUserId);
         if (targetUser is null || targetUser.Status != GroupMemberStatus.Accepted) { throw new GroupMemberNotFoundException(); }
 
-        if(actor.Role == GroupMemberRole.Member) { throw new InvalidUserRoleException(); }
-        if(actor.Role == GroupMemberRole.Admin && targetUser!.Role == GroupMemberRole.Owner) { throw new InvalidUserRoleException(); }
-        if(userId == request.TargetUserId) { throw new InvalidUserRoleException(); }
+        if (actor.Role == GroupMemberRole.Member) { throw new InvalidUserRoleException(); }
+        if (actor.Role == GroupMemberRole.Admin && targetUser!.Role == GroupMemberRole.Owner) { throw new InvalidUserRoleException(); }
+        if (userId == request.TargetUserId) { throw new InvalidUserRoleException(); }
 
         if (actor.Role == GroupMemberRole.Admin && request.NewRole == GroupMemberRole.Owner) { throw new InvalidUserRoleException(); }
 
@@ -125,7 +119,7 @@ public class GroupMemberService : IGroupMemberService
     {
         var user = await _groupMemberRepository.GetMemberAsync(groupId, userId);
         if (user is null || user.Status != GroupMemberStatus.Accepted) { throw new GroupMemberNotFoundException(); }
-        if(user.Role == GroupMemberRole.Owner) { throw new InvalidUserRoleException(); }
+        if (user.Role == GroupMemberRole.Owner) { throw new InvalidUserRoleException(); }
 
         user.Leave();
 
@@ -140,7 +134,7 @@ public class GroupMemberService : IGroupMemberService
         var targetUser = await _groupMemberRepository.GetMemberAsync(groupId, targetUserId);
         if (targetUser is null || targetUser.Status != GroupMemberStatus.Accepted) { throw new GroupMemberNotFoundException(); }
 
-        if(actor.Role == GroupMemberRole.Member) { throw new InvalidUserRoleException(); }
+        if (actor.Role == GroupMemberRole.Member) { throw new InvalidUserRoleException(); }
         if (actor.Role == GroupMemberRole.Admin && targetUser.Role != GroupMemberRole.Member) { throw new InvalidUserRoleException(); }
         if (userId == targetUserId) { throw new InvalidUserRoleException(); }
 

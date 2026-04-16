@@ -2,7 +2,6 @@
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Infrastructure.Persistence;
-using PayItOff.Shared.Responses;
 
 namespace PayItOff.Infrastructure.Repositories;
 

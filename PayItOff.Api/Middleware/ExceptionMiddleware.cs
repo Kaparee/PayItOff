@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using PayItOff.Domain.Exceptions;
 using System.Net;
-using System.Security.Authentication;
 using System.Text.Json;
 
 namespace PayItOff.Api.Middleware;

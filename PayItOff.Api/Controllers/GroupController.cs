@@ -1,12 +1,8 @@
-﻿using Azure.Core;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
 using PayItOff.Application.Interfaces;
-using PayItOff.Application.Services;
 using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
-using System.Security.Claims;
 
 namespace PayItOff.Api.Controllers;
 

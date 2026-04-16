@@ -19,7 +19,7 @@ namespace PayItOff.Domain.Entities
 
         private ExpenseItem(Expense expense, ExpenseGroup? expenseGroup, string name, string category, decimal quantity, decimal unitPrice)
         {
-            if(expense == null) { throw new ArgumentNullException(nameof(expense), "Nie może być null"); }
+            if (expense == null) { throw new ArgumentNullException(nameof(expense), "Nie może być null"); }
             if (string.IsNullOrWhiteSpace(name)) { throw new ArgumentException("Name cannot be empty", nameof(name)); }
             if (string.IsNullOrWhiteSpace(category)) { throw new ArgumentException("Category cannot be empty", nameof(category)); }
             if (quantity <= 0) { throw new InvalidOperationException("Nie można kupić mniej niż 0 rzeczy"); }

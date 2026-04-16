@@ -40,14 +40,14 @@ namespace PayItOff.Domain.Entities
         }
 
         public static Expense Create(Group group, User payer, string name, string? receiptImageUrl, DateTime purchasedAt)
-        { 
+        {
             var finalReceiptImageUrl = string.IsNullOrWhiteSpace(receiptImageUrl) ? null : receiptImageUrl;
             return new Expense(group, payer, name, finalReceiptImageUrl, purchasedAt);
         }
 
         public void AddItem(ExpenseItem item)
         {
-            if(item == null) { throw new ArgumentNullException(nameof(item), "Error przy item"); }
+            if (item == null) { throw new ArgumentNullException(nameof(item), "Error przy item"); }
             _items.Add(item);
             TotalAmount += item.TotalPrice;
             UpdatedAt = DateTime.UtcNow;
@@ -82,7 +82,7 @@ namespace PayItOff.Domain.Entities
                         {
                             debts.Add(split.UserId, split.OwedAmount);
                         }
-                    } 
+                    }
                 }
             }
             foreach (ExpenseGroup group in _groups)

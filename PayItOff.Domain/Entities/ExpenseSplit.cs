@@ -26,7 +26,7 @@ namespace PayItOff.Domain.Entities
             ExpenseGroupId = (expenseGroup == null) ? null : expenseGroup.Id;
             User = user;
             UserId = user.Id;
-            OwedAmount = owedAmount; 
+            OwedAmount = owedAmount;
         }
 
         public static ExpenseSplit Create(ExpenseItem? expenseItem, ExpenseGroup? expenseGroup, User user, decimal owedAmount)
