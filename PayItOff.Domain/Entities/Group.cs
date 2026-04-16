@@ -29,12 +29,22 @@ namespace PayItOff.Domain.Entities
 
         public void Edit(string? newName, string? newAvatarUrl)
         {
-            if (string.IsNullOrWhiteSpace(newName)) { throw new ArgumentException(nameof(newName)); }
-            if (string.IsNullOrWhiteSpace(newAvatarUrl)) { throw new ArgumentException(nameof(newAvatarUrl)); }
+            bool isUpdated = false;
+            if (!string.IsNullOrWhiteSpace(newName) && Name != newName)
+            {
+                Name = newName;
+                isUpdated = true;
+            }
+            if (!string.IsNullOrWhiteSpace(newAvatarUrl) && AvatarUrl != newAvatarUrl)
+            {
+                AvatarUrl = newAvatarUrl;
+                isUpdated = true;
+            }
 
-            Name = newName;
-            AvatarUrl = newAvatarUrl;
-            UpdatedAt = DateTime.UtcNow;
+            if (isUpdated)
+            {
+                UpdatedAt = DateTime.UtcNow;
+            }
         }
 
         public void Delete()

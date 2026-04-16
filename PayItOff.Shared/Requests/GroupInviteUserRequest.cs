@@ -6,6 +6,6 @@ namespace PayItOff.Shared.Requests
     {
         public required int UserId { get; set; }
         public required int GroupId { get; set; }
-        public required GroupMemberStatus Status { get; set; }
+        public required GroupMemberRole Role { get; set; }
     }
 }

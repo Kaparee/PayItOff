@@ -6,7 +6,7 @@ namespace PayItOff.Application.Interfaces
 {
     public interface IUserService
     {
-        Task RegisterAsync(RegisterRequest request, IFormFile? avatar = null);
+        Task RegisterAsync(RegisterRequest request, IFormFile? avatar);
         Task<LoginResponse> LoginAsync(LoginRequest request);
         Task VerifyUserAsync(string token);
         Task<UserInformationResponse> GetUserInformationAsync(int userId);

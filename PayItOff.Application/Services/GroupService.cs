@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using PayItOff.Application.Interfaces;
 using PayItOff.Domain.Entities;
@@ -17,17 +18,19 @@ public class GroupService : IGroupService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IValidator<CreateGroupRequest> _validator;
     private readonly IConfiguration _configuration;
+    private readonly IFileService _fileService;
 
-    public GroupService(IGroupRepository groupRepository, IUserRepository userRepository, IGroupMemberRepository groupMemberRepository, IUnitOfWork unitOfWork, IValidator<CreateGroupRequest> validator, IJWTService jwtService, IConfiguration configuration)
+    public GroupService(IGroupRepository groupRepository, IUserRepository userRepository, IGroupMemberRepository groupMemberRepository, IUnitOfWork unitOfWork, IValidator<CreateGroupRequest> validator, IJWTService jwtService, IConfiguration configuration, IFileService fileService)
     {
         _groupRepository = groupRepository;
         _userRepository = userRepository;
         _groupMemberRepository = groupMemberRepository;
         _unitOfWork = unitOfWork;
         _validator = validator;
+        _fileService = fileService;
         _configuration = configuration;
     }
-    public async Task CreateAsync(CreateGroupRequest request, int userId)
+    public async Task CreateAsync(CreateGroupRequest request, int userId, IFormFile? avatar)
     {
         var user = await _userRepository.GetUserByIdAsync(userId);
         if (user is null) { throw new UserNotFoundException(); }
@@ -35,9 +38,11 @@ public class GroupService : IGroupService
         var validationResult = await _validator.ValidateAsync(request);
         if (!validationResult.IsValid) throw new ValidationException(validationResult.Errors);
 
+        var savedFileName = await _fileService.SaveAvatarAsync(avatar);
+
         var group = Group.Create(
             request.Name,
-            request.AvatarUrl!
+            savedFileName!
         );
 
         var groupMember = GroupMember.CreateOwner(
@@ -65,19 +70,45 @@ public class GroupService : IGroupService
     {
         var groups = await _groupRepository.GetUserGroupsAsync(userId);
 
+        var baseUrl = _configuration["AppUrls:BackendUrl"];
+
         var response = groups.Select(groups => new GroupInfoResponse
         {
+            Id = groups!.Id,
             Name = groups!.Name,
-            AvatarUrl = groups.AvatarUrl,
+            AvatarUrl = $"{baseUrl}/avatars/{groups.AvatarUrl ?? "default-avatar.png"}",
             UpdatedAt = groups.UpdatedAt
         }).ToList();
 
         return response;
     }
 
-    public async Task InviteUserAsync(GroupInviteUserRequest request)
+    public async Task EditGroupInfoAsync(int userId, EditGroupInfoRequest request, IFormFile? avatar)
     {
-        var user = await _userRepository.GetUserByIdAsync(request.UserId);
-        if (user is null) { throw new UserNotFoundException(); }
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId);
+        var isOwnerOrAdmin = await _groupMemberRepository.IsUserOwnerOrAdmin(userId, request.GroupId);
+        if (!isOwnerOrAdmin) { throw new InvalidUserRoleException();  }
+
+        var savedFileName = await _fileService.SaveAvatarAsync(avatar);
+
+        group!.Edit(request.NewName, savedFileName);
+        await _groupRepository.UpdateAsync(group);
+        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task DeleteGroupAsync(int userId, DeleteGroupRequest request)
+    {
+        // TU MUSZE DODAĆ WALIDACJE DLA SPRAWDZENIA CZY "BUDŻET" KONTA JEST RÓWNY ZERO
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId);
+        var isOwner = await _groupMemberRepository.IsUserOwner(userId, request.GroupId);
+        if (!isOwner) { throw new InvalidUserRoleException(); }
+
+        group!.Delete();
+        await _groupRepository.UpdateAsync(group);
+        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.CommitAsync();
     }
 }

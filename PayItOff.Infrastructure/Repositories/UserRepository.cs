@@ -16,7 +16,9 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetUserByEmailAsync(string email)
     {
-        return await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
+        return await _context.Users
+            .Where(x => x.DeletedAt == null)
+            .FirstOrDefaultAsync(x => x.Email == email);
     }
 
     public async Task AddAsync(User user)
@@ -39,12 +41,16 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetUserByVerificationTokenAsync(string token)
     {
-        return await _context.Users.FirstOrDefaultAsync(x => x.VerificationToken == token);
+        return await _context.Users
+            .Where(x => x.DeletedAt == null)
+            .FirstOrDefaultAsync(x => x.VerificationToken == token);
     }
 
     public async Task<User?> GetUserByIdAsync(int userId)
     {
-        return await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
+        return await _context.Users
+            .Where(x => x.DeletedAt == null)
+            .FirstOrDefaultAsync(x => x.Id == userId);
     }
 
     public async Task<bool> IsEmailTakenAsync(string email)

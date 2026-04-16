@@ -88,8 +88,7 @@ public partial class RegisterViewModel : ObservableObject
                 Name = Name,
                 Surname = Surname,
                 PhoneNumber = PhoneNumber ?? string.Empty,
-                IBAN = IBAN ?? string.Empty,
-                AvatarUrl = string.Empty
+                IBAN = IBAN ?? string.Empty
             };
 
             var result = await _registerService.RegisterAsync(request, SelectedAvatarFile);

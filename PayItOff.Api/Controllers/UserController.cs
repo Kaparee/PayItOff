@@ -19,7 +19,7 @@ public class UserController : ControllerBase
 
     [HttpPost("register")]
     [AllowAnonymous]
-    public async Task<IActionResult> Register([FromForm] RegisterRequest request, IFormFile? avatar)
+    public async Task<IActionResult> Register([FromForm] RegisterRequest request, IFormFile? avatar = null)
     {
         await _userService.RegisterAsync(request, avatar);
         return Ok();
@@ -40,7 +40,7 @@ public class UserController : ControllerBase
     //"name": "Jakub",
     //"surname": "Płocica"
     [HttpPost("avatar")]
-    public async Task<IActionResult> UpdateAvatar(IFormFile avatar)
+    public async Task<IActionResult> UpdateAvatar(IFormFile? avatar = null)
     {
         await _userService.UpdateAvatarAsync(GetUserId(), avatar);
         return NoContent();
@@ -118,7 +118,7 @@ public class UserController : ControllerBase
         return Ok();
     }
 
-    [HttpDelete]
+    [HttpDelete("delete")]
     public async Task<IActionResult> DeleteAccount()
     {
         await _userService.DeleteUserAsync(GetUserId());

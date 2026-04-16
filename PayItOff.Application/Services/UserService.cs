@@ -33,7 +33,7 @@ public class UserService : IUserService
         _passwordHasher = passwordHasher;
     }
 
-    public async Task RegisterAsync(RegisterRequest request, IFormFile? avatar = null)
+    public async Task RegisterAsync(RegisterRequest request, IFormFile? avatar)
     {
         var validationResult = await _validator.ValidateAsync(request);
         if (!validationResult.IsValid) throw new ValidationException(validationResult.Errors);
