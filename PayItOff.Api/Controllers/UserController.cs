@@ -20,6 +20,21 @@ public class UserController : ControllerBase
     public UserController(IUserService userService)
     { _userService = userService; }
 
+    [HttpGet("verify")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Verify([FromQuery] string verificationToken)
+    {
+        await _userService.VerifyUserAsync(verificationToken);
+        return Ok("Konto zostało zweryfikowane. Możesz się zalogować.");
+    }
+
+    [HttpGet("info")]
+    public async Task<ActionResult<UserInformationResponse>> Info()
+    {
+        var result = await _userService.GetUserInformationAsync(GetUserId());
+        return Ok(result);
+    }
+
     [HttpPost("register")]
     [AllowAnonymous]
     public async Task<IActionResult> Register([FromForm] RegisterRequest request, IFormFile? avatar = null)
@@ -81,21 +96,6 @@ public class UserController : ControllerBase
     {
         await _userService.EmailChangeConfirmAsync(token);
         return Ok();
-    }
-
-    [HttpGet("verify")]
-    [AllowAnonymous]
-    public async Task<IActionResult> Verify([FromQuery] string verificationToken)
-    {
-        await _userService.VerifyUserAsync(verificationToken);
-        return Ok("Konto zostało zweryfikowane. Możesz się zalogować.");
-    }
-
-    [HttpGet("info")]
-    public async Task<ActionResult<UserInformationResponse>> Info()
-    {
-        var result = await _userService.GetUserInformationAsync(GetUserId());
-        return Ok(result);
     }
 
     [HttpPatch("notifications")]

@@ -143,11 +143,11 @@ public class GroupMemberService : IGroupMemberService
         await _unitOfWork.SaveChangesAsync();
     }
 
-    public async Task<List<PendingInvitationResponse>> GetPendingInvitationsAsync(int userId)
+    public async Task<List<GroupPendingInvitationResponse>> GetPendingInvitationsAsync(int userId)
     {
         var invitations = await _groupMemberRepository.GetPendingInvitationsByUserIdAsync(userId);
 
-        return invitations.Select(x => new PendingInvitationResponse
+        return invitations.Select(x => new GroupPendingInvitationResponse
         {
             InvitationId = x.Id,
             GroupId = x.GroupId,

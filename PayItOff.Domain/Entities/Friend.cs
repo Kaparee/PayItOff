@@ -33,6 +33,14 @@ namespace PayItOff.Domain.Entities
             return new Friend(inviter, receiver);
         }
 
+        public void ReInvite(User inviter, User receiver)
+        {
+            SentAt = DateTime.UtcNow;
+            AcceptedAt = null;
+            DeclinedAt = null;
+            DeletedAt = null;
+        }
+
         public void Accept(int currentUserId)
         {
             if (currentUserId != ReceiverId) { throw new InvalidOperationException("Tylko odbiorca może zaakceptować zaproszenie."); }
@@ -42,7 +50,6 @@ namespace PayItOff.Domain.Entities
 
         public void Decline(int currentUserId)
         {
-            if (currentUserId != ReceiverId) { throw new InvalidOperationException("Tylko odbiorca może odrzucić zaproszenie."); }
             if (AcceptedAt != null || DeclinedAt != null) { throw new InvalidOperationException("Nie można odrzucić już rozpatrzonego zaproszenia"); }
             DeclinedAt = DateTime.UtcNow;
         }

@@ -183,9 +183,9 @@ public class UserService : IUserService
         var user = await _userRepository.GetUserByIdAsync(userId);
         if (user is null) { throw new UserNotFoundException(); }
 
-        if (!BCrypt.Net.BCrypt.Verify(request.OldPassword, user.PassHash))
+        if (!_passwordHasher.Verify(request.OldPassword, user.PassHash))
         {
-            throw new Exception("Current password is invalid.");
+            throw new InvalidPasswordException();
         }
 
         if (request.OldPassword == request.NewPassword)

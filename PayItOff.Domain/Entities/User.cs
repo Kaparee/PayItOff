@@ -42,7 +42,7 @@ namespace PayItOff.Domain.Entities
             NotificationsSettings = notificationsSettings ?? new NotificationsSettings();
             VerificationToken = Guid.NewGuid().ToString();
             PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? null : phoneNumber;
-            IBAN = string.IsNullOrWhiteSpace(iban) ? null : iban;
+            IBAN = string.IsNullOrWhiteSpace(iban) ? null : iban.Replace(" ", "").ToUpper();
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
             IsActive = true;
@@ -83,7 +83,7 @@ namespace PayItOff.Domain.Entities
             Surname = surname;
 
             PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? null : phoneNumber;
-            IBAN = string.IsNullOrWhiteSpace(iban) ? null : iban;
+            IBAN = string.IsNullOrWhiteSpace(iban) ? null : iban.Replace(" ", "").ToUpper();
 
             UpdatedAt = DateTime.UtcNow;
         }

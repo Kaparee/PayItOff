@@ -9,5 +9,6 @@ public interface IFriendRepository
     Task AddAsync(Friend friend);
     Task UpdateAsync(Friend friend);
     Task<Friend?> GetInviteByIdAsync(int userId, int inviteId);
-
+    Task<Friend?> GetUsersFriendshipAsync(int userId, int targetUserId);
+    Task<List<Friend>> GetPendingInvitationsByUserIdAsync(int userId);
 }

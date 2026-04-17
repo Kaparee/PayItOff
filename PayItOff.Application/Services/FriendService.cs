@@ -27,6 +27,7 @@ public class FriendService : IFriendService
     {
         var friendsData = await _friendRepository.GetUserFriendListAsync(userId);
 
+        var baseUrl = _configuration["AppUrls:BackendUrl"];
         var response = friendsData.Select(data => new FriendListResponse
         {
             FriendId = data.Friend!.Id,
@@ -38,6 +39,8 @@ public class FriendService : IFriendService
             PhoneNumber = data.Friend.PhoneNumber,
             Balance = Math.Round(data.Balance, 2),
             SharedGroupAvatars = data.SharedAvatars
+                .Select(avatar => $"{baseUrl}/avatars/{avatar ?? "default-avatar.png"}")
+                .ToList()
         }).ToList();
 
         return response;
@@ -54,24 +57,25 @@ public class FriendService : IFriendService
         var isExists = await _friendRepository.IsFriendInviteExistAsync(userId, friend.Id);
         if (isExists == true) { throw new FriendInvitationAlreadyExistsException(); }
 
-        var invite = Friend.Invite(
-            user,
-            friend!
-        );
 
-        await _unitOfWork.BeginTransactionAsync();
-        try
+        var existingFriendship = await _friendRepository.GetUsersFriendshipAsync(userId, request.TargetUserId);
+
+        if (existingFriendship is not null)
         {
+
+            existingFriendship.ReInvite(user, friend);
+            await _friendRepository.UpdateAsync(existingFriendship);
+        }
+        else
+        {
+            var invite = Friend.Invite(
+                user,
+                friend!
+            );
             await _friendRepository.AddAsync(invite);
+        }
 
-            await _unitOfWork.SaveChangesAsync();
-            await _unitOfWork.CommitAsync();
-        }
-        catch
-        {
-            await _unitOfWork.RollbackAsync();
-            throw new Exception("Błąd podczas wysłania zaproszenia. Spróbuj ponownie później.");
-        }
+        await _unitOfWork.SaveChangesAsync();
     }
 
     public async Task AcceptInviteAsync(int userId, UpdateInviteRequest request)
@@ -81,20 +85,9 @@ public class FriendService : IFriendService
 
         invitation.Accept(userId);
 
-        await _unitOfWork.BeginTransactionAsync();
-        try
-        {
-            await _friendRepository.UpdateAsync(invitation);
+        await _friendRepository.UpdateAsync(invitation);
 
-            await _unitOfWork.SaveChangesAsync();
-            await _unitOfWork.CommitAsync();
-        }
-        catch
-        {
-            await _unitOfWork.RollbackAsync();
-            throw new Exception("Błąd podczas akceptacji zaproszenia. Spróbuj ponownie później.");
-        }
-
+        await _unitOfWork.SaveChangesAsync();
     }
 
     public async Task DeclineInviteAsync(int userId, UpdateInviteRequest request)
@@ -104,19 +97,9 @@ public class FriendService : IFriendService
 
         invitation.Decline(userId);
 
-        await _unitOfWork.BeginTransactionAsync();
-        try
-        {
-            await _friendRepository.UpdateAsync(invitation);
+        await _friendRepository.UpdateAsync(invitation);
 
-            await _unitOfWork.SaveChangesAsync();
-            await _unitOfWork.CommitAsync();
-        }
-        catch
-        {
-            await _unitOfWork.RollbackAsync();
-            throw new Exception("Błąd podczas odrzucania zaproszenia. Spróbuj ponownie później.");
-        }
+        await _unitOfWork.SaveChangesAsync();
     }
 
     public async Task RemoveFriendAsync(int userId, UpdateInviteRequest request)
@@ -126,18 +109,34 @@ public class FriendService : IFriendService
 
         invitation.Remove(userId);
 
-        await _unitOfWork.BeginTransactionAsync();
-        try
-        {
-            await _friendRepository.UpdateAsync(invitation);
+        await _friendRepository.UpdateAsync(invitation);
 
-            await _unitOfWork.SaveChangesAsync();
-            await _unitOfWork.CommitAsync();
-        }
-        catch
+        await _unitOfWork.SaveChangesAsync();
+
+    }
+
+    public async Task<List<FriendPendingInvitationResponse>> GetPendingInvitationsAsync(int userId)
+    {
+        var invitations = await _friendRepository.GetPendingInvitationsByUserIdAsync(userId);
+        var baseUrl = _configuration["AppUrls:BackendUrl"];
+
+        return invitations.Select(x =>
         {
-            await _unitOfWork.RollbackAsync();
-            throw new Exception("Błąd podczas usuwania znajomego. Spróbuj ponownie później.");
-        }
+            bool isInviter = x.InviterId == userId;
+
+            var targetUser = isInviter ? x.Receiver! : x.Inviter!;
+
+            return new FriendPendingInvitationResponse
+            {
+                InvitationId = x.Id,
+                FriendId = targetUser.Id,
+                AvatarUrl = $"{baseUrl}/avatars/{targetUser.AvatarUrl ?? "default-avatar.png"}",
+                Name = targetUser.Name,
+                Surname = targetUser.Surname,
+                Nickname = targetUser.Nickname,
+                SentAt = x.SentAt,
+                IsIncoming = !isInviter
+            };
+        }).ToList();
     }
 }

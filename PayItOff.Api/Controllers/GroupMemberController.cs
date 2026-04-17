@@ -18,7 +18,7 @@ public class GroupMemberController : ControllerBase
     public GroupMemberController(IGroupMemberService groupMemberService) { _groupMemberService = groupMemberService; }
 
     [HttpGet("all-pending-invitation")]
-    public async Task<ActionResult<List<PendingInvitationResponse>>> AllPendingInvitations()
+    public async Task<ActionResult<List<GroupPendingInvitationResponse>>> AllPendingInvitations()
     {
         var result = await _groupMemberService.GetPendingInvitationsAsync(GetUserId());
         return Ok(result);

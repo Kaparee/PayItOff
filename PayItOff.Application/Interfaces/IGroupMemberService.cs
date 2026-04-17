@@ -12,7 +12,7 @@ namespace PayItOff.Application.Interfaces
         Task SetGroupAsFavoriteAsync(int userId, int groupId);
         Task LeaveGroupAsync(int userId, int groupId);
         Task KickUserFromGroupAsync(int userId, int groupId, int targetUserId);
-        Task<List<PendingInvitationResponse>> GetPendingInvitationsAsync(int userId);
+        Task<List<GroupPendingInvitationResponse>> GetPendingInvitationsAsync(int userId);
         Task<List<GroupMemberResponse>> GetAllActiveGroupMembersAsync(int groupId);
     }
 }

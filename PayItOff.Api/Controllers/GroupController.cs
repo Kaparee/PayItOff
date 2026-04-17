@@ -17,18 +17,18 @@ public class GroupController : ControllerBase
            ?? throw new UnauthorizedAccessException());
     public GroupController(IGroupService groupService) { _groupService = groupService; }
 
-    [HttpPost("create")]
-    public async Task<IActionResult> Create([FromForm] CreateGroupRequest request, IFormFile? avatar = null)
-    {
-        await _groupService.CreateAsync(request, GetUserId(), avatar);
-        return Ok();
-    }
-
     [HttpGet("groups")]
     public async Task<ActionResult<GroupInfoResponse>> Info()
     {
         var result = await _groupService.GetUserGroupsAsync(GetUserId());
         return Ok(result);
+    }
+
+    [HttpPost("create")]
+    public async Task<IActionResult> Create([FromForm] CreateGroupRequest request, IFormFile? avatar = null)
+    {
+        await _groupService.CreateAsync(request, GetUserId(), avatar);
+        return Ok();
     }
 
     [HttpPatch("group-edit")]

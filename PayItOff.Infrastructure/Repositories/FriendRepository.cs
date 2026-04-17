@@ -67,4 +67,21 @@ public class FriendRepository : IFriendRepository
             .Where(x => x.DeletedAt == null && x.DeclinedAt == null)
             .FirstOrDefaultAsync();
     }
+
+    public async Task<Friend?> GetUsersFriendshipAsync(int userId, int targetUserId)
+    {
+        return await _context.Friends
+            .Where(x => (x.InviterId == userId && x.ReceiverId == targetUserId) || (x.InviterId == targetUserId && x.ReceiverId == userId))
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<List<Friend>> GetPendingInvitationsByUserIdAsync(int userId)
+    {
+        return await _context.Friends
+        .Include(x => x.Inviter)
+        .Include(x => x.Receiver)
+        .Where(x => x.InviterId == userId || x.ReceiverId == userId)
+        .Where(x => x.AcceptedAt == null && x.DeclinedAt == null && x.DeletedAt == null) // Filtrujemy tylko OCZEKUJĄCE
+        .ToListAsync();
+    }
 }
