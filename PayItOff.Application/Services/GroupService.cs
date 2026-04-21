@@ -19,8 +19,9 @@ public class GroupService : IGroupService
     private readonly IValidator<CreateGroupRequest> _validator;
     private readonly IConfiguration _configuration;
     private readonly IFileService _fileService;
+    private readonly IGroupDebtRepository _groupDebtRepository;
 
-    public GroupService(IGroupRepository groupRepository, IUserRepository userRepository, IGroupMemberRepository groupMemberRepository, IUnitOfWork unitOfWork, IValidator<CreateGroupRequest> validator, IJWTService jwtService, IConfiguration configuration, IFileService fileService)
+    public GroupService(IGroupRepository groupRepository, IUserRepository userRepository, IGroupMemberRepository groupMemberRepository, IUnitOfWork unitOfWork, IValidator<CreateGroupRequest> validator, IJWTService jwtService, IConfiguration configuration, IFileService fileService, IGroupDebtRepository groupDebtRepository)
     {
         _groupRepository = groupRepository;
         _userRepository = userRepository;
@@ -29,6 +30,7 @@ public class GroupService : IGroupService
         _validator = validator;
         _fileService = fileService;
         _configuration = configuration;
+        _groupDebtRepository = groupDebtRepository;
     }
     public async Task CreateAsync(CreateGroupRequest request, int userId, IFormFile? avatar)
     {
@@ -56,13 +58,12 @@ public class GroupService : IGroupService
             await _groupRepository.AddAsync(group);
             await _groupMemberRepository.AddAsync(groupMember);
 
-            await _unitOfWork.SaveChangesAsync();
             await _unitOfWork.CommitAsync();
         }
         catch
         {
             await _unitOfWork.RollbackAsync();
-            throw new Exception("Błąd podczas tworzenia grupy. Spróbuj ponownie później.");
+            throw;
         }
     }
 
@@ -93,23 +94,32 @@ public class GroupService : IGroupService
 
         var savedFileName = await _fileService.SaveAvatarAsync(avatar);
 
+        if (savedFileName != null && group!.AvatarUrl != null)
+        {
+            _fileService.DeleteAvatar(group.AvatarUrl);
+        }
+
         group!.Edit(request.NewName, savedFileName);
         await _groupRepository.UpdateAsync(group);
         await _unitOfWork.SaveChangesAsync();
-        await _unitOfWork.CommitAsync();
     }
 
     public async Task DeleteGroupAsync(int userId, DeleteGroupRequest request)
     {
-        // TU MUSZE DODAĆ WALIDACJE DLA SPRAWDZENIA CZY "BUDŻET" KONTA JEST RÓWNY ZERO
         var user = await _userRepository.GetUserByIdAsync(userId);
         var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId);
         var isOwner = await _groupMemberRepository.IsUserOwner(userId, request.GroupId);
         if (!isOwner) { throw new InvalidUserRoleException(); }
+        var hasDebt = await _groupDebtRepository.HasActiveGroupDebt(request.GroupId);
+        if (hasDebt) { throw new InvalidGroupActionException(); }
+
+        if (group!.AvatarUrl != null)
+        {
+            _fileService.DeleteAvatar(group.AvatarUrl);
+        }
 
         group!.Delete();
         await _groupRepository.UpdateAsync(group);
         await _unitOfWork.SaveChangesAsync();
-        await _unitOfWork.CommitAsync();
     }
 }

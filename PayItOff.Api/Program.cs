@@ -73,6 +73,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();
 builder.Services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
 builder.Services.AddScoped<IFriendRepository, FriendRepository>();
+builder.Services.AddScoped<IGroupDebtRepository, GroupDebtRepository>();
 
 // Services
 builder.Services.AddScoped<IUserService, UserService>();

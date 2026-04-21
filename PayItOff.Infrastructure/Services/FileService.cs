@@ -42,4 +42,16 @@ public class FileService : IFileService
 
         return uniqueFileName;
     }
+
+    public void DeleteAvatar(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName)) return;
+
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "avatars", fileName);
+
+        if (File.Exists(filePath))
+        {
+            File.Delete(filePath);
+        }
+    }
 }

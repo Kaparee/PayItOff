@@ -37,7 +37,7 @@ public class FriendService : IFriendService
             Surname = data.Friend.Surname,
             Nickname = data.Friend.Nickname,
             PhoneNumber = data.Friend.PhoneNumber,
-            Balance = Math.Round(data.Balance, 2),
+            Balance = data.Balance,
             SharedGroupAvatars = data.SharedAvatars
                 .Select(avatar => $"{baseUrl}/avatars/{avatar ?? "default-avatar.png"}")
                 .ToList()

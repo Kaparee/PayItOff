@@ -43,11 +43,6 @@ public class UserService : IUserService
 
         string passwordHash = _passwordHasher.Hash(request.Password);
 
-        if (!string.IsNullOrWhiteSpace(request.IBAN))
-        {
-            request.IBAN = request.IBAN.Replace(" ", "").ToUpper();
-        }
-
         var savedFileName = await _fileService.SaveAvatarAsync(avatar);
 
         var user = User.Register(
@@ -65,7 +60,6 @@ public class UserService : IUserService
         try
         {
             await _userRepository.AddAsync(user);
-            await _unitOfWork.SaveChangesAsync();
 
             var backendUrl = _configuration["AppUrls:BackendUrl"];
             await _emailService.SendEmailAsync(user.Email, "Witaj w PayItOff!", $"<h1>Cześć {user.Nickname}!</h1><p>Dzięki za rejestrację.<br/>Aby zweryfikować konto, kliknij tutaj -> <a href=\"{backendUrl}/api/User/verify?verificationToken={user.VerificationToken}\">Link</a></p>");
@@ -169,8 +163,9 @@ public class UserService : IUserService
         if (user is null) { throw new UserNotFoundException(); }
 
         var savedFileName = await _fileService.SaveAvatarAsync(avatar);
-        if (savedFileName != null)
+        if (savedFileName != null && user!.AvatarUrl != null)
         {
+            _fileService.DeleteAvatar(user.AvatarUrl);
             user.UpdateAvatar(savedFileName);
         }
 
@@ -201,15 +196,13 @@ public class UserService : IUserService
             user.ModifyPassword(passHash);
             await _userRepository.UpdateAsync(user);
 
-            await _unitOfWork.SaveChangesAsync();
-
             await _emailService.SendEmailAsync(user.Email, $"Zmieniono hasło użytkownika {user.Nickname} - PayItOff", "<h1>Twoje hasło zostało pomyślnie zmienione!</h1>");
             await _unitOfWork.CommitAsync();
         }
         catch
         {
             await _unitOfWork.RollbackAsync();
-            throw new Exception("Serwis pocztowy chwilowo niedostępny. Spróbuj ponownie później.");
+            throw;
         }
     }
 
@@ -224,8 +217,6 @@ public class UserService : IUserService
             user.GeneratePasswordResetToken();
             await _userRepository.UpdateAsync(user);
 
-            await _unitOfWork.SaveChangesAsync();
-
             var backendUrl = _configuration["AppUrls:BackendUrl"];
             await _emailService.SendEmailAsync(user.Email, $"Reset hasła - PayItOff", $"<h1>Aby zmienić hasło, kliknij poniższy link<br><a href=\"{backendUrl}/api/User/confirm-password-reset?token={user.PasswordResetToken}\">RESETUJ HASŁO</a></h1>");
             await _unitOfWork.CommitAsync();
@@ -233,7 +224,7 @@ public class UserService : IUserService
         catch
         {
             await _unitOfWork.RollbackAsync();
-            throw new Exception("Serwis pocztowy chwilowo niedostępny. Spróbuj ponownie później.");
+            throw;
         }
     }
 
@@ -254,15 +245,13 @@ public class UserService : IUserService
             user.ResetPassword(user.PasswordResetToken!, passwordHash);
             await _userRepository.UpdateAsync(user);
 
-            await _unitOfWork.SaveChangesAsync();
-
             await _emailService.SendEmailAsync(user.Email, $"Zmieniono hasło użytkownika {user.Nickname} - PayItOff", "<h1>Twoje hasło zostało pomyślnie zmienione!</h1>");
             await _unitOfWork.CommitAsync();
         }
         catch
         {
             await _unitOfWork.RollbackAsync();
-            throw new Exception("Serwis pocztowy chwilowo niedostępny. Spróbuj ponownie później.");
+            throw;
         }
     }
 
@@ -282,8 +271,6 @@ public class UserService : IUserService
             user.GenerateEmailChangeToken(newEmail);
             await _userRepository.UpdateAsync(user);
 
-            await _unitOfWork.SaveChangesAsync();
-
             var backendUrl = _configuration["AppUrls:BackendUrl"];
             await _emailService.SendEmailAsync(newEmail, "Potwierdz swój nowy adres email - PayItOff", $"<h1>Witaj {user.Name} {user.Surname}</h1><br>Aby potwierdzić zmianę maila, kliknij poniższy link:<br> <a href=\"{backendUrl}/api/User/confirm-email-change?token={user.EmailChangeToken}\">Zmień adres email</a>");
             await _unitOfWork.CommitAsync();
@@ -291,7 +278,7 @@ public class UserService : IUserService
         catch
         {
             await _unitOfWork.RollbackAsync();
-            throw new Exception("Serwis pocztowy chwilowo niedostępny. Spróbuj ponownie później.");
+            throw;
         }
     }
 
@@ -310,15 +297,13 @@ public class UserService : IUserService
             user.EmailChange(token);
             await _userRepository.UpdateAsync(user);
 
-            await _unitOfWork.SaveChangesAsync();
-
             await _emailService.SendEmailAsync(user.Email, "Email zmienione - PayItOff", "<h1>Twój Email został zmieniony</h1>");
             await _unitOfWork.CommitAsync();
         }
         catch
         {
             await _unitOfWork.RollbackAsync();
-            throw new Exception("Serwis pocztowy chwilowo niedostępny. Spróbuj ponownie później.");
+            throw;
         }
     }
 
@@ -330,10 +315,13 @@ public class UserService : IUserService
         await _unitOfWork.BeginTransactionAsync();
         try
         {
+            if (user!.AvatarUrl != null)
+            {
+                _fileService.DeleteAvatar(user.AvatarUrl);
+            }
+
             user.Delete();
             await _userRepository.UpdateAsync(user);
-
-            await _unitOfWork.SaveChangesAsync();
 
             await _emailService.SendEmailAsync(user.Email, "Konto usunięte - PayItOff", "<h1>Twoje konto zostało usunięte</h1>");
             await _unitOfWork.CommitAsync();
@@ -341,7 +329,7 @@ public class UserService : IUserService
         catch
         {
             await _unitOfWork.RollbackAsync();
-            throw new Exception("Serwis pocztowy chwilowo niedostępny. Spróbuj ponownie później.");
+            throw;
         }
     }
 }

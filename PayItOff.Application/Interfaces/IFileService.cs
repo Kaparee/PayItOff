@@ -4,6 +4,6 @@ namespace PayItOff.Application.Interfaces;
 
 public interface IFileService
 {
-
     Task<string?> SaveAvatarAsync(IFormFile? avatar);
+    void DeleteAvatar(string fileName);
 }
