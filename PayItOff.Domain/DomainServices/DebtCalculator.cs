@@ -6,11 +6,7 @@
 
     public static class DebtCalculator
     {
-        public static ExpenseCalculationResult CalculateEqualSplit(
-            decimal totalAmount,
-            int creditorId,
-            List<int> participantIds,
-            int? remainderRecipientId = null)
+        public static ExpenseCalculationResult CalculateEqualSplit(decimal totalAmount, int creditorId, List<int> participantIds, int? remainderRecipientId = null)
         {
             var splits = new List<CalculatedSplit>();
             var debts = new List<CalculatedDebt>();

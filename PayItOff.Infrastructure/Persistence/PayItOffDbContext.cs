@@ -74,8 +74,13 @@ namespace PayItOff.Infrastructure.Persistence
 
             modelBuilder.Entity<ExpenseGroup>(builder =>
             {
-                builder.Metadata.FindNavigation(nameof(ExpenseGroup.Splits))
+                builder.Metadata.FindNavigation(nameof(ExpenseGroup.Items))
                     ?.SetPropertyAccessMode(PropertyAccessMode.Field);
+
+                builder.HasMany(g => g.Items)
+                       .WithOne(i => i.ExpenseGroup)
+                       .HasForeignKey(i => i.ExpenseGroupId)
+                       .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<ExpenseSplit>(builder =>
@@ -83,12 +88,7 @@ namespace PayItOff.Infrastructure.Persistence
                 builder.HasOne(s => s.ExpenseItem)
                        .WithMany(i => i.Splits)
                        .HasForeignKey(s => s.ExpenseItemId)
-                       .OnDelete(DeleteBehavior.Restrict);
-
-                builder.HasOne(s => s.ExpenseGroup)
-                       .WithMany(g => g.Splits)
-                       .HasForeignKey(s => s.ExpenseGroupId)
-                       .OnDelete(DeleteBehavior.Restrict);
+                       .IsRequired();
             });
 
             modelBuilder.Entity<GroupDebt>(builder =>

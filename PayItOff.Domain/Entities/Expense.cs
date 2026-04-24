@@ -68,41 +68,43 @@ namespace PayItOff.Domain.Entities
         public Dictionary<int, decimal> CalculateDebts()
         {
             var debts = new Dictionary<int, decimal>();
+
             foreach (ExpenseItem item in _items)
             {
                 foreach (ExpenseSplit split in item.Splits)
                 {
-                    if (split.UserId != PayerId)
-                    {
-                        if (debts.ContainsKey(split.UserId))
-                        {
-                            debts[split.UserId] += split.OwedAmount;
-                        }
-                        else
-                        {
-                            debts.Add(split.UserId, split.OwedAmount);
-                        }
-                    }
+                    AddDebtToDictionary(debts, split);
                 }
             }
+
             foreach (ExpenseGroup group in _groups)
             {
-                foreach (ExpenseSplit split in group.Splits)
+                foreach (var item in group.Items)
                 {
-                    if (split.UserId != PayerId)
+                    foreach (ExpenseSplit split in item.Splits)
                     {
-                        if (debts.ContainsKey(split.UserId))
-                        {
-                            debts[split.UserId] += split.OwedAmount;
-                        }
-                        else
-                        {
-                            debts.Add(split.UserId, split.OwedAmount);
-                        }
+                        AddDebtToDictionary(debts, split);
                     }
                 }
             }
+
             return debts;
+        }
+
+
+        private void AddDebtToDictionary(Dictionary<int, decimal> debts, ExpenseSplit split)
+        {
+            if (split.UserId != PayerId)
+            {
+                if (debts.ContainsKey(split.UserId))
+                {
+                    debts[split.UserId] += split.OwedAmount;
+                }
+                else
+                {
+                    debts.Add(split.UserId, split.OwedAmount);
+                }
+            }
         }
         public void RecalculateTotal()
         {

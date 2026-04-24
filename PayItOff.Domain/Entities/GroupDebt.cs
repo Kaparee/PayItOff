@@ -3,9 +3,9 @@ namespace PayItOff.Domain.Entities
     public class GroupDebt
     {
         public int Id { get; private set; }
-        public Group Group { get; private set; }
-        public User Debtor { get; private set; }
-        public User Creditor { get; private set; }
+        public Group Group { get; private set; } = null!;
+        public User Debtor { get; private set; } = null!;
+        public User Creditor { get; private set; } = null!;
         public int GroupId { get; private set; }
         public int DebtorId { get; private set; }
         public int CreditorId { get; private set; }
@@ -46,6 +46,12 @@ namespace PayItOff.Domain.Entities
             if (amountToSubtract < 0) { throw new InvalidOperationException("Nie można odjąć od długu mniej niż 0"); }
             if (amountToSubtract > Amount) { throw new InvalidOperationException("Nie można odjąć od długu więcej niż on wynosi"); }
             Amount -= amountToSubtract;
+        }
+
+        public void ChangeAmount(decimal delta)
+        {
+            Amount += delta;
+            if (Amount < 0) Amount = 0;
         }
     }
 }

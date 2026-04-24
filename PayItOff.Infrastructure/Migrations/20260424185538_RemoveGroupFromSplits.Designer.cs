@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PayItOff.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using PayItOff.Infrastructure.Persistence;
 namespace PayItOff.Infrastructure.Migrations
 {
     [DbContext(typeof(PayItOffDbContext))]
-    partial class PayItOffDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260424185538_RemoveGroupFromSplits")]
+    partial class RemoveGroupFromSplits
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

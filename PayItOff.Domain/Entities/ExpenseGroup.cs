@@ -7,8 +7,8 @@ namespace PayItOff.Domain.Entities
         public int ExpenseId { get; private set; }
         public string Name { get; private set; }
         public decimal TotalAmount { get; private set; }
-        private readonly List<ExpenseSplit> _splits = new();
-        public IReadOnlyCollection<ExpenseSplit> Splits => _splits.AsReadOnly();
+        private readonly List<ExpenseItem> _items = new();
+        public IReadOnlyCollection<ExpenseItem> Items => _items.AsReadOnly();
 
         protected ExpenseGroup() { }
 
@@ -41,10 +41,10 @@ namespace PayItOff.Domain.Entities
             TotalAmount = newAmount;
         }
 
-        public void AddSplit(ExpenseSplit split)
+        public void AddItem(ExpenseItem item)
         {
-            if (split == null) { throw new ArgumentNullException(nameof(split), "Nie może być null"); }
-            _splits.Add(split);
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            _items.Add(item);
         }
     }
 }
