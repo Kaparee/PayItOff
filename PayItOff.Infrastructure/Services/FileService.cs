@@ -7,6 +7,10 @@ public class FileService : IFileService
 {
     public async Task<string?> SaveAvatarAsync(IFormFile? avatar)
     {
+        if (avatar == null || avatar.Length == 0)
+        {
+            return null;
+        }
         var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
         var extension = Path.GetExtension(avatar.FileName).ToLowerInvariant();
 
@@ -18,11 +22,6 @@ public class FileService : IFileService
         if (avatar.Length > 5 * 1024 * 1024)
         {
             throw new Exception("Plik jest za duży. Maksymalny rozmiar to 5 MB.");
-        }
-
-        if (avatar == null || avatar.Length == 0)
-        {
-            return null;
         }
 
         var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "avatars");

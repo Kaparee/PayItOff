@@ -22,6 +22,7 @@ public class GroupRepository : IGroupRepository
             .Where(x => x.UserId == userId && x.Status == GroupMemberStatus.Accepted)
             .Where(x => x.Group!.DeletedAt == null)
             .OrderByDescending(x => x.IsFavorite)
+            .OrderBy(x => x.UpdatedAt)
             .ToListAsync();
     }
 

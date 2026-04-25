@@ -71,15 +71,26 @@ public class GroupService : IGroupService
     {
         var members = await _groupRepository.GetUserGroupsAsync(userId);
 
+        var balances = await _groupDebtRepository.GetUserGroupBalancesAsync(userId);
+
         var baseUrl = _configuration["AppUrls:BackendUrl"];
 
-        var response = members.Select(member => new GroupInfoResponse
+        var response = members.Select(member =>
         {
-            Id = member.Group!.Id,
-            Name = member.Group!.Name,
-            AvatarUrl = $"{baseUrl}/avatars/{member.Group.AvatarUrl ?? "default-avatar.png"}",
-            UpdatedAt = member.Group.UpdatedAt,
-            IsFavorite = member.IsFavorite
+            var groupId = member.Group!.Id;
+
+            var (income, expense) = balances.ContainsKey(groupId) ? balances[groupId] : (0m, 0m);
+            return new GroupInfoResponse
+            {
+                Id = groupId,
+                Name = member.Group.Name,
+                AvatarUrl = $"{baseUrl}/avatars/{member.Group.AvatarUrl ?? "default-avatar.png"}",
+                UpdatedAt = member.Group.UpdatedAt,
+                IsFavorite = member.IsFavorite,
+                Income = income,
+                Expense = expense,
+                Balance = income - expense,
+            };
         }).ToList();
 
         return response;
@@ -87,19 +98,22 @@ public class GroupService : IGroupService
 
     public async Task EditGroupInfoAsync(int userId, EditGroupInfoRequest request, IFormFile? avatar)
     {
+        if (request == null) throw new ArgumentNullException(nameof(request), "Payload nie został zmapowany.");
         var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user is null) { throw new UserNotFoundException(); }
         var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId);
+        if (group is null) { throw new GroupNotFoundException(); }
         var isOwnerOrAdmin = await _groupMemberRepository.IsUserOwnerOrAdmin(userId, request.GroupId);
         if (!isOwnerOrAdmin) { throw new InvalidUserRoleException(); }
 
         var savedFileName = await _fileService.SaveAvatarAsync(avatar);
 
-        if (savedFileName != null && group!.AvatarUrl != null)
+        if (savedFileName != null && group.AvatarUrl != null)
         {
             _fileService.DeleteAvatar(group.AvatarUrl);
         }
 
-        group!.Edit(request.NewName, savedFileName);
+        group.Edit(request.NewName, savedFileName);
         await _groupRepository.UpdateAsync(group);
         await _unitOfWork.SaveChangesAsync();
     }
@@ -107,7 +121,9 @@ public class GroupService : IGroupService
     public async Task DeleteGroupAsync(int userId, DeleteGroupRequest request)
     {
         var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user is null) { throw new UserNotFoundException(); }
         var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId);
+        if (group is null) { throw new GroupNotFoundException(); }
         var isOwner = await _groupMemberRepository.IsUserOwner(userId, request.GroupId);
         if (!isOwner) { throw new InvalidUserRoleException(); }
         var hasDebt = await _groupDebtRepository.HasActiveGroupDebt(request.GroupId);
@@ -118,7 +134,7 @@ public class GroupService : IGroupService
             _fileService.DeleteAvatar(group.AvatarUrl);
         }
 
-        group!.Delete();
+        group.Delete();
         await _groupRepository.UpdateAsync(group);
         await _unitOfWork.SaveChangesAsync();
     }

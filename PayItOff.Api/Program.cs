@@ -74,6 +74,7 @@ builder.Services.AddScoped<IGroupRepository, GroupRepository>();
 builder.Services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
 builder.Services.AddScoped<IFriendRepository, FriendRepository>();
 builder.Services.AddScoped<IGroupDebtRepository, GroupDebtRepository>();
+builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 
 // Services
 builder.Services.AddScoped<IUserService, UserService>();
@@ -84,6 +85,8 @@ builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IFriendService, FriendService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IGroupMemberService, GroupMemberService>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<ISettlementService, SettlementService>();
 
 // Validators
 builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
