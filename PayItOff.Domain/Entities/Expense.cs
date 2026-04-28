@@ -4,8 +4,10 @@ namespace PayItOff.Domain.Entities
     {
         public int Id { get; private set; }
         public Group Group { get; private set; }
+        public User Creator { get; private set; }
         public User Payer { get; private set; }
         public int GroupId { get; private set; }
+        public int CreatorId { get; private set; }
         public int PayerId { get; private set; }
         public decimal TotalAmount { get; private set; }
         public string Name { get; private set; }
@@ -21,15 +23,18 @@ namespace PayItOff.Domain.Entities
 
         protected Expense() { }
 
-        private Expense(Group group, User payer, string name, string? receiptImageUrl, DateTime purchasedAt)
+        private Expense(Group group, User creator, User payer, string name, string? receiptImageUrl, DateTime purchasedAt)
         {
             if (group == null) { throw new ArgumentNullException(nameof(group), "Error przy group"); }
+            if (creator == null) { throw new ArgumentNullException(nameof(creator), "Error przy creator"); }
             if (payer == null) { throw new ArgumentNullException(nameof(payer), "Error przy payer"); }
             if (string.IsNullOrWhiteSpace(name)) { throw new ArgumentException(nameof(name)); }
 
             Group = group;
+            Creator = creator;
             Payer = payer;
             GroupId = group.Id;
+            CreatorId = creator.Id;
             PayerId = payer.Id;
             TotalAmount = 0;
             Name = name;
@@ -39,10 +44,10 @@ namespace PayItOff.Domain.Entities
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public static Expense Create(Group group, User payer, string name, string? receiptImageUrl, DateTime purchasedAt)
+        public static Expense Create(Group group, User creator, User payer, string name, string? receiptImageUrl, DateTime purchasedAt)
         {
             var finalReceiptImageUrl = string.IsNullOrWhiteSpace(receiptImageUrl) ? null : receiptImageUrl;
-            return new Expense(group, payer, name, finalReceiptImageUrl, purchasedAt);
+            return new Expense(group, creator, payer, name, finalReceiptImageUrl, purchasedAt);
         }
 
         public void AddItem(ExpenseItem item)

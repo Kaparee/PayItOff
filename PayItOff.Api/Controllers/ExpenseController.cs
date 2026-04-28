@@ -18,6 +18,8 @@ public class ExpenseController : ControllerBase
     public ExpenseController(IExpenseService expenseService) { _expenseService = expenseService; }
 
     [HttpPost("create")]
+    [EndpointSummary("Tworzenie nowego wydatku")]
+    [EndpointDescription("Endpoint do utworzenia nowego wydatku, obszerny JSON, który obsłuży duże transakcje (kilkanaście produktów na paragonie)")]
     public async Task<IActionResult> Create([FromBody] CreateExpenseBatchRequest request)
     {
         await _expenseService.CreateExpenseBatch(GetUserId(), request);

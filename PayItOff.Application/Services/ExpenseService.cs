@@ -35,6 +35,9 @@ namespace PayItOff.Application.Services
         {
             var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId);
             if(group == null) { throw new GroupNotFoundException(); }
+            var creator = await _userRepository.GetUserByIdAsync(request.CreatorId);
+            if (creator == null) { throw new UserNotFoundException(); }
+
             await _unitOfWork.BeginTransactionAsync();
             try
             {
@@ -45,7 +48,7 @@ namespace PayItOff.Application.Services
                     var payer = await _userRepository.GetUserByIdAsync(subDto.PayerId);
                     if (payer == null) { throw new UserNotFoundException(); }
 
-                    var expense = Expense.Create(group, payer, subDto.Name, subDto.ReciptImageUrl, subDto.PurchasedAt);
+                    var expense = Expense.Create(group, creator, payer, subDto.Name, subDto.ReciptImageUrl, subDto.PurchasedAt);
 
                     foreach (var gDTO in subDto.Groups)
                     {
@@ -55,7 +58,7 @@ namespace PayItOff.Application.Services
                         {
                             var expenseItem = ExpenseItem.Create(expense, expenseGroup, iDTO.Name, iDTO.Category, iDTO.Quantity, iDTO.UnitPrice);
 
-                            var calc = DebtCalculator.CalculateEqualSplit(expenseItem.TotalPrice, payer.Id, gDTO.ParticipantIds, subDto.RemainderRecipientId);
+                            var calc = DebtCalculator.CalculateEqualSplit(expenseItem.TotalPrice, payer.Id, gDTO.ParticipantIds, iDTO.RemainderRecipientId);
 
                             foreach (var r in calc.Splits)
                             {
@@ -77,7 +80,7 @@ namespace PayItOff.Application.Services
                     {
                         var expenseItem = ExpenseItem.Create(expense, null, iDTO.Name, iDTO.Category, iDTO.Quantity, iDTO.UnitPrice);
 
-                        var calc = DebtCalculator.CalculateEqualSplit(expenseItem.TotalPrice, payer.Id, iDTO.ParticipantIds, subDto.RemainderRecipientId);
+                        var calc = DebtCalculator.CalculateEqualSplit(expenseItem.TotalPrice, payer.Id, iDTO.ParticipantIds, iDTO.RemainderRecipientId);
                         foreach (var r in calc.Splits)
                         {
                             var user = await _userRepository.GetUserByIdAsync(r.UserId);

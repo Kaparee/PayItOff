@@ -64,6 +64,16 @@ namespace PayItOff.Infrastructure.Persistence
                        .WithOne(g => g.Expense)
                        .HasForeignKey(g => g.ExpenseId)
                        .OnDelete(DeleteBehavior.Restrict);
+
+                builder.HasOne(e => e.Creator)
+                       .WithMany()
+                       .HasForeignKey(e => e.CreatorId)
+                       .OnDelete(DeleteBehavior.Restrict);
+
+                builder.HasOne(e => e.Payer)
+                       .WithMany()
+                       .HasForeignKey(e => e.PayerId)
+                       .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<ExpenseItem>(builder =>
