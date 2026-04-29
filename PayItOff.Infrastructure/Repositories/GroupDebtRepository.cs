@@ -5,6 +5,7 @@ using PayItOff.Domain.Entities;
 using PayItOff.Domain.Enums;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Infrastructure.Persistence;
+using PayItOff.Shared.Responses;
 
 namespace PayItOff.Infrastructure.Repositories;
 
@@ -74,39 +75,71 @@ public class GroupDebtRepository : IGroupDebtRepository
         return balances;
     }
 
-    public async Task<List<(int UserId, string Name, string Surname, string? AvatarUrl, decimal Amount)>> GetUserTotalIncomesAsync(int userId)
+    public async Task<List<(int UserId, string Name, string Surname, string? AvatarUrl, List<string> Categories, DateTime Date, decimal Amount)>> GetUserTotalIncomesAsync(int userId)
     {
-        var incomes = await _context.GroupDebts
-            .Where(x => x.CreditorId == userId)
-            .GroupBy(x => new { x.Debtor!.Id, x.Debtor.Name, x.Debtor.Surname, x.Debtor.AvatarUrl })
+        var groupedIncomes = await _context.ExpenseSplits
+            .Where(s => s.ExpenseItem.Expense.PayerId == userId && s.UserId != userId)
+            .GroupBy(s => new
+            {
+                s.User.Id,
+                s.User.Name,
+                s.User.Surname,
+                s.User.AvatarUrl
+            })
             .Select(g => new
             {
                 g.Key.Id,
                 g.Key.Name,
                 g.Key.Surname,
                 g.Key.AvatarUrl,
-                TotalAmount = g.Sum(x => x.Amount)
+                Categories = g.Select(s => s.ExpenseItem.Category).Distinct().ToList(),
+                LastExpenseDate = g.Max(s => s.ExpenseItem.Expense.PurchasedAt),
+                TotalOwedAmount = g.Sum(s => s.OwedAmount)
             })
             .ToListAsync();
 
-        return incomes.ConvertAll(x => (x.Id, x.Name, x.Surname, x.AvatarUrl, x.TotalAmount));
+        return groupedIncomes.ConvertAll(x => (
+            x.Id,
+            x.Name,
+            x.Surname,
+            x.AvatarUrl,
+            x.Categories,
+            x.LastExpenseDate,
+            x.TotalOwedAmount
+        ));
     }
 
-    public async Task<List<(int UserId, string Name, string Surname, string? AvatarUrl, decimal Amount)>> GetUserTotalExpensesAsync(int userId)
+    public async Task<List<(int UserId, string Name, string Surname, string? AvatarUrl, List<string> Categories, DateTime Date, decimal Amount)>> GetUserTotalExpensesAsync(int userId)
     {
-        var expenses = await _context.GroupDebts
-            .Where(x => x.DebtorId == userId)
-            .GroupBy(x => new { x.Creditor!.Id, x.Creditor.Name, x.Creditor.Surname, x.Creditor.AvatarUrl })
+        var groupedExpenses = await _context.ExpenseSplits
+            .Where(s => s.UserId == userId && s.ExpenseItem.Expense.PayerId != userId)
+            .GroupBy(s => new
+            {
+                s.ExpenseItem.Expense.Payer.Id,
+                s.ExpenseItem.Expense.Payer.Name,
+                s.ExpenseItem.Expense.Payer.Surname,
+                s.ExpenseItem.Expense.Payer.AvatarUrl
+            })
             .Select(g => new
             {
                 g.Key.Id,
                 g.Key.Name,
                 g.Key.Surname,
                 g.Key.AvatarUrl,
-                TotalAmount = g.Sum(x => x.Amount)
+                Categories = g.Select(s => s.ExpenseItem.Category).Distinct().ToList(),
+                LastExpenseDate = g.Max(s => s.ExpenseItem.Expense.PurchasedAt),
+                TotalOwedAmount = g.Sum(s => s.OwedAmount)
             })
             .ToListAsync();
 
-        return expenses.ConvertAll(x => (x.Id, x.Name, x.Surname, x.AvatarUrl, x.TotalAmount));
+        return groupedExpenses.ConvertAll(x => (
+            x.Id,
+            x.Name,
+            x.Surname,
+            x.AvatarUrl,
+            x.Categories,
+            x.LastExpenseDate,
+            x.TotalOwedAmount
+        ));
     }
 }

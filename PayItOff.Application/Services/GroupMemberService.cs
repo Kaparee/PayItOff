@@ -6,6 +6,7 @@ using PayItOff.Domain.Exceptions;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
+using System.Buffers.Text;
 using System.Data;
 
 namespace PayItOff.Application.Services;
@@ -162,9 +163,13 @@ public class GroupMemberService : IGroupMemberService
     {
         var members = await _groupMemberRepository.GetAllActiveGroupMembersAsync(groupId);
 
+        var baseUrl = _configuration["AppUrls:BackendUrl"];
+
         return members.Select(x => new GroupMemberResponse
         {
-            AvatarUrl = x.User!.AvatarUrl ?? string.Empty,
+            UserId = x.UserId,
+            GroupMemberId = x.Id,
+            AvatarUrl = $"{baseUrl}/avatars/{x.User!.AvatarUrl ?? "default-avatar.png"}",
             Name = x.User.Name,
             Surname = x.User.Surname,
             Email = x.User.Email,

@@ -4,7 +4,7 @@ namespace PayItOff.Application.Interfaces
 {
     public interface ISettlementService
     {
-        Task<List<GlobalDebtSummaryResponse>> GetUserAllIncomesSummaryAsync(int userId);
-        Task<List<GlobalDebtSummaryResponse>> GetUserAllExpensesSummaryAsync(int userId);
+        Task<GlobalSettlementResponse> GetUserAllIncomesSummaryAsync(int userId);
+        Task<GlobalSettlementResponse> GetUserAllExpensesSummaryAsync(int userId);
     }
 }

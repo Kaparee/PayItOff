@@ -1,5 +1,6 @@
 ﻿using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
 using MimeKit.Text;
@@ -20,8 +21,9 @@ namespace PayItOff.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IExpenseRepository _expenseRepository;
         private readonly IGroupDebtRepository _groupDebtRepository;
+        private readonly IFileService _fileService;
 
-        public ExpenseService(IConfiguration configuration, IUnitOfWork unitOfWork, IGroupRepository groupRepository, IUserRepository userRepository, IExpenseRepository expenseRepository, IGroupDebtRepository groupDebtRepository)
+        public ExpenseService(IConfiguration configuration, IUnitOfWork unitOfWork, IGroupRepository groupRepository, IUserRepository userRepository, IExpenseRepository expenseRepository, IGroupDebtRepository groupDebtRepository, IFileService fileService)
         {
             _configuration = configuration;
             _unitOfWork = unitOfWork;
@@ -29,24 +31,33 @@ namespace PayItOff.Application.Services
             _userRepository = userRepository;
             _expenseRepository = expenseRepository;
             _groupDebtRepository = groupDebtRepository;
+            _fileService = fileService;
         }
 
         public async Task CreateExpenseBatch(int userId, CreateExpenseBatchRequest request)
         {
             var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId);
             if(group == null) { throw new GroupNotFoundException(); }
-            var creator = await _userRepository.GetUserByIdAsync(request.CreatorId);
+            var creator = await _userRepository.GetUserByIdAsync(userId);
             if (creator == null) { throw new UserNotFoundException(); }
 
             await _unitOfWork.BeginTransactionAsync();
             try
             {
+                var allUserIds = request.Expenses.Select(e => e.PayerId)
+                    .Concat(request.Expenses.SelectMany(e => e.Groups.SelectMany(g => g.ParticipantIds)))
+                    .Concat(request.Expenses.SelectMany(e => e.Items.SelectMany(i => i.ParticipantIds)))
+                    .Distinct()
+                    .ToList();
+
+                var usersDict = await _userRepository.GetUsersByIdsAsync(allUserIds);
+
                 var globalDebts = new Dictionary<(int DebtorId, int CreditorId), decimal>();
 
                 foreach (var subDto in request.Expenses)
                 {
-                    var payer = await _userRepository.GetUserByIdAsync(subDto.PayerId);
-                    if (payer == null) { throw new UserNotFoundException(); }
+                    if (!usersDict.ContainsKey(subDto.PayerId)){ throw new UserNotFoundException(); }
+                    var payer = usersDict[subDto.PayerId];
 
                     var expense = Expense.Create(group, creator, payer, subDto.Name, subDto.ReciptImageUrl, subDto.PurchasedAt);
 
@@ -62,8 +73,8 @@ namespace PayItOff.Application.Services
 
                             foreach (var r in calc.Splits)
                             {
-                                var user = await _userRepository.GetUserByIdAsync(r.UserId);
-                                if (user == null) { throw new UserNotFoundException(); }
+                                if (!usersDict.ContainsKey(r.UserId)) { throw new UserNotFoundException(); }
+                                var user = usersDict[r.UserId];
                                 var expenseSplit = ExpenseSplit.Create(expenseItem, user, r.Amount);
                                 expenseItem.AddSplit(expenseSplit);
                                 if (r.UserId != payer.Id)
@@ -83,8 +94,8 @@ namespace PayItOff.Application.Services
                         var calc = DebtCalculator.CalculateEqualSplit(expenseItem.TotalPrice, payer.Id, iDTO.ParticipantIds, iDTO.RemainderRecipientId);
                         foreach (var r in calc.Splits)
                         {
-                            var user = await _userRepository.GetUserByIdAsync(r.UserId);
-                            if (user == null) { throw new UserNotFoundException(); }
+                            if (!usersDict.ContainsKey(r.UserId)) { throw new UserNotFoundException(); }
+                            var user = usersDict[r.UserId];
                             var expenseSplit = ExpenseSplit.Create(expenseItem, user, r.Amount);
                             expenseItem.AddSplit(expenseSplit);
                             if (r.UserId != payer.Id)
@@ -102,10 +113,10 @@ namespace PayItOff.Application.Services
                 foreach (var debt in globalDebts)
                 {
                     if (debt.Key.DebtorId == debt.Key.CreditorId) continue;
-                    var debtor = await _userRepository.GetUserByIdAsync(debt.Key.DebtorId);
-                    if (debtor == null) { throw new UserNotFoundException(); }
-                    var creditor = await _userRepository.GetUserByIdAsync(debt.Key.CreditorId);
-                    if (creditor == null) { throw new UserNotFoundException(); }
+                    if (!usersDict.ContainsKey(debt.Key.DebtorId)) { throw new UserNotFoundException(); }
+                    var debtor = usersDict[debt.Key.DebtorId];
+                    if (!usersDict.ContainsKey(debt.Key.CreditorId)) { throw new UserNotFoundException(); }
+                    var creditor = usersDict[debt.Key.CreditorId];
                     await _groupDebtRepository.ApplyDebtChangeAsync(group, debtor, creditor, debt.Value);
                 }
 

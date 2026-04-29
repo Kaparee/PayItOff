@@ -5,7 +5,7 @@ namespace PayItOff.Infrastructure.Services;
 
 public class FileService : IFileService
 {
-    public async Task<string?> SaveAvatarAsync(IFormFile? avatar)
+    public async Task<string?> SaveFileAsync(IFormFile? avatar)
     {
         if (avatar == null || avatar.Length == 0)
         {
@@ -42,7 +42,7 @@ public class FileService : IFileService
         return uniqueFileName;
     }
 
-    public void DeleteAvatar(string fileName)
+    public void DeleteFile(string fileName)
     {
         if (string.IsNullOrWhiteSpace(fileName)) return;
 

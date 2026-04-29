@@ -19,7 +19,7 @@ namespace PayItOff.Infrastructure.Migrations
                 table: "Expenses",
                 type: "integer",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: null);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Expenses_CreatorId",

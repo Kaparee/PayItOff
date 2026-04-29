@@ -111,6 +111,25 @@
         <Setter Property="ThumbColor" Value="{StaticResource TextMain}" />
     </Style>
 
+    <Style x:Key="MenuItemHoverStyle" TargetType="HorizontalStackLayout">
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal">
+                        <VisualState.Setters>
+                            <Setter Property="BackgroundColor" Value="Transparent" />
+                        </VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="PointerOver">
+                        <VisualState.Setters>
+                            <Setter Property="BackgroundColor" Value="{StaticResource SurfaceLight}"/>
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>
+    </Style>
+
     <Style TargetType="Slider">
         <Setter Property="MinimumTrackColor" Value="{StaticResource PrimaryViolet}" />
         <Setter Property="MaximumTrackColor" Value="{StaticResource Border}" />

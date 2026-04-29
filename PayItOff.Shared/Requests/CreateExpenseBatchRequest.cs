@@ -3,7 +3,6 @@
     public class CreateExpenseBatchRequest
     {
         public required int GroupId { get; set; }
-        public required int CreatorId { get; set; }
         public required List<SubExpenseDto> Expenses { get; set; }
     }
 

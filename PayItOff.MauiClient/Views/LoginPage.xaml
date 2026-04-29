@@ -67,7 +67,7 @@
                             Padding="0"
                             HeightRequest="45"
                             WidthRequest="45"
-                            VerticalOptions="Center" /> 
+                            VerticalOptions="Center" />
                     </Grid>
                 </Border>
             </VerticalStackLayout>

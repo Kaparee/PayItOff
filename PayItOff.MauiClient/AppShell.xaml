@@ -4,11 +4,25 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:PayItOff.MauiClient.Views"
-    Title="PayItOff.MauiClient">
+    Title="PayItOff.MauiClient"
+    FlyoutBehavior="Disabled">
 
+    <Shell.Resources>
+        <Style TargetType="ShellItem">
+            <Setter Property="Shell.NavBarIsVisible" Value="False" />
+        </Style>
+    </Shell.Resources>
+
+    <!-- Strona logowania - startowa -->
+    <ShellContent
+        Title="Login"
+        ContentTemplate="{DataTemplate views:LoginPage}"
+        Route="LoginPage" />
+
+    <!-- Strona główna -->
     <ShellContent
         Title="Home"
-        ContentTemplate="{DataTemplate views:LoginPage}"
+        ContentTemplate="{DataTemplate views:MainPage}"
         Route="MainPage" />
 
 </Shell>

@@ -4,6 +4,8 @@ namespace PayItOff.Shared.Responses
 {
     public class GroupMemberResponse
     {
+        public required int UserId { get; set; }
+        public required int GroupMemberId { get; set; }
         public required string AvatarUrl { get; set; }
         public required string Name { get; set; }
         public required string Surname { get; set; }

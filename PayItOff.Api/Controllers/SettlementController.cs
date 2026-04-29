@@ -18,16 +18,18 @@ public class SettlementController : ControllerBase
     public SettlementController(ISettlementService settlementService) { _settlementService = settlementService; }
 
     [HttpGet("get-user-incomes-summ")]
-    public async Task<ActionResult<GlobalDebtSummaryResponse>> GetAllUserIncomeSummaries()
+    public async Task<ActionResult<GlobalSettlementResponse>> GetAllUserIncomeSummaries()
     {
         var result = await _settlementService.GetUserAllIncomesSummaryAsync(GetUserId());
+
         return Ok(result);
     }
 
     [HttpGet("get-user-expenses-summ")]
-    public async Task<ActionResult<GlobalDebtSummaryResponse>> GetAllUserExpenseSummaries()
+    public async Task<ActionResult<GlobalSettlementResponse>> GetAllUserExpenseSummaries()
     {
         var result = await _settlementService.GetUserAllExpensesSummaryAsync(GetUserId());
+
         return Ok(result);
     }
 }

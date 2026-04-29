@@ -29,14 +29,17 @@ namespace PayItOff.MauiClient
             // Services
             builder.Services.AddSingleton<RegisterService>();
             builder.Services.AddScoped<AuthService>();
+            builder.Services.AddScoped<SettlementService>();
 
             // ViewModels
             builder.Services.AddTransient<RegisterViewModel>();
             builder.Services.AddTransient<LoginViewModel>();
+            builder.Services.AddTransient<MainViewModel>();
 
             // Views
             builder.Services.AddTransient<RegisterPage>();
             builder.Services.AddTransient<LoginPage>();
+            builder.Services.AddTransient<MainPage>();
 
             return builder.Build();
         }

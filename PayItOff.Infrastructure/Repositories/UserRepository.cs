@@ -71,4 +71,11 @@ public class UserRepository : IUserRepository
             .Where(x => x.EmailChangeToken == token && x.DeletedAt == null)
             .FirstOrDefaultAsync();
     }
+
+    public async Task<Dictionary<int, User>> GetUsersByIdsAsync(IEnumerable<int> userIds)
+    {
+        return await _context.Users
+            .Where(x => userIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id);
+    }
 }

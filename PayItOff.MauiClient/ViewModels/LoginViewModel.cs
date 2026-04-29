@@ -47,35 +47,29 @@ public partial class LoginViewModel : ObservableObject
     {
         if (IsBusy) return;
 
+        if (string.IsNullOrWhiteSpace(EmailOrNickname) || string.IsNullOrWhiteSpace(Password))
+        {
+            HasError = true;
+            return;
+        }
+
         IsBusy = true;
         HasError = false;
 
         try
         {
             var request = new LoginRequest { EmailOrNickname = EmailOrNickname, Password = Password };
-            var result = await _authService.LoginAsync(request);
 
-            if (result == true)
-            {
-                await Shell.Current.GoToAsync("//MainDashboardPage");
-            }
-            else
-            {
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    Password = string.Empty;
-                    HasError = true;
-                });
-            }
+            await _authService.LoginAsync(request);
+
+            await Shell.Current.GoToAsync("//MainPage");
         }
         catch (Exception ex)
         {
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                Password = string.Empty;
-                HasError = true;
-            });
-            await Shell.Current.DisplayAlertAsync("Błąd", ex.Message, "OK");
+            Password = string.Empty;
+            HasError = true;
+
+            await Shell.Current.DisplayAlertAsync("Błąd logowania", ex.Message, "OK");
         }
         finally
         {

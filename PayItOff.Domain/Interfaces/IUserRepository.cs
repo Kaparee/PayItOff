@@ -13,4 +13,5 @@ public interface IUserRepository
     Task<bool> IsEmailTakenAsync(string email);
     Task<User?> GetUserByPasswordResetTokenAsync(string token);
     Task<User?> GetUserByEmailChangeTokenAsync(string token);
+    Task<Dictionary<int, User>> GetUsersByIdsAsync(IEnumerable<int> userIds);
 }

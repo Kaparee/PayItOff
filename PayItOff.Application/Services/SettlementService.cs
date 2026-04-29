@@ -28,40 +28,44 @@ namespace PayItOff.Application.Services
 
         }
 
-        public async Task<List<GlobalDebtSummaryResponse>> GetUserAllIncomesSummaryAsync(int userId)
+        public async Task<GlobalSettlementResponse> GetUserAllIncomesSummaryAsync(int userId)
         {
             var incomes = await _groupDebtRepository.GetUserTotalIncomesAsync(userId);
 
             var baseUrl = _configuration["AppUrls:BackendUrl"];
 
-            var response = incomes.Select(data => new GlobalDebtSummaryResponse
+            var items = incomes.Select(data => new GlobalDebtSummaryResponse
             {
                 UserId = data.UserId,
                 Name = data.Name,
                 Surname = data.Surname,
                 AvatarUrl = $"{baseUrl}/avatars/{data.AvatarUrl ?? "default-avatar.png"}",
+                Categories = data.Categories,
+                Date = data.Date,
                 Amount = data.Amount
             }).ToList();
 
-            return response;
+            return new GlobalSettlementResponse { Items = items, TotalAmount = items.Sum(i => i.Amount) };
         }
 
-        public async Task<List<GlobalDebtSummaryResponse>> GetUserAllExpensesSummaryAsync(int userId)
+        public async Task<GlobalSettlementResponse> GetUserAllExpensesSummaryAsync(int userId)
         {
             var expenses = await _groupDebtRepository.GetUserTotalExpensesAsync(userId);
 
             var baseUrl = _configuration["AppUrls:BackendUrl"];
 
-            var response = expenses.Select(data => new GlobalDebtSummaryResponse
+            var items = expenses.Select(data => new GlobalDebtSummaryResponse
             {
                 UserId = data.UserId,
                 Name = data.Name,
                 Surname = data.Surname,
                 AvatarUrl = $"{baseUrl}/avatars/{data.AvatarUrl ?? "default-avatar.png"}",
+                Categories = data.Categories,
+                Date = data.Date,
                 Amount = data.Amount
             }).ToList();
 
-            return response;
+            return new GlobalSettlementResponse { Items = items, TotalAmount = items.Sum(i => i.Amount) };
         }
     }
 }

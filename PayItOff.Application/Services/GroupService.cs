@@ -40,7 +40,7 @@ public class GroupService : IGroupService
         var validationResult = await _validator.ValidateAsync(request);
         if (!validationResult.IsValid) throw new ValidationException(validationResult.Errors);
 
-        var savedFileName = await _fileService.SaveAvatarAsync(avatar);
+        var savedFileName = await _fileService.SaveFileAsync(avatar);
 
         var group = Group.Create(
             request.Name,
@@ -106,11 +106,11 @@ public class GroupService : IGroupService
         var isOwnerOrAdmin = await _groupMemberRepository.IsUserOwnerOrAdmin(userId, request.GroupId);
         if (!isOwnerOrAdmin) { throw new InvalidUserRoleException(); }
 
-        var savedFileName = await _fileService.SaveAvatarAsync(avatar);
+        var savedFileName = await _fileService.SaveFileAsync(avatar);
 
         if (savedFileName != null && group.AvatarUrl != null)
         {
-            _fileService.DeleteAvatar(group.AvatarUrl);
+            _fileService.DeleteFile(group.AvatarUrl);
         }
 
         group.Edit(request.NewName, savedFileName);
@@ -131,7 +131,7 @@ public class GroupService : IGroupService
 
         if (group!.AvatarUrl != null)
         {
-            _fileService.DeleteAvatar(group.AvatarUrl);
+            _fileService.DeleteFile(group.AvatarUrl);
         }
 
         group.Delete();
