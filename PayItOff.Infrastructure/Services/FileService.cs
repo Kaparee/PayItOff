@@ -5,7 +5,7 @@ namespace PayItOff.Infrastructure.Services;
 
 public class FileService : IFileService
 {
-    public async Task<string?> SaveFileAsync(IFormFile? avatar)
+    public async Task<string?> SaveAvatarAsync(IFormFile? avatar)
     {
         if (avatar == null || avatar.Length == 0)
         {
@@ -42,6 +42,43 @@ public class FileService : IFileService
         return uniqueFileName;
     }
 
+    public async Task<string?> SaveFileAsync(IFormFile? file)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return null;
+        }
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+        if (!allowedExtensions.Contains(extension))
+        {
+            throw new Exception("Niedozwolony format pliku. Obsługiwane to: JPG, PNG, WEBP.");
+        }
+
+        if (file.Length > 30 * 1024 * 1024)
+        {
+            throw new Exception("Plik jest za duży. Maksymalny rozmiar to 30 MB.");
+        }
+
+        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files");
+
+        if (!Directory.Exists(uploadsFolder))
+        {
+            Directory.CreateDirectory(uploadsFolder);
+        }
+
+        var uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+        using (var fileStream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(fileStream);
+        }
+
+        return uniqueFileName;
+    }
+
     public void DeleteFile(string fileName)
     {
         if (string.IsNullOrWhiteSpace(fileName)) return;
@@ -50,6 +87,10 @@ public class FileService : IFileService
 
         if (File.Exists(filePath))
         {
+            File.Delete(filePath);
+        } else
+        {
+            filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files", fileName);
             File.Delete(filePath);
         }
     }

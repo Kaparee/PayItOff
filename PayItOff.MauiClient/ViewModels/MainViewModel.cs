@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using PayItOff.MauiClient.Services;
 using PayItOff.Shared.Responses;
 using System.Collections.ObjectModel;
+using System.Net.NetworkInformation;
 
 namespace PayItOff.MauiClient.ViewModels;
 
@@ -99,5 +101,13 @@ public partial class MainViewModel : ObservableObject
         {
             IsBusy = false;
         }
+    }
+
+    [RelayCommand]
+    private async Task Logout()
+    {
+        SecureStorage.Default.Remove("auth_token");
+
+        await Shell.Current.GoToAsync("//LoginPage");
     }
 }

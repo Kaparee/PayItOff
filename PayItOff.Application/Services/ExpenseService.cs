@@ -63,7 +63,8 @@ namespace PayItOff.Application.Services
 
                     foreach (var gDTO in subDto.Groups)
                     {
-                        var expenseGroup = ExpenseGroup.Create(expense, gDTO.Name, gDTO.TotalAmount);
+                        var calculatedGroupTotal = gDTO.Items.Sum(i => i.Quantity * i.UnitPrice);
+                        var expenseGroup = ExpenseGroup.Create(expense, gDTO.Name, calculatedGroupTotal);
 
                         foreach (var iDTO in gDTO.Items)
                         {

@@ -44,17 +44,49 @@ public class GroupDebtRepository : IGroupDebtRepository
 
     public async Task ApplyDebtChangeAsync(Group group, User debtor, User creditor, decimal amountChange)
     {
-        var existingDebt = await GetDebtAsync(group.Id, debtor.Id, creditor.Id);
+        if (amountChange == 0) return;
 
-        if (existingDebt != null)
+        var directDebt = await GetDebtAsync(group.Id, debtor.Id, creditor.Id);
+
+        if (directDebt != null)
         {
-            existingDebt.ChangeAmount(amountChange);
-            _context.GroupDebts.Update(existingDebt);
+            directDebt.ChangeAmount(amountChange);
+
+            if (directDebt.Amount <= 0)
+                _context.GroupDebts.Remove(directDebt);
+            else
+                _context.GroupDebts.Update(directDebt);
+
+            return;
         }
-        else if (amountChange > 0)
+
+        var reverseDebt = await GetDebtAsync(group.Id, creditor.Id, debtor.Id);
+
+        if (reverseDebt != null)
+        {
+            if (reverseDebt.Amount > amountChange)
+            {
+                reverseDebt.ChangeAmount(-amountChange);
+                _context.GroupDebts.Update(reverseDebt);
+            }
+            else if (reverseDebt.Amount == amountChange)
+            {
+                _context.GroupDebts.Remove(reverseDebt);
+            }
+            else
+            {
+                decimal remainingAmount = amountChange - reverseDebt.Amount;
+                _context.GroupDebts.Remove(reverseDebt);
+
+                var newDebt = GroupDebt.Create(group, debtor, creditor, remainingAmount);
+                await _context.GroupDebts.AddAsync(newDebt);
+            }
+            return;
+        }
+
+        if (amountChange > 0)
         {
             var newDebt = GroupDebt.Create(group, debtor, creditor, amountChange);
-
             await _context.GroupDebts.AddAsync(newDebt);
         }
     }
@@ -77,69 +109,73 @@ public class GroupDebtRepository : IGroupDebtRepository
 
     public async Task<List<(int UserId, string Name, string Surname, string? AvatarUrl, List<string> Categories, DateTime Date, decimal Amount)>> GetUserTotalIncomesAsync(int userId)
     {
-        var groupedIncomes = await _context.ExpenseSplits
-            .Where(s => s.ExpenseItem.Expense.PayerId == userId && s.UserId != userId)
-            .GroupBy(s => new
-            {
-                s.User.Id,
-                s.User.Name,
-                s.User.Surname,
-                s.User.AvatarUrl
-            })
-            .Select(g => new
-            {
-                g.Key.Id,
-                g.Key.Name,
-                g.Key.Surname,
-                g.Key.AvatarUrl,
-                Categories = g.Select(s => s.ExpenseItem.Category).Distinct().ToList(),
-                LastExpenseDate = g.Max(s => s.ExpenseItem.Expense.PurchasedAt),
-                TotalOwedAmount = g.Sum(s => s.OwedAmount)
-            })
+        var allDebts = await _context.GroupDebts
+            .Include(d => d.Debtor)
+            .Include(d => d.Creditor)
+            .Where(d => d.DebtorId == userId || d.CreditorId == userId)
             .ToListAsync();
 
-        return groupedIncomes.ConvertAll(x => (
-            x.Id,
-            x.Name,
-            x.Surname,
-            x.AvatarUrl,
-            x.Categories,
-            x.LastExpenseDate,
-            x.TotalOwedAmount
-        ));
+        var globalBalances = allDebts
+            .GroupBy(d => d.DebtorId == userId ? d.CreditorId : d.DebtorId)
+            .Select(g => new
+            {
+                OtherUserId = g.Key,
+                NetBalance = g.Sum(d => d.CreditorId == userId ? d.Amount : -d.Amount),
+                User = g.First().DebtorId == userId ? g.First().Creditor : g.First().Debtor
+            })
+            .Where(x => x.NetBalance > 0)
+            .ToList();
+
+        return await MapToResponseWithMetadata(userId, globalBalances.Select(x => (x.User, x.NetBalance)).ToList());
     }
 
     public async Task<List<(int UserId, string Name, string Surname, string? AvatarUrl, List<string> Categories, DateTime Date, decimal Amount)>> GetUserTotalExpensesAsync(int userId)
     {
-        var groupedExpenses = await _context.ExpenseSplits
-            .Where(s => s.UserId == userId && s.ExpenseItem.Expense.PayerId != userId)
-            .GroupBy(s => new
-            {
-                s.ExpenseItem.Expense.Payer.Id,
-                s.ExpenseItem.Expense.Payer.Name,
-                s.ExpenseItem.Expense.Payer.Surname,
-                s.ExpenseItem.Expense.Payer.AvatarUrl
-            })
-            .Select(g => new
-            {
-                g.Key.Id,
-                g.Key.Name,
-                g.Key.Surname,
-                g.Key.AvatarUrl,
-                Categories = g.Select(s => s.ExpenseItem.Category).Distinct().ToList(),
-                LastExpenseDate = g.Max(s => s.ExpenseItem.Expense.PurchasedAt),
-                TotalOwedAmount = g.Sum(s => s.OwedAmount)
-            })
+        var allDebts = await _context.GroupDebts
+            .Include(d => d.Debtor)
+            .Include(d => d.Creditor)
+            .Where(d => d.DebtorId == userId || d.CreditorId == userId)
             .ToListAsync();
 
-        return groupedExpenses.ConvertAll(x => (
-            x.Id,
-            x.Name,
-            x.Surname,
-            x.AvatarUrl,
-            x.Categories,
-            x.LastExpenseDate,
-            x.TotalOwedAmount
-        ));
+        var globalBalances = allDebts
+            .GroupBy(d => d.DebtorId == userId ? d.CreditorId : d.DebtorId)
+            .Select(g => new
+            {
+                OtherUserId = g.Key,
+                NetBalance = g.Sum(d => d.CreditorId == userId ? d.Amount : -d.Amount),
+                User = g.First().DebtorId == userId ? g.First().Creditor : g.First().Debtor
+            })
+            .Where(x => x.NetBalance < 0)
+            .ToList();
+
+        return await MapToResponseWithMetadata(userId, globalBalances.Select(x => (x.User, Math.Abs(x.NetBalance))).ToList());
+    }
+
+    private async Task<List<(int UserId, string Name, string Surname, string? AvatarUrl, List<string> Categories, DateTime Date, decimal Amount)>> MapToResponseWithMetadata(int userId, List<(User User, decimal Amount)> balances)
+    {
+        var result = new List<(int, string, string, string?, List<string>, DateTime, decimal)>();
+
+        foreach (var item in balances)
+        {
+            var metadata = await _context.ExpenseSplits
+                .Where(s => (s.UserId == userId && s.ExpenseItem.Expense.PayerId == item.User.Id) ||
+                            (s.UserId == item.User.Id && s.ExpenseItem.Expense.PayerId == userId))
+                .OrderByDescending(s => s.ExpenseItem.Expense.PurchasedAt)
+                .Select(s => new { s.ExpenseItem.Category, s.ExpenseItem.Expense.PurchasedAt })
+                .Take(5)
+                .ToListAsync();
+
+            result.Add((
+                item.User.Id,
+                item.User.Name,
+                item.User.Surname,
+                item.User.AvatarUrl,
+                metadata.Select(m => m.Category).Distinct().ToList(),
+                metadata.FirstOrDefault()?.PurchasedAt ?? DateTime.Now,
+                item.Amount
+            ));
+        }
+
+        return result;
     }
 }

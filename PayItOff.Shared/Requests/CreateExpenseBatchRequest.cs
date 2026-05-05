@@ -11,7 +11,6 @@
         public required int PayerId { get; set; }
         public required string Name { get; set; }
         public string? ReciptImageUrl { get; set; }
-        public required decimal TotalAmount { get; set; }
         public required DateTime PurchasedAt { get; set; }
         public List<ExpenseGroupDto> Groups { get; set; } = [];
         public List<ExpenseItemDto> Items { get; set; } = [];
@@ -20,7 +19,6 @@
     public class ExpenseGroupDto
     {
         public required string Name { get; set; }
-        public required decimal TotalAmount { get; set; }
         public int? RemainderRecipientId { get; set; }
         public required List<int> ParticipantIds { get; set; }
         public List<ExpenseItemDto> Items { get; set; } = [];

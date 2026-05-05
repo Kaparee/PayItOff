@@ -43,7 +43,7 @@ public class UserService : IUserService
 
         string passwordHash = _passwordHasher.Hash(request.Password);
 
-        var savedFileName = await _fileService.SaveFileAsync(avatar);
+        var savedFileName = await _fileService.SaveAvatarAsync(avatar);
 
         var user = User.Register(
             request.Email,
@@ -163,7 +163,7 @@ public class UserService : IUserService
         var user = await _userRepository.GetUserByIdAsync(userId);
         if (user is null) { throw new UserNotFoundException(); }
 
-        var savedFileName = await _fileService.SaveFileAsync(avatar);
+        var savedFileName = await _fileService.SaveAvatarAsync(avatar);
         if (savedFileName != null && user!.AvatarUrl != null)
         {
             _fileService.DeleteFile(user.AvatarUrl);
