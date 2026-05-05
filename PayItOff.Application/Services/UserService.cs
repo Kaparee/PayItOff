@@ -105,7 +105,7 @@ public class UserService : IUserService
         return new UserInformationResponse
         {
             Id = user.Id,
-            AvatarUrl = $"{baseUrl}/avatars/{user.AvatarUrl ?? "default-avatar.png"}",
+            AvatarUrl = $"{baseUrl}/avatars/{user.AvatarUrl ?? "default-user-avatar.png"}",
             Name = user.Name,
             Surname = user.Surname,
             Email = user.Email,

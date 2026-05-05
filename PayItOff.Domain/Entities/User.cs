@@ -38,7 +38,7 @@ namespace PayItOff.Domain.Entities
             Nickname = nickname;
             Name = name;
             Surname = surname;
-            AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? "default-avatar.png" : avatarUrl;
+            AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? "default-user-avatar.png" : avatarUrl;
             NotificationsSettings = notificationsSettings ?? new NotificationsSettings();
             VerificationToken = Guid.NewGuid().ToString();
             PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? null : phoneNumber;
@@ -90,7 +90,7 @@ namespace PayItOff.Domain.Entities
 
         public void UpdateAvatar(string avatarUrl)
         {
-            AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? "default-avatar.png" : avatarUrl;
+            AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? "default-user-avatar.png" : avatarUrl;
 
             UpdatedAt = DateTime.UtcNow;
         }

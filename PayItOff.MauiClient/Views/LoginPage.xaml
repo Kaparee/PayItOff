@@ -18,11 +18,8 @@
         <Style x:Key="PasswordEntryBorderStyle" TargetType="Border" BasedOn="{StaticResource BaseEntryBorderStyle}">
             <Style.Triggers>
                 <DataTrigger TargetType="Border" Binding="{Binding HasError}" Value="True">
-                    <Setter Property="Stroke">
-                        <Setter.Value>
-                            <SolidColorBrush Color="{StaticResource StatusRed}" />
-                        </Setter.Value>
-                    </Setter>
+                    <!-- Uproszczony zapis właściwości Stroke -->
+                    <Setter Property="Stroke" Value="{StaticResource StatusRed}" />
                     <Setter Property="StrokeThickness" Value="2" />
                 </DataTrigger>
             </Style.Triggers>
@@ -30,54 +27,62 @@
     </ContentPage.Resources>
 
     <ScrollView>
-        <VerticalStackLayout Spacing="25" Padding="30" VerticalOptions="Center" MaximumWidthRequest="1000">
+        <!-- Zmiana MaximumWidthRequest zapobiega gigantycznym polom tekstowym na PC i tabletach -->
+        <VerticalStackLayout Spacing="25" Padding="{OnIdiom Phone='20', Default='30'}" VerticalOptions="Center" MaximumWidthRequest="450">
 
-            <Label Text="PayItOff!" Style="{StaticResource Headline}" Margin="0,0,0,20" />
+            <Label Text="PayItOff!" Style="{StaticResource Headline}" Margin="0,0,0,20" HorizontalOptions="Center" />
 
             <VerticalStackLayout Spacing="8">
+                <!-- Zrównano lewy margines (15) z paddingiem w Border, aby zachować linię pionową -->
                 <Label Text="Adres E-Mail lub Nazwa Użytkownika"
                        TextColor="{StaticResource TextSubtle}"
-                       Margin="10, 0" />
+                       Margin="15, 0, 0, 0" />
                 <Border Style="{StaticResource BaseEntryBorderStyle}">
+                    <!-- Dodano Keyboard="Email" oraz ReturnType="Next" dla lepszego UX na smartfonach -->
                     <Entry Text="{Binding EmailOrNickname}"
                            Placeholder="Wpisz email lub nickname..."
+                           Keyboard="Email"
+                           ReturnType="Next"
                            Margin="0" />
                 </Border>
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="8">
-                <Label Text="Hasło" TextColor="{StaticResource TextSubtle}" Margin="10, 0" />
+                <!-- Zrównano lewy margines (15) -->
+                <Label Text="Hasło" TextColor="{StaticResource TextSubtle}" Margin="15, 0, 0, 0" />
                 <Border Style="{StaticResource PasswordEntryBorderStyle}">
                     <Grid ColumnDefinitions="*, Auto">
 
                         <Entry Grid.Column="0"
-                           Text="{Binding Password}"
-                           IsPassword="{Binding IsPasswordHidden}"
-                           Placeholder="••••••••"
-                           ReturnCommand="{Binding LoginCommand}"
-                           ReturnType="Done"
-                           Margin="0" />
+                               Text="{Binding Password}"
+                               IsPassword="{Binding IsPasswordHidden}"
+                               Placeholder="••••••••"
+                               ReturnCommand="{Binding LoginCommand}"
+                               ReturnType="Done"
+                               Margin="0" />
 
                         <Button Grid.Column="1"
-                            Text="{Binding PasswordIcon}"
-                            Command="{Binding TogglePasswordVisibilityCommand}"
-                            BackgroundColor="Transparent"
-                            TextColor="{StaticResource TextMain}"
-                            FontSize="18"
-                            Padding="0"
-                            HeightRequest="45"
-                            WidthRequest="45"
-                            VerticalOptions="Center" />
+                                Text="{Binding PasswordIcon}"
+                                Command="{Binding TogglePasswordVisibilityCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="{StaticResource TextMain}"
+                                FontSize="18"
+                                Padding="0"
+                                HeightRequest="45"
+                                WidthRequest="45"
+                                VerticalOptions="Center" />
                     </Grid>
                 </Border>
             </VerticalStackLayout>
 
             <ActivityIndicator IsRunning="{Binding IsBusy}"
-                   IsVisible="{Binding IsBusy}"
-                   Color="{StaticResource PrimaryViolet}" />
+                               IsVisible="{Binding IsBusy}"
+                               Color="{StaticResource PrimaryViolet}" />
 
+            <!-- Dodano margines od góry, by oddzielić przycisk od bloku formularza -->
             <Button Text="Zaloguj się"
-                    Command="{Binding LoginCommand}" />
+                    Command="{Binding LoginCommand}" 
+                    Margin="0,10,0,0" />
 
             <Button Text="Nie masz konta? Zarejestruj się"
                     BackgroundColor="Transparent"
