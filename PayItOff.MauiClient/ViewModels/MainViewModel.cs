@@ -44,6 +44,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     public partial string CurrentUserEmail { get; set; }
 
+    [ObservableProperty]
+    public partial bool IsMenuVisible { get; set; }
+
     public MainViewModel(SettlementService settlementService)
     {
         _settlementService = settlementService;
@@ -109,5 +112,11 @@ public partial class MainViewModel : ObservableObject
         SecureStorage.Default.Remove("auth_token");
 
         await Shell.Current.GoToAsync("//LoginPage");
+    }
+
+    [RelayCommand]
+    private void ToggleMenu()
+    {
+        IsMenuVisible = !IsMenuVisible;
     }
 }
