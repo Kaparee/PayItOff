@@ -1,9 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using PayItOff.MauiClient.Services;
 using PayItOff.Shared.Responses;
 using System.Collections.ObjectModel;
-using System.Net.NetworkInformation;
 
 namespace PayItOff.MauiClient.ViewModels;
 
@@ -17,15 +15,19 @@ public class DebtDisplayItem
     public decimal Amount { get; set; }
 }
 
-public partial class MainViewModel : ObservableObject
+public partial class MainViewModel : BaseViewModel
 {
     private readonly SettlementService _settlementService;
+    private readonly GroupService _groupService;
 
     [ObservableProperty]
     public partial ObservableCollection<DebtDisplayItem> Incomes { get; set; } = new();
 
     [ObservableProperty]
     public partial ObservableCollection<DebtDisplayItem> Expenses { get; set; } = new();
+
+    [ObservableProperty]
+    public partial ObservableCollection<ActiveGroupsDisplayResponse> ActiveGroups { get; set; } = new();
 
     [ObservableProperty]
     public partial decimal TotalIncomes { get; set; }
@@ -36,20 +38,18 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     public partial bool IsBusy { get; set; }
     [ObservableProperty]
-    public partial string DebugStatus { get; set; }
+    public required partial string DebugStatus { get; set; }
 
     [ObservableProperty]
-    public partial string DebugColor { get; set; }
+    public required partial string DebugColor { get; set; }
 
     [ObservableProperty]
-    public partial string CurrentUserEmail { get; set; }
+    public required partial string CurrentUserEmail { get; set; }
 
-    [ObservableProperty]
-    public partial bool IsMenuVisible { get; set; }
-
-    public MainViewModel(SettlementService settlementService)
+    public MainViewModel(SettlementService settlementService, GroupService groupService)
     {
         _settlementService = settlementService;
+        _groupService = groupService;
     }
 
     public async Task LoadDashboardDataAsync()
@@ -66,11 +66,13 @@ public partial class MainViewModel : ObservableObject
 
             var incTask = _settlementService.GetIncomesAsync();
             var expTask = _settlementService.GetExpensesAsync();
+            var groupsTask = _groupService.Get4ActiveGroups();
 
-            await Task.WhenAll(incTask, expTask);
+            await Task.WhenAll(incTask, expTask, groupsTask);
 
             var incResult = await incTask;
             var expResult = await expTask;
+            var groupsResult = await groupsTask;
 
             Incomes = new ObservableCollection<DebtDisplayItem>(incResult.Items.Select(i => new DebtDisplayItem
             {
@@ -95,6 +97,8 @@ public partial class MainViewModel : ObservableObject
             }));
 
             TotalExpenses = expResult.TotalAmount;
+
+            ActiveGroups = new ObservableCollection<ActiveGroupsDisplayResponse>(groupsResult);
         }
         catch (Exception ex)
         {
@@ -104,19 +108,5 @@ public partial class MainViewModel : ObservableObject
         {
             IsBusy = false;
         }
-    }
-
-    [RelayCommand]
-    private async Task Logout()
-    {
-        SecureStorage.Default.Remove("auth_token");
-
-        await Shell.Current.GoToAsync("//LoginPage");
-    }
-
-    [RelayCommand]
-    private void ToggleMenu()
-    {
-        IsMenuVisible = !IsMenuVisible;
     }
 }

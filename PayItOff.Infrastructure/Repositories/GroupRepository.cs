@@ -22,7 +22,7 @@ public class GroupRepository : IGroupRepository
             .Where(x => x.UserId == userId && x.Status == GroupMemberStatus.Accepted)
             .Where(x => x.Group!.DeletedAt == null)
             .OrderByDescending(x => x.IsFavorite)
-            .OrderBy(x => x.UpdatedAt)
+            .ThenByDescending(x => x.Group!.UpdatedAt)
             .ToListAsync();
     }
 
@@ -41,5 +41,16 @@ public class GroupRepository : IGroupRepository
         return await _context.Groups
             .Where(x => x.Id == groupId && x.DeletedAt == null)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<List<GroupMember>> GetTop4UserActiveGroupsAsync(int userId)
+    {
+        return await _context.GroupMembers
+            .Include(x => x.Group)
+            .Where(x => x.UserId == userId && x.Status == GroupMemberStatus.Accepted)
+            .Where(x => x.Group!.DeletedAt == null)
+            .OrderByDescending(x => x.UpdatedAt)
+            .Take(4)
+            .ToListAsync();
     }
 }

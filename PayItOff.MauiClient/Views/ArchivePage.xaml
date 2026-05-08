@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:PayItOff.MauiClient.Controls"
+             x:Class="PayItOff.MauiClient.Views.ArchivePage"
+             BackgroundColor="{StaticResource MainBackground}"
+             Shell.NavBarIsVisible="False">
+
+    <Grid>
+        <!-- WARSTWA 1: UKŁAD GŁÓWNY -->
+        <Grid ColumnDefinitions="{OnIdiom Phone='0, *', Default='360, *'}">
+
+            <!-- MENU BOCZNE -->
+            <controls:SidebarMenu Grid.Column="0"
+                                  ActiveTab="Archive"
+                                  IsVisible="{OnIdiom Phone=False, Default=True}" />
+
+            <!-- ZAWARTOŚĆ STRONY -->
+            <ScrollView Grid.Column="1" VerticalScrollBarVisibility="Always">
+                <Grid Padding="{OnIdiom Phone='15', Default='40'}" RowDefinitions="Auto, Auto, *" RowSpacing="30">
+
+                    <!-- NAGŁÓWEK MOBILNY (☰) -->
+                    <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" IsVisible="{OnIdiom Phone=True, Default=False}" Margin="0,10,0,0">
+                        <HorizontalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
+                        </HorizontalStackLayout.GestureRecognizers>
+                        <Label Text="☰" TextColor="{StaticResource TextMain}" FontSize="28" VerticalOptions="Center"/>
+                        <Label Text="Menu" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" Margin="5,0,0,0" FontSize="18"/>
+                    </HorizontalStackLayout>
+
+                    <!-- LINIA ODCIĘCIA (PULPIT) -->
+                    <BoxView Grid.Row="1" HeightRequest="1" Color="{StaticResource Border}" VerticalOptions="Start" Margin="-40,10,-40,0" IsVisible="{OnIdiom Phone=False, Default=True}" Opacity="0.5"/>
+
+                    <!-- ========================================== -->
+                    <!--          OBSZAR ROBOCZY (KONTENT)         -->
+                    <!-- ========================================== -->
+                    <VerticalStackLayout Grid.Row="2" Spacing="20">
+                        <Label Text="Tytuł Sekcji" TextColor="{StaticResource TextMain}" FontSize="32" FontAttributes="Bold" HorizontalOptions="Start"/>
+
+                        <Border StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" HeightRequest="200" Padding="20">
+                            <Label Text="Miejsce na Twoją treść..." TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Border>
+                    </VerticalStackLayout>
+                    <!-- ========================================== -->
+
+                </Grid>
+            </ScrollView>
+        </Grid>
+
+        <!-- WARSTWA 2: NAKŁADKA MENU (Dla telefonów) -->
+        <Grid IsVisible="{Binding IsMenuVisible}" BackgroundColor="#CC121212" ZIndex="100">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
+            </Grid.GestureRecognizers>
+            <Border HorizontalOptions="End" VerticalOptions="Start" Margin="0,60,20,0" WidthRequest="220" BackgroundColor="{StaticResource SurfaceDark}" StrokeShape="RoundRectangle 15" StrokeThickness="0" Padding="15">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="PayItOff!" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource TextMain}" Margin="0,0,0,10"/>
+
+                    <HorizontalStackLayout Spacing="15" Padding="15,12">
+                        <HorizontalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding NavigateCommand}" CommandParameter="//MainPage" />
+                        </HorizontalStackLayout.GestureRecognizers>
+                        <Image Source="icon_home.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
+                        <Label Text="Menu Główne" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Spacing="15" Padding="15,12">
+                        <HorizontalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding NavigateCommand}" CommandParameter="//GroupsPage" />
+                        </HorizontalStackLayout.GestureRecognizers>
+                        <Image Source="icon_groups.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
+                        <Label Text="Twoje Grupy" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
+                    </HorizontalStackLayout>
+
+                    <BoxView HeightRequest="1" Color="{StaticResource Border}" Margin="0,10" Opacity="0.5"/>
+                    <HorizontalStackLayout Spacing="15" Padding="15,12">
+                        <HorizontalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding LogoutCommand}" />
+                        </HorizontalStackLayout.GestureRecognizers>
+                        <Label Text="➔" TextColor="{StaticResource StatusRed}" FontSize="20" VerticalOptions="Center" WidthRequest="24" HorizontalTextAlignment="Center"/>
+                        <Label Text="Wyloguj się" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" VerticalOptions="Center" FontSize="16"/>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+    </Grid>
+</ContentPage>

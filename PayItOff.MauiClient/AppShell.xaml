@@ -19,10 +19,46 @@
         ContentTemplate="{DataTemplate views:LoginPage}"
         Route="LoginPage" />
 
+    <!-- Strona rejestracji -->
+    <ShellContent 
+        Title="Register" 
+        ContentTemplate="{DataTemplate views:RegisterPage}"
+        Route="RegisterPage"/>
+
     <!-- Strona główna -->
     <ShellContent
-        Title="Home"
+        Title="Main"
         ContentTemplate="{DataTemplate views:MainPage}"
         Route="MainPage" />
+
+    <!-- Strona grup -->
+    <ShellContent 
+        Title="Grupy" 
+        ContentTemplate="{DataTemplate views:GroupsPage}"
+        Route="GroupsPage"/>
+
+    <!-- Strona grup -->
+    <ShellContent 
+        Title="Znajomi" 
+        ContentTemplate="{DataTemplate views:FriendsPage}"
+        Route="FriendsPage"/>
+
+    <!-- Strona konta -->
+    <ShellContent 
+        Title="Konto" 
+        ContentTemplate="{DataTemplate views:AccountPage}"
+        Route="AccountPage"/>
+
+    <!-- Strona powiadomień -->
+    <ShellContent 
+        Title="Grupy" 
+        ContentTemplate="{DataTemplate views:NotificationsPage}"
+        Route="NotificationsPage"/>
+
+    <!-- Strona archiwum -->
+    <ShellContent 
+        Title="Grupy" 
+        ContentTemplate="{DataTemplate views:ArchivePage}"
+        Route="ArchivePage"/>
 
 </Shell>

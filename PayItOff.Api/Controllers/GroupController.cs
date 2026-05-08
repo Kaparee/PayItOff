@@ -24,6 +24,13 @@ public class GroupController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("last-active-groups")]
+    public async Task<ActionResult<ActiveGroupsDisplayResponse>> Get4ActiveGroups()
+    {
+        var result = await _groupService.GetTop4UserActiveGroupsAsync(GetUserId());
+        return Ok(result);
+    }
+
     [HttpPost("create")]
     public async Task<IActionResult> Create([FromForm] CreateGroupRequest request, IFormFile? avatar = null)
     {

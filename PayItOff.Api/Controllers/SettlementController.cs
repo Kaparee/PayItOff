@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PayItOff.Application.Interfaces;
-using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
 
 namespace PayItOff.Api.Controllers;

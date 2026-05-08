@@ -1,9 +1,4 @@
-﻿using MailKit.Net.Smtp;
-using MailKit.Security;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using MimeKit;
-using MimeKit.Text;
+﻿using Microsoft.Extensions.Configuration;
 using PayItOff.Application.Interfaces;
 using PayItOff.Domain.DomainServices;
 using PayItOff.Domain.Entities;
@@ -37,7 +32,7 @@ namespace PayItOff.Application.Services
         public async Task CreateExpenseBatch(int userId, CreateExpenseBatchRequest request)
         {
             var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId);
-            if(group == null) { throw new GroupNotFoundException(); }
+            if (group == null) { throw new GroupNotFoundException(); }
             var creator = await _userRepository.GetUserByIdAsync(userId);
             if (creator == null) { throw new UserNotFoundException(); }
 
@@ -56,7 +51,7 @@ namespace PayItOff.Application.Services
 
                 foreach (var subDto in request.Expenses)
                 {
-                    if (!usersDict.ContainsKey(subDto.PayerId)){ throw new UserNotFoundException(); }
+                    if (!usersDict.ContainsKey(subDto.PayerId)) { throw new UserNotFoundException(); }
                     var payer = usersDict[subDto.PayerId];
 
                     var expense = Expense.Create(group, creator, payer, subDto.Name, subDto.ReciptImageUrl, subDto.PurchasedAt);

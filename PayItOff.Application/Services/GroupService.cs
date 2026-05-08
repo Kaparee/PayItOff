@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using PayItOff.Application.Interfaces;
@@ -7,6 +8,7 @@ using PayItOff.Domain.Exceptions;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
+using System.Globalization;
 
 namespace PayItOff.Application.Services;
 
@@ -20,8 +22,9 @@ public class GroupService : IGroupService
     private readonly IConfiguration _configuration;
     private readonly IFileService _fileService;
     private readonly IGroupDebtRepository _groupDebtRepository;
+    private readonly IExpenseRepository _expenseRepository;
 
-    public GroupService(IGroupRepository groupRepository, IUserRepository userRepository, IGroupMemberRepository groupMemberRepository, IUnitOfWork unitOfWork, IValidator<CreateGroupRequest> validator, IJWTService jwtService, IConfiguration configuration, IFileService fileService, IGroupDebtRepository groupDebtRepository)
+    public GroupService(IGroupRepository groupRepository, IUserRepository userRepository, IGroupMemberRepository groupMemberRepository, IUnitOfWork unitOfWork, IValidator<CreateGroupRequest> validator, IJWTService jwtService, IConfiguration configuration, IFileService fileService, IGroupDebtRepository groupDebtRepository, IExpenseRepository expenseRepository)
     {
         _groupRepository = groupRepository;
         _userRepository = userRepository;
@@ -31,6 +34,7 @@ public class GroupService : IGroupService
         _fileService = fileService;
         _configuration = configuration;
         _groupDebtRepository = groupDebtRepository;
+        _expenseRepository = expenseRepository;
     }
     public async Task CreateAsync(CreateGroupRequest request, int userId, IFormFile? avatar)
     {
@@ -84,7 +88,7 @@ public class GroupService : IGroupService
             {
                 Id = groupId,
                 Name = member.Group.Name,
-                AvatarUrl = $"{baseUrl}/avatars/{member.Group.AvatarUrl ?? "default-avatar.png"}",
+                AvatarUrl = $"{baseUrl}/avatars/{member.Group.AvatarUrl ?? "default-group-avatar.png"}",
                 UpdatedAt = member.Group.UpdatedAt,
                 IsFavorite = member.IsFavorite,
                 Income = income,
@@ -94,6 +98,37 @@ public class GroupService : IGroupService
         }).ToList();
 
         return response;
+    }
+
+    public async Task<List<ActiveGroupsDisplayResponse>> GetTop4UserActiveGroupsAsync(int userId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user is null) { throw new UserNotFoundException(); }
+
+        var groups = await _groupRepository.GetTop4UserActiveGroupsAsync(userId);
+        if (groups is null) { throw new GroupNotFoundException(); }
+
+        var baseUrl = _configuration["AppUrls:BackendUrl"];
+
+        var plCulture = new CultureInfo("pl-PL");
+
+
+        return groups.Select(group =>
+        {
+            var diff = DateTime.UtcNow - group.Group!.UpdatedAt;
+
+            var lastUpdateText = diff.TotalMinutes < 1
+                ? "Teraz"
+                : $"{diff.Humanize(precision: 1, culture: plCulture)} temu";
+
+            return new ActiveGroupsDisplayResponse
+            {
+                Id = group.Id,
+                Name = group.Group!.Name,
+                AvatarUrl = $"{baseUrl}/avatars/{group.Group.AvatarUrl ?? "default-group-avatar.png"}",
+                LastUpdate = lastUpdateText
+            };
+        }).ToList();
     }
 
     public async Task EditGroupInfoAsync(int userId, EditGroupInfoRequest request, IFormFile? avatar)

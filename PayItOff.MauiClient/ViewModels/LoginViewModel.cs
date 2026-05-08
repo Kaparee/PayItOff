@@ -78,6 +78,35 @@ public partial class LoginViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task LoginAsJakubAsync()
+    {
+        if (IsBusy) return;
+
+        IsBusy = true;
+        HasError = false;
+
+        try
+        {
+            var request = new LoginRequest { EmailOrNickname = "JakubPlocica", Password = "JakubPlocica123!" };
+
+            await _authService.LoginAsync(request);
+
+            await Shell.Current.GoToAsync("//MainPage");
+        }
+        catch (Exception ex)
+        {
+            Password = string.Empty;
+            HasError = true;
+
+            await Shell.Current.DisplayAlertAsync("Błąd logowania", ex.Message, "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
     private void TogglePasswordVisibility()
     {
         IsPasswordHidden = !IsPasswordHidden;

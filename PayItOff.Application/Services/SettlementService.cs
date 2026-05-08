@@ -1,16 +1,7 @@
-﻿using MailKit.Net.Smtp;
-using MailKit.Security;
-using Microsoft.Extensions.Configuration;
-using MimeKit;
-using MimeKit.Text;
+﻿using Microsoft.Extensions.Configuration;
 using PayItOff.Application.Interfaces;
-using PayItOff.Domain.DomainServices;
-using PayItOff.Domain.Entities;
-using PayItOff.Domain.Exceptions;
 using PayItOff.Domain.Interfaces;
-using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
-using System.Buffers.Text;
 
 namespace PayItOff.Application.Services
 {
@@ -39,7 +30,7 @@ namespace PayItOff.Application.Services
                 UserId = data.UserId,
                 Name = data.Name,
                 Surname = data.Surname,
-                AvatarUrl = $"{baseUrl}/avatars/{data.AvatarUrl ?? "default-avatar.png"}",
+                AvatarUrl = $"{baseUrl}/avatars/{data.AvatarUrl ?? "default-user-avatar.png"}",
                 Categories = data.Categories,
                 Date = data.Date,
                 Amount = data.Amount
@@ -59,7 +50,7 @@ namespace PayItOff.Application.Services
                 UserId = data.UserId,
                 Name = data.Name,
                 Surname = data.Surname,
-                AvatarUrl = $"{baseUrl}/avatars/{data.AvatarUrl ?? "default-avatar.png"}",
+                AvatarUrl = $"{baseUrl}/avatars/{data.AvatarUrl ?? "default-user-avatar.png"}",
                 Categories = data.Categories,
                 Date = data.Date,
                 Amount = data.Amount

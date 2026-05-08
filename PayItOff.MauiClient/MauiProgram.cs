@@ -30,16 +30,27 @@ namespace PayItOff.MauiClient
             builder.Services.AddSingleton<RegisterService>();
             builder.Services.AddScoped<AuthService>();
             builder.Services.AddScoped<SettlementService>();
+            builder.Services.AddScoped<GroupService>();
 
             // ViewModels
             builder.Services.AddTransient<RegisterViewModel>();
             builder.Services.AddTransient<LoginViewModel>();
             builder.Services.AddTransient<MainViewModel>();
+            builder.Services.AddTransient<AccountsViewModel>();
+            builder.Services.AddTransient<ArchiveViewModel>();
+            builder.Services.AddTransient<FriendsViewModel>();
+            builder.Services.AddTransient<GroupsViewModel>();
+            builder.Services.AddTransient<NotificationsViewModel>();
 
             // Views
             builder.Services.AddTransient<RegisterPage>();
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<MainPage>();
+            builder.Services.AddTransient<AccountPage>();
+            builder.Services.AddTransient<ArchivePage>();
+            builder.Services.AddTransient<FriendsPage>();
+            builder.Services.AddTransient<GroupsPage>();
+            builder.Services.AddTransient<NotificationsPage>();
 
             return builder.Build();
         }

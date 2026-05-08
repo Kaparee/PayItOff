@@ -88,7 +88,8 @@ public class FileService : IFileService
         if (File.Exists(filePath))
         {
             File.Delete(filePath);
-        } else
+        }
+        else
         {
             filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files", fileName);
             File.Delete(filePath);

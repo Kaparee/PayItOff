@@ -1,11 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Pkcs;
-using PayItOff.Domain.DomainServices;
 using PayItOff.Domain.Entities;
-using PayItOff.Domain.Enums;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Infrastructure.Persistence;
-using PayItOff.Shared.Responses;
 
 namespace PayItOff.Infrastructure.Repositories;
 

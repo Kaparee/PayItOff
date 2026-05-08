@@ -6,7 +6,6 @@ using PayItOff.Domain.Exceptions;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
-using System.Buffers.Text;
 using System.Data;
 
 namespace PayItOff.Application.Services;

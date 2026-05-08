@@ -2,74 +2,16 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:PayItOff.MauiClient.ViewModels"
+             xmlns:controls="clr-namespace:PayItOff.MauiClient.Controls"
              x:Class="PayItOff.MauiClient.Views.MainPage"
              BackgroundColor="{StaticResource MainBackground}"
              Shell.NavBarIsVisible="False">
 
-    <!-- GŁÓWNY KONTENER -->
     <Grid>
+        <Grid ColumnDefinitions="{OnIdiom Phone='0, *', Default='360, *'}">
 
-        <!-- WARSTWA 1: WŁAŚCIWA APLIKACJA -->
-        <Grid ColumnDefinitions="{OnIdiom Phone='0, *', Default='260, *'}">
+            <controls:SidebarMenu Grid.Column="0" ActiveTab="Home" IsVisible="{OnIdiom Phone=False, Default=True}" />
 
-            <!-- PASEK BOCZNY -->
-            <Border Grid.Column="0" IsVisible="{OnIdiom Phone=False, Default=True}" BackgroundColor="{StaticResource SurfaceDark}" StrokeThickness="0" >
-                <Grid RowDefinitions="*, Auto" Padding="25">
-
-                    <!-- GÓRNA SEKCJA MENU -->
-                    <ScrollView Grid.Row="0" VerticalScrollBarVisibility="Never">
-                        <VerticalStackLayout Spacing="10">
-                            <Label Text="PayItOff!"
-                                   FontSize="{OnIdiom Phone=24, Default=32}"
-                                   FontAttributes="Bold"
-                                   TextColor="{StaticResource TextMain}"
-                                   Margin="0,30,0,30"/>
-
-                            <Grid ColumnDefinitions="4, *" ColumnSpacing="15">
-                                <BoxView Grid.Column="0" Color="{StaticResource StatusGreen}" WidthRequest="4" VerticalOptions="Fill" CornerRadius="2"/>
-                                <HorizontalStackLayout Grid.Column="1" Spacing="15" Padding="0,12">
-                                    <Image Source="icon_home.png" WidthRequest="33" HeightRequest="33"/>
-                                    <Label Text="Menu Główne" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" FontSize="16"/>
-                                </HorizontalStackLayout>
-                            </Grid>
-
-                            <HorizontalStackLayout Spacing="15" Padding="19,12" Style="{StaticResource MenuItemHoverStyle}">
-                                <Image Source="icon_groups.png" WidthRequest="33" HeightRequest="33" Opacity="0.7"/>
-                                <Label Text="Twoje Grupy" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
-                            </HorizontalStackLayout>
-
-                            <HorizontalStackLayout Spacing="15" Padding="19,12" Style="{StaticResource MenuItemHoverStyle}">
-                                <Image Source="icon_friends.png" WidthRequest="33" HeightRequest="33" Opacity="0.7"/>
-                                <Label Text="Twoi Znajomi" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
-                            </HorizontalStackLayout>
-
-                            <HorizontalStackLayout Spacing="15" Padding="19,12" Style="{StaticResource MenuItemHoverStyle}">
-                                <Image Source="icon_wallet.png" WidthRequest="33" HeightRequest="33" Opacity="0.7"/>
-                                <Label Text="Twoje Konto" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
-                            </HorizontalStackLayout>
-
-                            <HorizontalStackLayout Spacing="15" Padding="19,12" Style="{StaticResource MenuItemHoverStyle}">
-                                <Image Source="icon_notifications.png" WidthRequest="33" HeightRequest="33" Opacity="0.7"/>
-                                <Label Text="Powiadomienia" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
-                            </HorizontalStackLayout>
-                        </VerticalStackLayout>
-                    </ScrollView>
-
-                    <!-- DOLNA SEKCJA -->
-                    <VerticalStackLayout Grid.Row="1" Spacing="5" Padding="0,20,0,10">
-                        <BoxView HeightRequest="1" Color="{StaticResource Border}" Margin="0,0,0,10"/>
-                        <HorizontalStackLayout Spacing="15" Padding="19,12" Style="{StaticResource MenuItemHoverStyle}">
-                            <HorizontalStackLayout.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding LogoutCommand}" />
-                            </HorizontalStackLayout.GestureRecognizers>
-                            <Label Text="➔" TextColor="{StaticResource StatusRed}" FontSize="24" VerticalOptions="Center" WidthRequest="30" HorizontalTextAlignment="Center"/>
-                            <Label Text="Wyloguj się" TextColor="{StaticResource StatusRed}" VerticalOptions="Center" FontSize="16" FontAttributes="Bold"/>
-                        </HorizontalStackLayout>
-                    </VerticalStackLayout>
-                </Grid>
-            </Border>
-
-            <!-- ZAWARTOŚĆ GŁÓWNA -->
             <ScrollView Grid.Column="1" VerticalScrollBarVisibility="Always">
                 <Grid Padding="{OnIdiom Phone='15', Default='30'}" RowDefinitions="Auto, Auto, Auto, Auto, Auto" RowSpacing="30">
 
@@ -81,34 +23,48 @@
                         <Label Text="Menu" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" Margin="5,0,0,0" FontSize="18"/>
                     </HorizontalStackLayout>
 
-                    <!-- LINIA ODCIĘCIA -->
                     <BoxView Grid.Row="1" HeightRequest="1" Color="{StaticResource Border}" VerticalOptions="Start" Margin="-30,10,-30,0" IsVisible="{OnIdiom Phone=False, Default=True}" />
 
-                    <!-- KARTY: PRZYCHODY I WYDATKI -->
                     <Grid Grid.Row="2" ColumnDefinitions="{OnIdiom Phone='*', Default='*, *'}" RowDefinitions="{OnIdiom Phone='Auto, Auto', Default='Auto'}" ColumnSpacing="25" RowSpacing="25">
 
-                        <!-- KARTA: PRZYCHODY -->
                         <Border Grid.Row="{OnIdiom Phone=0, Default=0}" Grid.Column="{OnIdiom Phone=0, Default=0}" StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="5, 20" StrokeThickness="0">
                             <Grid RowDefinitions="Auto, *, Auto, Auto" RowSpacing="15">
-                                <Label Grid.Row="0" Text="Przychody" TextColor="{StaticResource StatusGreen}" FontSize="{OnIdiom Phone=22, Default=28}" HorizontalOptions="Center" FontAttributes="Bold"/>
+                                <Label Grid.Row="0" Text="Przychody" TextColor="{StaticResource StatusGreen}" FontSize="{OnIdiom Phone=22, Default=32}" HorizontalOptions="Center" FontAttributes="Bold"/>
+
                                 <CollectionView Grid.Row="1" ItemsSource="{Binding Incomes}" HeightRequest="{OnIdiom Phone=250, Default=350}">
                                     <CollectionView.EmptyView>
-                                        <Label Text="Brak przychodów" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" Padding="30"/>
+                                        <Grid VerticalOptions="Center" HorizontalOptions="Center">
+                                            <Label Text="Brak przychodów" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" Padding="30"/>
+                                        </Grid>
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate>
                                             <ContentView Padding="0,0,0,5">
-                                                <Border BackgroundColor="{StaticResource MainBackground}" Padding="10,10" StrokeThickness="0">
-                                                    <Grid ColumnDefinitions="60, 2*, 1.5*, 110" ColumnSpacing="10">
-                                                        <Border HeightRequest="50" WidthRequest="50" StrokeShape="RoundRectangle 15" StrokeThickness="0" VerticalOptions="Center">
-                                                            <Image Source="{Binding AvatarUrl}" Aspect="AspectFill"/>
+                                                <Border BackgroundColor="{StaticResource MainBackground}" Padding="15,15" StrokeThickness="0">
+                                                    <Grid ColumnDefinitions="70, 2*, 1.5*, 110" ColumnSpacing="20">
+
+                                                        <Border HeightRequest="70" WidthRequest="70" StrokeShape="RoundRectangle 15" StrokeThickness="0" VerticalOptions="Center" BackgroundColor="#1E232D">
+                                                            <Grid>
+                                                                <Path Aspect="Uniform" WidthRequest="26" HeightRequest="26" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444" Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                                                <Image Source="{Binding AvatarUrl}" Aspect="AspectFill">
+                                                                    <Image.Triggers>
+                                                                        <DataTrigger TargetType="Image" Binding="{Binding AvatarUrl}" Value="{x:Null}">
+                                                                            <Setter Property="IsVisible" Value="False" />
+                                                                        </DataTrigger>
+                                                                        <DataTrigger TargetType="Image" Binding="{Binding AvatarUrl}" Value="">
+                                                                            <Setter Property="IsVisible" Value="False" />
+                                                                        </DataTrigger>
+                                                                    </Image.Triggers>
+                                                                </Image>
+                                                            </Grid>
                                                         </Border>
+
                                                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
-                                                            <Label Text="{Binding FullName}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=15}"/>
-                                                            <Label Text="{Binding CategoriesDisplay}" TextColor="{StaticResource TextSubtle}" FontSize="12"/>
+                                                            <Label Text="{Binding FullName}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=18}"/>
+                                                            <Label Text="{Binding CategoriesDisplay}" TextColor="{StaticResource TextSubtle}" FontSize="14"/>
                                                         </VerticalStackLayout>
-                                                        <Label Grid.Column="2" Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=14}" VerticalOptions="Center" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
-                                                        <Label Grid.Column="3" Text="{Binding Amount, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusGreen}" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="End" HorizontalTextAlignment="End"/>
+                                                        <Label Grid.Column="2" Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=16}" VerticalOptions="Center" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                                                        <Label Grid.Column="3" Text="{Binding Amount, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusGreen}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=20}" VerticalOptions="Center" HorizontalOptions="End" HorizontalTextAlignment="End"/>
                                                     </Grid>
                                                 </Border>
                                             </ContentView>
@@ -121,29 +77,44 @@
                             </Grid>
                         </Border>
 
-                        <!-- KARTA: WYDATKI -->
                         <Border Grid.Row="{OnIdiom Phone=1, Default=0}" Grid.Column="{OnIdiom Phone=0, Default=1}" StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="5, 20" StrokeThickness="0">
                             <Grid RowDefinitions="Auto, *, Auto, Auto" RowSpacing="15">
-                                <Label Grid.Row="0" Text="Wydatki" TextColor="{StaticResource StatusRed}" FontSize="{OnIdiom Phone=22, Default=28}" HorizontalOptions="Center" FontAttributes="Bold"/>
+                                <Label Grid.Row="0" Text="Wydatki" TextColor="{StaticResource StatusRed}" FontSize="{OnIdiom Phone=22, Default=32}" HorizontalOptions="Center" FontAttributes="Bold"/>
 
                                 <CollectionView Grid.Row="1" ItemsSource="{Binding Expenses}" HeightRequest="{OnIdiom Phone=250, Default=350}">
                                     <CollectionView.EmptyView>
-                                        <Label Text="Brak wydatków" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" Padding="30"/>
+                                        <Grid VerticalOptions="Center" HorizontalOptions="Center">
+                                            <Label Text="Brak wydatków" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" Padding="30"/>
+                                        </Grid>
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate>
                                             <ContentView Padding="0,0,0,5">
-                                                <Border BackgroundColor="{StaticResource MainBackground}" Padding="10,10" StrokeThickness="0">
-                                                    <Grid ColumnDefinitions="60, 2*, 1.5*, 110" ColumnSpacing="10">
-                                                        <Border HeightRequest="50" WidthRequest="50" StrokeShape="RoundRectangle 15" StrokeThickness="0" VerticalOptions="Center">
-                                                            <Image Source="{Binding AvatarUrl}" Aspect="AspectFill"/>
+                                                <Border BackgroundColor="{StaticResource MainBackground}" Padding="15,15" StrokeThickness="0">
+                                                    <Grid ColumnDefinitions="70, 2*, 1.5*, 110" ColumnSpacing="20">
+
+                                                        <Border HeightRequest="70" WidthRequest="70" StrokeShape="RoundRectangle 15" StrokeThickness="0" VerticalOptions="Center" BackgroundColor="#1E232D">
+                                                            <Grid>
+                                                                <Path Aspect="Uniform" WidthRequest="26" HeightRequest="26" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444" Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                                                <Image Source="{Binding AvatarUrl}" Aspect="AspectFill">
+                                                                    <Image.Triggers>
+                                                                        <DataTrigger TargetType="Image" Binding="{Binding AvatarUrl}" Value="{x:Null}">
+                                                                            <Setter Property="IsVisible" Value="False" />
+                                                                        </DataTrigger>
+                                                                        <DataTrigger TargetType="Image" Binding="{Binding AvatarUrl}" Value="">
+                                                                            <Setter Property="IsVisible" Value="False" />
+                                                                        </DataTrigger>
+                                                                    </Image.Triggers>
+                                                                </Image>
+                                                            </Grid>
                                                         </Border>
+
                                                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
-                                                            <Label Text="{Binding FullName}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=15}"/>
-                                                            <Label Text="{Binding CategoriesDisplay}" TextColor="{StaticResource TextSubtle}" FontSize="12"/>
+                                                            <Label Text="{Binding FullName}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=18}"/>
+                                                            <Label Text="{Binding CategoriesDisplay}" TextColor="{StaticResource TextSubtle}" FontSize="14"/>
                                                         </VerticalStackLayout>
-                                                        <Label Grid.Column="2" Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=14}" VerticalOptions="Center" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
-                                                        <Label Grid.Column="3" Text="{Binding Amount, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="End" HorizontalTextAlignment="End"/>
+                                                        <Label Grid.Column="2" Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=16}" VerticalOptions="Center" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                                                        <Label Grid.Column="3" Text="{Binding Amount, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=20}" VerticalOptions="Center" HorizontalOptions="End" HorizontalTextAlignment="End"/>
                                                     </Grid>
                                                 </Border>
                                             </ContentView>
@@ -157,126 +128,88 @@
                         </Border>
                     </Grid>
 
-                    <!-- LINIA ODCIĘCIA -->
                     <BoxView Grid.Row="3" HeightRequest="1" Color="{StaticResource Border}" VerticalOptions="Center" Margin="-30,0,-30,0" />
 
-                    <!-- KARTY: AKTYWNOŚĆ I GRUPY -->
-                    <Grid Grid.Row="4" ColumnDefinitions="{OnIdiom Phone='*', Default='*, *'}" RowDefinitions="{OnIdiom Phone='Auto, Auto', Default='Auto'}" ColumnSpacing="25" RowSpacing="25" Padding="0,0,0,30">
+                    <Grid Grid.Row="4" ColumnDefinitions="*, *" ColumnSpacing="30">
 
-                        <!-- OSTATNIA AKTYWNOŚĆ -->
-                        <Grid Grid.Row="0" Grid.Column="0" RowDefinitions="Auto, Auto" RowSpacing="15">
-                            <Label Grid.Row="0" Text="Ostatnia aktywność" TextColor="{StaticResource TextMain}" FontSize="{OnIdiom Phone=20, Default=24}" HorizontalOptions="Center" FontAttributes="Bold"/>
-                            <Border Grid.Row="1" StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="20" StrokeThickness="0">
-                                <CollectionView ItemsSource="{Binding Notifications}" HeightRequest="200">
+                        <Border Grid.Column="0" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="25" StrokeThickness="0" VerticalOptions="Fill">
+                            <Grid RowDefinitions="Auto, *">
+                                <Label Grid.Row="0" Text="Ostatnia aktywność" TextColor="{StaticResource TextMain}" FontSize="28" HorizontalOptions="Center" FontAttributes="Bold" Margin="0,0,0,15"/>
+                                <CollectionView Grid.Row="1" ItemsSource="{Binding Notifications}" HeightRequest="200">
                                     <CollectionView.EmptyView>
-                                        <Label Text="Brak nowych powiadomień." TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                        <Grid VerticalOptions="Center" HorizontalOptions="Center">
+                                            <Label Text="Brak nowych powiadomień." TextColor="{StaticResource TextSubtle}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
+                                        </Grid>
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate>
-                                            <ContentView Padding="0,0,0,10">
-                                                <VerticalStackLayout>
-                                                    <Grid ColumnDefinitions="30, *" Padding="5,15">
-                                                        <Image Grid.Column="0" Source="icon_activity_item.png" WidthRequest="18" HeightRequest="18" VerticalOptions="Center"/>
-                                                        <Label Grid.Column="1" Text="{Binding Message}" TextColor="{StaticResource TextSubtle}" FontSize="12" VerticalOptions="Center"/>
-                                                    </Grid>
-                                                    <BoxView HeightRequest="1" Color="{StaticResource Border}" />
-                                                </VerticalStackLayout>
-                                            </ContentView>
+                                            <VerticalStackLayout>
+                                                <Grid ColumnDefinitions="40, *" Padding="5,12">
+                                                    <Image Grid.Column="0" Source="icon_activity_item.png" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" Opacity="0.8"/>
+                                                    <Label Grid.Column="1" Text="{Binding Message}" TextColor="{StaticResource TextSubtle}" FontSize="13" VerticalOptions="Center"/>
+                                                </Grid>
+                                                <BoxView HeightRequest="1" Color="{StaticResource Border}" Opacity="0.2" Margin="0,0,0,5"/>
+                                            </VerticalStackLayout>
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
                                 </CollectionView>
-                            </Border>
-                        </Grid>
+                            </Grid>
+                        </Border>
 
-                        <!-- AKTYWNE GRUPY -->
-                        <Grid Grid.Row="{OnIdiom Phone=1, Default=0}" Grid.Column="{OnIdiom Phone=0, Default=1}" RowDefinitions="Auto, Auto" RowSpacing="15">
-                            <Label Grid.Row="0" Text="Aktywne Grupy" TextColor="{StaticResource TextMain}" FontSize="{OnIdiom Phone=20, Default=24}" HorizontalOptions="Center" FontAttributes="Bold"/>
-                            <Border Grid.Row="1" StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="20" StrokeThickness="0">
-                                <CollectionView ItemsSource="{Binding ActiveGroups}" ItemsLayout="HorizontalList" HorizontalScrollBarVisibility="Always" HeightRequest="120">
+                        <Border Grid.Column="1" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="25" StrokeThickness="0" VerticalOptions="Fill">
+                            <Grid RowDefinitions="Auto, *">
+                                <Label Grid.Row="0" Text="Aktywne Grupy" TextColor="{StaticResource TextMain}" FontSize="28" HorizontalOptions="Center" FontAttributes="Bold" Margin="0,0,0,5"/>
+
+                                <CollectionView Grid.Row="1" ItemsSource="{Binding ActiveGroups}" HorizontalScrollBarVisibility="Always" HeightRequest="200" HorizontalOptions="Center">
+                                    <CollectionView.ItemsLayout>
+                                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8" />
+                                    </CollectionView.ItemsLayout>
                                     <CollectionView.EmptyView>
-                                        <Label Text="Nie należysz do żadnej grupy." TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                        <Grid VerticalOptions="Center" HorizontalOptions="Center">
+                                            <Label Text="Nie należysz do żadnej grupy." TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                        </Grid>
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate>
-                                            <ContentView Padding="0,0,15,0">
-                                                <Border StrokeShape="RoundRectangle 12" BackgroundColor="{StaticResource MainBackground}" Padding="15" StrokeThickness="0" WidthRequest="110">
-                                                    <VerticalStackLayout Spacing="8" VerticalOptions="Center" HorizontalOptions="Center">
-                                                        <Border HeightRequest="50" WidthRequest="50" StrokeShape="RoundRectangle 25" StrokeThickness="0" HorizontalOptions="Center">
-                                                            <Image Source="{Binding ImageUrl}" Aspect="AspectFill"/>
+                                            <ContentView Padding="0,0,5,0">
+                                                <Border StrokeShape="RoundRectangle 20" BackgroundColor="{StaticResource MainBackground}" Padding="10" StrokeThickness="0" WidthRequest="150" HeightRequest="180" VerticalOptions="Center">
+                                                    <VerticalStackLayout Spacing="15" VerticalOptions="Center" HorizontalOptions="Center">
+
+                                                        <Border HeightRequest="70" WidthRequest="70" StrokeShape="RoundRectangle 35" StrokeThickness="0" HorizontalOptions="Center" BackgroundColor="#1E232D">
+                                                            <Grid>
+                                                                <Path Aspect="Uniform" WidthRequest="26" HeightRequest="26" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444" Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                                                <Image Source="{Binding AvatarUrl}" Aspect="AspectFill">
+                                                                    <Image.Triggers>
+                                                                        <DataTrigger TargetType="Image" Binding="{Binding AvatarUrl}" Value="{x:Null}">
+                                                                            <Setter Property="IsVisible" Value="False" />
+                                                                        </DataTrigger>
+                                                                        <DataTrigger TargetType="Image" Binding="{Binding AvatarUrl}" Value="">
+                                                                            <Setter Property="IsVisible" Value="False" />
+                                                                        </DataTrigger>
+                                                                    </Image.Triggers>
+                                                                </Image>
+                                                            </Grid>
                                                         </Border>
-                                                        <Label Text="{Binding Name}" TextColor="{StaticResource TextMain}" HorizontalOptions="Center" FontAttributes="Bold" FontSize="12" HorizontalTextAlignment="Center" MaxLines="2" LineBreakMode="WordWrap"/>
+
+                                                        <Label Text="{Binding Name}" TextColor="{StaticResource TextMain}" HorizontalOptions="Center" FontAttributes="Bold" FontSize="16" HorizontalTextAlignment="Center" MaxLines="2" LineBreakMode="WordWrap"/>
+                                                        <Label Text="{Binding LastUpdate}" TextColor="{StaticResource TextSubtle}" FontSize="12" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
                                                     </VerticalStackLayout>
                                                 </Border>
                                             </ContentView>
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
                                 </CollectionView>
-                            </Border>
-                        </Grid>
+                            </Grid>
+                        </Border>
                     </Grid>
                 </Grid>
             </ScrollView>
         </Grid>
 
-        <!-- WARSTWA 2: NAKŁADKA MENU (Wyskakuje tylko po kliknięciu na telefonie) -->
         <Grid IsVisible="{Binding IsMenuVisible}" BackgroundColor="#CC121212" ZIndex="100">
-            <!-- Tło zamykające menu po kliknięciu poza okienkiem -->
             <Grid.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
             </Grid.GestureRecognizers>
-
-            <Border HorizontalOptions="End" VerticalOptions="Start" Margin="0,60,20,0" WidthRequest="220"
-                BackgroundColor="{StaticResource SurfaceDark}" StrokeShape="RoundRectangle 15" StrokeThickness="0" Padding="15">
-
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer />
-                    <!-- Puste = przechwytuje kliknięcie na oknie, żeby go nie zamknęło -->
-                </Border.GestureRecognizers>
-
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="PayItOff!" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource TextMain}" Margin="0,0,0,10"/>
-
-                    <HorizontalStackLayout Spacing="15" Style="{StaticResource MenuItemHoverStyle}">
-                        <Image Source="icon_home.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
-                        <Label Text="Menu Główne" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
-                    </HorizontalStackLayout>
-
-                    <HorizontalStackLayout Spacing="15" Style="{StaticResource MenuItemHoverStyle}">
-                        <Image Source="icon_groups.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
-                        <Label Text="Twoje Grupy" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
-                    </HorizontalStackLayout>
-
-                    <HorizontalStackLayout Spacing="15" Style="{StaticResource MenuItemHoverStyle}">
-                        <Image Source="icon_friends.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
-                        <Label Text="Twoi Znajomi" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
-                    </HorizontalStackLayout>
-
-                    <HorizontalStackLayout Spacing="15" Style="{StaticResource MenuItemHoverStyle}">
-                        <Image Source="icon_wallet.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
-                        <Label Text="Twoje Konto" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
-                    </HorizontalStackLayout>
-
-                    <HorizontalStackLayout Spacing="15" Style="{StaticResource MenuItemHoverStyle}">
-                        <Image Source="icon_notifications.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
-                        <Label Text="Powiadomienia" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
-                    </HorizontalStackLayout>
-
-                    <HorizontalStackLayout Spacing="15" Style="{StaticResource MenuItemHoverStyle}">
-                        <Image Source="icon_archive.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
-                        <Label Text="Archiwum" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
-                    </HorizontalStackLayout>
-
-                    <BoxView HeightRequest="1" Color="{StaticResource Border}" Margin="0,10"/>
-
-                    <HorizontalStackLayout Spacing="15" Style="{StaticResource MenuItemHoverStyle}">
-                        <HorizontalStackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding LogoutCommand}" />
-                        </HorizontalStackLayout.GestureRecognizers>
-                        <Label Text="➔" TextColor="{StaticResource StatusRed}" FontSize="20" VerticalOptions="Center" WidthRequest="24" HorizontalTextAlignment="Center"/>
-                        <Label Text="Wyloguj się" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" VerticalOptions="Center" FontSize="16"/>
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
-            </Border>
         </Grid>
     </Grid>
 </ContentPage>
