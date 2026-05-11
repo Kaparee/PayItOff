@@ -12,4 +12,6 @@ public interface IGroupDebtRepository
     Task<Dictionary<int, (decimal Income, decimal Expense)>> GetUserGroupBalancesAsync(int userId);
     Task<List<(int UserId, string Name, string Surname, string? AvatarUrl, List<string> Categories, DateTime Date, decimal Amount)>> GetUserTotalIncomesAsync(int userId);
     Task<List<(int UserId, string Name, string Surname, string? AvatarUrl, List<string> Categories, DateTime Date, decimal Amount)>> GetUserTotalExpensesAsync(int userId);
+    Task<GroupDebt?> GetSpecificDebtAsync(int debtorId, int creditorId, int groupId);
+
 }

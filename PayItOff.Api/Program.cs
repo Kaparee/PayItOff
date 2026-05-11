@@ -75,6 +75,7 @@ builder.Services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
 builder.Services.AddScoped<IFriendRepository, FriendRepository>();
 builder.Services.AddScoped<IGroupDebtRepository, GroupDebtRepository>();
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
+builder.Services.AddScoped<IExpenseSplitRepository, ExpenseSplitRepository>();
 
 // Services
 builder.Services.AddScoped<IUserService, UserService>();

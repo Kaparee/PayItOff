@@ -1,4 +1,5 @@
-﻿using PayItOff.Shared.Responses;
+﻿using PayItOff.Shared.Requests;
+using PayItOff.Shared.Responses;
 
 namespace PayItOff.Application.Interfaces
 {
@@ -6,5 +7,6 @@ namespace PayItOff.Application.Interfaces
     {
         Task<GlobalSettlementResponse> GetUserAllIncomesSummaryAsync(int userId);
         Task<GlobalSettlementResponse> GetUserAllExpensesSummaryAsync(int userId);
+        Task<PagedTransactionResponse> GetHistoryAsync(int userId, UserExpenseHistoryRequest request);
     }
 }

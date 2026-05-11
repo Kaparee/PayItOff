@@ -174,4 +174,10 @@ public class GroupDebtRepository : IGroupDebtRepository
 
         return result;
     }
+
+    public async Task<GroupDebt?> GetSpecificDebtAsync(int debtorId, int creditorId, int groupId)
+    {
+        return await _context.GroupDebts
+            .FirstOrDefaultAsync(gd => gd.DebtorId == debtorId && gd.CreditorId == creditorId && gd.GroupId == groupId);
+    }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PayItOff.Application.Interfaces;
+using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
 
 namespace PayItOff.Api.Controllers;
@@ -29,6 +30,13 @@ public class SettlementController : ControllerBase
     {
         var result = await _settlementService.GetUserAllExpensesSummaryAsync(GetUserId());
 
+        return Ok(result);
+    }
+
+    [HttpGet("get-user-expense-history")]
+    public async Task<ActionResult<PagedTransactionResponse>> GetHistory([FromQuery] UserExpenseHistoryRequest request)
+    {
+        var result = await _settlementService.GetHistoryAsync(GetUserId(), request);
         return Ok(result);
     }
 }
