@@ -107,6 +107,8 @@ namespace PayItOff.Infrastructure.Persistence
 
                 builder.HasOne(gd => gd.Debtor).WithMany().HasForeignKey(gd => gd.DebtorId).OnDelete(DeleteBehavior.Restrict);
                 builder.HasOne(gd => gd.Creditor).WithMany().HasForeignKey(gd => gd.CreditorId).OnDelete(DeleteBehavior.Restrict);
+
+                builder.Property(gd => gd.Amount).IsConcurrencyToken();
             });
 
             modelBuilder.Entity<Friend>(builder =>

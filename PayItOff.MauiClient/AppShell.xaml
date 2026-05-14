@@ -20,8 +20,8 @@
         Route="LoginPage" />
 
     <!-- Strona rejestracji -->
-    <ShellContent 
-        Title="Register" 
+    <ShellContent
+        Title="Register"
         ContentTemplate="{DataTemplate views:RegisterPage}"
         Route="RegisterPage"/>
 
@@ -32,33 +32,38 @@
         Route="MainPage" />
 
     <!-- Strona grup -->
-    <ShellContent 
-        Title="Grupy" 
+    <ShellContent
+        Title="Grupy"
         ContentTemplate="{DataTemplate views:GroupsPage}"
         Route="GroupsPage"/>
 
     <!-- Strona grup -->
-    <ShellContent 
-        Title="Znajomi" 
+    <ShellContent
+        Title="Znajomi"
         ContentTemplate="{DataTemplate views:FriendsPage}"
         Route="FriendsPage"/>
 
     <!-- Strona konta -->
-    <ShellContent 
-        Title="Konto" 
+    <ShellContent
+        Title="Konto"
         ContentTemplate="{DataTemplate views:AccountPage}"
         Route="AccountPage"/>
 
     <!-- Strona powiadomień -->
-    <ShellContent 
-        Title="Grupy" 
+    <ShellContent
+        Title="Grupy"
         ContentTemplate="{DataTemplate views:NotificationsPage}"
         Route="NotificationsPage"/>
 
     <!-- Strona archiwum -->
-    <ShellContent 
-        Title="Grupy" 
+    <ShellContent
+        Title="Archiwum"
         ContentTemplate="{DataTemplate views:ArchivePage}"
         Route="ArchivePage"/>
 
+    <!-- Strona Historii -->
+    <ShellContent
+        Title="Wallet"
+        ContentTemplate="{DataTemplate views:WalletPage}"
+        Route="WalletPage"/>
 </Shell>

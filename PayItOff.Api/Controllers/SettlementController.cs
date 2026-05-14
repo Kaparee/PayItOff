@@ -15,13 +15,13 @@ public class SettlementController : ControllerBase
     private int GetUserId()
         => int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
            ?? throw new UnauthorizedAccessException());
+
     public SettlementController(ISettlementService settlementService) { _settlementService = settlementService; }
 
     [HttpGet("get-user-incomes-summ")]
     public async Task<ActionResult<GlobalSettlementResponse>> GetAllUserIncomeSummaries()
     {
         var result = await _settlementService.GetUserAllIncomesSummaryAsync(GetUserId());
-
         return Ok(result);
     }
 
@@ -29,7 +29,6 @@ public class SettlementController : ControllerBase
     public async Task<ActionResult<GlobalSettlementResponse>> GetAllUserExpenseSummaries()
     {
         var result = await _settlementService.GetUserAllExpensesSummaryAsync(GetUserId());
-
         return Ok(result);
     }
 
@@ -39,5 +38,46 @@ public class SettlementController : ControllerBase
         var result = await _settlementService.GetHistoryAsync(GetUserId(), request);
         return Ok(result);
     }
-}
 
+    [HttpGet("current-debt")]
+    public async Task<ActionResult<decimal>> GetCurrentDebt([FromQuery] int? targetId)
+    {
+        var result = await _settlementService.GetUserCurrentTotalDebtAsync(GetUserId(), targetId);
+        return Ok(result);
+    }
+
+    [HttpGet("payable-options")]
+    public async Task<ActionResult<List<PayableDebtOptionResponse>>> GetPayableOptions()
+    {
+        var result = await _settlementService.GetPayableDebtOptionsAsync(GetUserId());
+        return Ok(result);
+    }
+
+    [HttpPost("create")]
+    public async Task<IActionResult> Create([FromBody] CreateSettlementRequest request)
+    {
+        await _settlementService.CreateSettlementAsync(GetUserId(), request);
+        return Ok();
+    }
+
+    [HttpPost("accept/{id}")]
+    public async Task<IActionResult> Accept(int id)
+    {
+        await _settlementService.AcceptSettlementAsync(GetUserId(), id);
+        return Ok();
+    }
+
+    [HttpPost("reject/{id}")]
+    public async Task<IActionResult> Reject(int id)
+    {
+        await _settlementService.RejectSettlementAsync(GetUserId(), id);
+        return Ok();
+    }
+
+    [HttpPost("remind-debt")]
+    public async Task<IActionResult> RemindDebt([FromBody] RemindDebtRequest request)
+    {
+        await _settlementService.SendDebtReminderAsync(GetUserId(), request);
+        return Ok();
+    }
+}

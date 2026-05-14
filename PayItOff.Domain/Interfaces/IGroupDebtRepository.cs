@@ -14,4 +14,5 @@ public interface IGroupDebtRepository
     Task<List<(int UserId, string Name, string Surname, string? AvatarUrl, List<string> Categories, DateTime Date, decimal Amount)>> GetUserTotalExpensesAsync(int userId);
     Task<GroupDebt?> GetSpecificDebtAsync(int debtorId, int creditorId, int groupId);
 
+    Task<List<(int GroupId, string GroupName, int CreditorId, string CreditorName, string CreditorSurname, decimal Amount)>> GetOpenDebtLinesForDebtorAsync(int debtorId);
 }

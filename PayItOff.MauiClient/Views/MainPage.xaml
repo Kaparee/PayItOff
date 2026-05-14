@@ -6,15 +6,15 @@
              x:Class="PayItOff.MauiClient.Views.MainPage"
              BackgroundColor="{StaticResource MainBackground}"
              Shell.NavBarIsVisible="False">
-
     <Grid>
         <Grid ColumnDefinitions="{OnIdiom Phone='0, *', Default='360, *'}">
-
+            <!-- Lewy Sidebar -->
             <controls:SidebarMenu Grid.Column="0" ActiveTab="Home" IsVisible="{OnIdiom Phone=False, Default=True}" />
 
             <ScrollView Grid.Column="1" VerticalScrollBarVisibility="Always">
                 <Grid Padding="{OnIdiom Phone='15', Default='30'}" RowDefinitions="Auto, Auto, Auto, Auto, Auto" RowSpacing="30">
 
+                    <!-- Menu Mobile Hamburger -->
                     <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" IsVisible="{OnIdiom Phone=True, Default=False}" Margin="0,10,0,0">
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
@@ -25,103 +25,95 @@
 
                     <BoxView Grid.Row="1" HeightRequest="1" Color="{StaticResource Border}" VerticalOptions="Start" Margin="-30,10,-30,0" IsVisible="{OnIdiom Phone=False, Default=True}" />
 
+                    <!-- Sekcja: Przychody i Wydatki -->
                     <Grid Grid.Row="2" ColumnDefinitions="{OnIdiom Phone='*', Default='*, *'}" RowDefinitions="{OnIdiom Phone='Auto, Auto', Default='Auto'}" ColumnSpacing="25" RowSpacing="25">
 
-                        <Border Grid.Row="{OnIdiom Phone=0, Default=0}" Grid.Column="{OnIdiom Phone=0, Default=0}" StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="5, 20" StrokeThickness="0">
+                        <!-- Panel Przychodów -->
+                        <Border Grid.Row="0" Grid.Column="0" StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="5, 20" StrokeThickness="0">
                             <Grid RowDefinitions="Auto, *, Auto, Auto" RowSpacing="15">
-                                <Label Grid.Row="0" Text="Przychody" TextColor="{StaticResource StatusGreen}" FontSize="{OnIdiom Phone=22, Default=32}" HorizontalOptions="Center" FontAttributes="Bold"/>
+                                <Label Grid.Row="0" Text="Przychody" TextColor="{StaticResource StatusGreen}" FontSize="{OnIdiom Phone=22, Default=32}" HorizontalOptions="Center" FontAttributes="Bold">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding NavigateToWalletCommand}" CommandParameter="Income" />
+                                    </Label.GestureRecognizers>
+                                </Label>
 
                                 <CollectionView Grid.Row="1" ItemsSource="{Binding Incomes}" HeightRequest="{OnIdiom Phone=250, Default=350}">
                                     <CollectionView.EmptyView>
-                                        <Grid VerticalOptions="Center" HorizontalOptions="Center">
-                                            <Label Text="Brak przychodów" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" Padding="30"/>
-                                        </Grid>
+                                        <Label Text="Brak przychodów" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" Padding="30"/>
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate>
                                             <ContentView Padding="0,0,0,5">
+                                                <ContentView.GestureRecognizers>
+                                                    <TapGestureRecognizer 
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.NavigateToPersonCommand}" 
+                                                        CommandParameter="{Binding .}" />
+                                                </ContentView.GestureRecognizers>
                                                 <Border BackgroundColor="{StaticResource MainBackground}" Padding="15,15" StrokeThickness="0">
                                                     <Grid ColumnDefinitions="70, 2*, 1.5*, 110" ColumnSpacing="20">
-
                                                         <Border HeightRequest="70" WidthRequest="70" StrokeShape="RoundRectangle 15" StrokeThickness="0" VerticalOptions="Center" BackgroundColor="#1E232D">
                                                             <Grid>
                                                                 <Path Aspect="Uniform" WidthRequest="26" HeightRequest="26" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444" Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-                                                                <Image Source="{Binding AvatarUrl}" Aspect="AspectFill">
-                                                                    <Image.Triggers>
-                                                                        <DataTrigger TargetType="Image" Binding="{Binding AvatarUrl}" Value="{x:Null}">
-                                                                            <Setter Property="IsVisible" Value="False" />
-                                                                        </DataTrigger>
-                                                                        <DataTrigger TargetType="Image" Binding="{Binding AvatarUrl}" Value="">
-                                                                            <Setter Property="IsVisible" Value="False" />
-                                                                        </DataTrigger>
-                                                                    </Image.Triggers>
-                                                                </Image>
+                                                                <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
                                                             </Grid>
                                                         </Border>
-
                                                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
                                                             <Label Text="{Binding FullName}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=18}"/>
                                                             <Label Text="{Binding CategoriesDisplay}" TextColor="{StaticResource TextSubtle}" FontSize="14"/>
                                                         </VerticalStackLayout>
-                                                        <Label Grid.Column="2" Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=16}" VerticalOptions="Center" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
-                                                        <Label Grid.Column="3" Text="{Binding Amount, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusGreen}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=20}" VerticalOptions="Center" HorizontalOptions="End" HorizontalTextAlignment="End"/>
+                                                        <Label Grid.Column="2" Text="{Binding Date, StringFormat='{0:dd/MM/yy}'}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=15}" VerticalOptions="Center" HorizontalOptions="Center"/>
+                                                        <Label Grid.Column="3" Text="{Binding Amount, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusGreen}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=20}" VerticalOptions="Center" HorizontalOptions="End"/>
                                                     </Grid>
                                                 </Border>
                                             </ContentView>
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
                                 </CollectionView>
-
                                 <BoxView Grid.Row="2" HeightRequest="1" Color="{StaticResource Border}" Margin="0,5"/>
                                 <Label Grid.Row="3" Text="{Binding TotalIncomes, StringFormat='Suma: {0:N2} zł'}" TextColor="{StaticResource TextMain}" HorizontalOptions="End" FontAttributes="Bold" FontSize="18" Padding="10,0"/>
                             </Grid>
                         </Border>
 
+                        <!-- Panel Wydatków -->
                         <Border Grid.Row="{OnIdiom Phone=1, Default=0}" Grid.Column="{OnIdiom Phone=0, Default=1}" StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="5, 20" StrokeThickness="0">
                             <Grid RowDefinitions="Auto, *, Auto, Auto" RowSpacing="15">
-                                <Label Grid.Row="0" Text="Wydatki" TextColor="{StaticResource StatusRed}" FontSize="{OnIdiom Phone=22, Default=32}" HorizontalOptions="Center" FontAttributes="Bold"/>
-
+                                <Label Grid.Row="0" Text="Wydatki" TextColor="{StaticResource StatusRed}" FontSize="{OnIdiom Phone=22, Default=32}" HorizontalOptions="Center" FontAttributes="Bold">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding NavigateToWalletCommand}" CommandParameter="Expense" />
+                                    </Label.GestureRecognizers>
+                                </Label>
                                 <CollectionView Grid.Row="1" ItemsSource="{Binding Expenses}" HeightRequest="{OnIdiom Phone=250, Default=350}">
                                     <CollectionView.EmptyView>
-                                        <Grid VerticalOptions="Center" HorizontalOptions="Center">
-                                            <Label Text="Brak wydatków" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" Padding="30"/>
-                                        </Grid>
+                                        <Label Text="Brak wydatków" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" Padding="30"/>
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate>
                                             <ContentView Padding="0,0,0,5">
+                                                <ContentView.GestureRecognizers>
+                                                    <TapGestureRecognizer 
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.NavigateToPersonCommand}" 
+                                                            CommandParameter="{Binding .}" />
+                                                </ContentView.GestureRecognizers>
                                                 <Border BackgroundColor="{StaticResource MainBackground}" Padding="15,15" StrokeThickness="0">
                                                     <Grid ColumnDefinitions="70, 2*, 1.5*, 110" ColumnSpacing="20">
-
                                                         <Border HeightRequest="70" WidthRequest="70" StrokeShape="RoundRectangle 15" StrokeThickness="0" VerticalOptions="Center" BackgroundColor="#1E232D">
                                                             <Grid>
                                                                 <Path Aspect="Uniform" WidthRequest="26" HeightRequest="26" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444" Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-                                                                <Image Source="{Binding AvatarUrl}" Aspect="AspectFill">
-                                                                    <Image.Triggers>
-                                                                        <DataTrigger TargetType="Image" Binding="{Binding AvatarUrl}" Value="{x:Null}">
-                                                                            <Setter Property="IsVisible" Value="False" />
-                                                                        </DataTrigger>
-                                                                        <DataTrigger TargetType="Image" Binding="{Binding AvatarUrl}" Value="">
-                                                                            <Setter Property="IsVisible" Value="False" />
-                                                                        </DataTrigger>
-                                                                    </Image.Triggers>
-                                                                </Image>
+                                                                <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
                                                             </Grid>
                                                         </Border>
-
                                                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
                                                             <Label Text="{Binding FullName}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=18}"/>
                                                             <Label Text="{Binding CategoriesDisplay}" TextColor="{StaticResource TextSubtle}" FontSize="14"/>
                                                         </VerticalStackLayout>
-                                                        <Label Grid.Column="2" Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=16}" VerticalOptions="Center" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
-                                                        <Label Grid.Column="3" Text="{Binding Amount, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=20}" VerticalOptions="Center" HorizontalOptions="End" HorizontalTextAlignment="End"/>
+                                                        <Label Grid.Column="2" Text="{Binding Date, StringFormat='{0:dd/MM}'}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="12" VerticalOptions="Center" HorizontalOptions="Center"/>
+                                                        <Label Grid.Column="3" Text="{Binding Amount, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=20}" VerticalOptions="Center" HorizontalOptions="End"/>
                                                     </Grid>
                                                 </Border>
                                             </ContentView>
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
                                 </CollectionView>
-
                                 <BoxView Grid.Row="2" HeightRequest="1" Color="{StaticResource Border}" Margin="0,5"/>
                                 <Label Grid.Row="3" Text="{Binding TotalExpenses, StringFormat='Suma: {0:N2} zł'}" TextColor="{StaticResource TextMain}" HorizontalOptions="End" FontAttributes="Bold" FontSize="18" Padding="10,0"/>
                             </Grid>
@@ -130,16 +122,15 @@
 
                     <BoxView Grid.Row="3" HeightRequest="1" Color="{StaticResource Border}" VerticalOptions="Center" Margin="-30,0,-30,0" />
 
+                    <!-- Ostatnia Aktywność i Aktywne Grupy -->
                     <Grid Grid.Row="4" ColumnDefinitions="*, *" ColumnSpacing="30">
-
-                        <Border Grid.Column="0" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="25" StrokeThickness="0" VerticalOptions="Fill">
+                        <!-- Lewy: Aktywność -->
+                        <Border Grid.Column="0" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="25" StrokeThickness="0">
                             <Grid RowDefinitions="Auto, *">
                                 <Label Grid.Row="0" Text="Ostatnia aktywność" TextColor="{StaticResource TextMain}" FontSize="28" HorizontalOptions="Center" FontAttributes="Bold" Margin="0,0,0,15"/>
                                 <CollectionView Grid.Row="1" ItemsSource="{Binding Notifications}" HeightRequest="200">
                                     <CollectionView.EmptyView>
-                                        <Grid VerticalOptions="Center" HorizontalOptions="Center">
-                                            <Label Text="Brak nowych powiadomień." TextColor="{StaticResource TextSubtle}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
-                                        </Grid>
+                                        <Label Text="Brak nowych powiadomień." TextColor="{StaticResource TextSubtle}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate>
@@ -156,43 +147,30 @@
                             </Grid>
                         </Border>
 
-                        <Border Grid.Column="1" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="25" StrokeThickness="0" VerticalOptions="Fill">
+                        <!-- Prawy: Grupy -->
+                        <Border Grid.Column="1" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="25" StrokeThickness="0">
                             <Grid RowDefinitions="Auto, *">
                                 <Label Grid.Row="0" Text="Aktywne Grupy" TextColor="{StaticResource TextMain}" FontSize="28" HorizontalOptions="Center" FontAttributes="Bold" Margin="0,0,0,5"/>
-
-                                <CollectionView Grid.Row="1" ItemsSource="{Binding ActiveGroups}" HorizontalScrollBarVisibility="Always" HeightRequest="200" HorizontalOptions="Center">
+                                <CollectionView Grid.Row="1" ItemsSource="{Binding ActiveGroups}" HorizontalScrollBarVisibility="Always" HeightRequest="200">
                                     <CollectionView.ItemsLayout>
                                         <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8" />
                                     </CollectionView.ItemsLayout>
                                     <CollectionView.EmptyView>
-                                        <Grid VerticalOptions="Center" HorizontalOptions="Center">
-                                            <Label Text="Nie należysz do żadnej grupy." TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" VerticalOptions="Center"/>
-                                        </Grid>
+                                        <Label Text="Nie należysz do żadnej grupy." TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" VerticalOptions="Center"/>
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate>
                                             <ContentView Padding="0,0,5,0">
-                                                <Border StrokeShape="RoundRectangle 20" BackgroundColor="{StaticResource MainBackground}" Padding="10" StrokeThickness="0" WidthRequest="150" HeightRequest="180" VerticalOptions="Center">
+                                                <Border StrokeShape="RoundRectangle 20" BackgroundColor="{StaticResource MainBackground}" Padding="10" StrokeThickness="0" WidthRequest="150" HeightRequest="180">
                                                     <VerticalStackLayout Spacing="15" VerticalOptions="Center" HorizontalOptions="Center">
-
                                                         <Border HeightRequest="70" WidthRequest="70" StrokeShape="RoundRectangle 35" StrokeThickness="0" HorizontalOptions="Center" BackgroundColor="#1E232D">
                                                             <Grid>
                                                                 <Path Aspect="Uniform" WidthRequest="26" HeightRequest="26" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444" Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-                                                                <Image Source="{Binding AvatarUrl}" Aspect="AspectFill">
-                                                                    <Image.Triggers>
-                                                                        <DataTrigger TargetType="Image" Binding="{Binding AvatarUrl}" Value="{x:Null}">
-                                                                            <Setter Property="IsVisible" Value="False" />
-                                                                        </DataTrigger>
-                                                                        <DataTrigger TargetType="Image" Binding="{Binding AvatarUrl}" Value="">
-                                                                            <Setter Property="IsVisible" Value="False" />
-                                                                        </DataTrigger>
-                                                                    </Image.Triggers>
-                                                                </Image>
+                                                                <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
                                                             </Grid>
                                                         </Border>
-
-                                                        <Label Text="{Binding Name}" TextColor="{StaticResource TextMain}" HorizontalOptions="Center" FontAttributes="Bold" FontSize="16" HorizontalTextAlignment="Center" MaxLines="2" LineBreakMode="WordWrap"/>
-                                                        <Label Text="{Binding LastUpdate}" TextColor="{StaticResource TextSubtle}" FontSize="12" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                                                        <Label Text="{Binding Name}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="16" HorizontalTextAlignment="Center" MaxLines="2"/>
+                                                        <Label Text="{Binding LastUpdate}" TextColor="{StaticResource TextSubtle}" FontSize="12" HorizontalOptions="Center"/>
                                                     </VerticalStackLayout>
                                                 </Border>
                                             </ContentView>
@@ -206,10 +184,18 @@
             </ScrollView>
         </Grid>
 
+        <!-- Mobilna warstwa blokująca pod Menu -->
         <Grid IsVisible="{Binding IsMenuVisible}" BackgroundColor="#CC121212" ZIndex="100">
             <Grid.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
             </Grid.GestureRecognizers>
+            <controls:SidebarMenu HorizontalOptions="Start" ActiveTab="Home" WidthRequest="300"/>
+        </Grid>
+        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#CC121212" ZIndex="999">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="20">
+                <ActivityIndicator IsRunning="{Binding IsBusy}" Color="#7F00FF" WidthRequest="60" HeightRequest="60" />
+                <Label Text="Pobieranie..." TextColor="White" FontAttributes="Bold" FontSize="16" HorizontalOptions="Center" />
+            </VerticalStackLayout>
         </Grid>
     </Grid>
 </ContentPage>

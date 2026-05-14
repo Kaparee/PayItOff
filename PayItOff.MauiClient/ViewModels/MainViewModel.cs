@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using PayItOff.MauiClient.Services;
 using PayItOff.Shared.Responses;
 using System.Collections.ObjectModel;
@@ -36,8 +37,6 @@ public partial class MainViewModel : BaseViewModel
     public partial decimal TotalExpenses { get; set; }
 
     [ObservableProperty]
-    public partial bool IsBusy { get; set; }
-    [ObservableProperty]
     public required partial string DebugStatus { get; set; }
 
     [ObservableProperty]
@@ -64,14 +63,14 @@ public partial class MainViewModel : BaseViewModel
             DebugColor = string.IsNullOrEmpty(token) ? "#FF4500" : "#00FF7F";
             CurrentUserEmail = string.IsNullOrEmpty(token) ? "Niezalogowany" : "Zalogowano pomyślnie";
 
-            var incTask = _settlementService.GetIncomesAsync();
-            var expTask = _settlementService.GetExpensesAsync();
+            var incTask = _settlementService.GetUserAllIncomesSummaryAsync();
+            var expTask = _settlementService.GetUserAllExpensesSummaryAsync();
             var groupsTask = _groupService.Get4ActiveGroups();
 
             await Task.WhenAll(incTask, expTask, groupsTask);
 
-            var incResult = await incTask;
-            var expResult = await expTask;
+            var incResult = await incTask ?? new GlobalSettlementResponse();
+            var expResult = await expTask ?? new GlobalSettlementResponse();
             var groupsResult = await groupsTask;
 
             Incomes = new ObservableCollection<DebtDisplayItem>(incResult.Items.Select(i => new DebtDisplayItem
@@ -108,5 +107,37 @@ public partial class MainViewModel : BaseViewModel
         {
             IsBusy = false;
         }
+    }
+
+    [RelayCommand]
+    private async Task NavigateToWallet(string filter)
+    {
+        IsBusy = true;
+        await Task.Delay(50);
+
+        try
+        {
+            await Shell.Current.GoToAsync($"//WalletPage?filter={filter}");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task NavigateToPerson(DebtDisplayItem item)
+    {
+        if (item == null) return;
+
+        string filter = Incomes.Contains(item) ? "Income" : "Expense";
+
+        IsBusy = true;
+        await Task.Delay(50);
+        try
+        {
+            await Shell.Current.GoToAsync($"//WalletPage?targetId={item.UserId}&filter={filter}");
+        }
+        finally { IsBusy = false; }
     }
 }

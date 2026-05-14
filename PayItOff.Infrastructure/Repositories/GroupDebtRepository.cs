@@ -180,4 +180,22 @@ public class GroupDebtRepository : IGroupDebtRepository
         return await _context.GroupDebts
             .FirstOrDefaultAsync(gd => gd.DebtorId == debtorId && gd.CreditorId == creditorId && gd.GroupId == groupId);
     }
+
+    public async Task<List<(int GroupId, string GroupName, int CreditorId, string CreditorName, string CreditorSurname, decimal Amount)>> GetOpenDebtLinesForDebtorAsync(int debtorId)
+    {
+        var rows = await _context.GroupDebts
+            .Where(gd => gd.DebtorId == debtorId && gd.Amount > 0)
+            .Select(gd => new
+            {
+                gd.GroupId,
+                GroupName = gd.Group.Name,
+                gd.CreditorId,
+                CreditorName = gd.Creditor.Name,
+                CreditorSurname = gd.Creditor.Surname,
+                gd.Amount
+            })
+            .ToListAsync();
+
+        return rows.ConvertAll(x => (x.GroupId, x.GroupName, x.CreditorId, x.CreditorName, x.CreditorSurname, x.Amount));
+    }
 }

@@ -7,6 +7,7 @@ namespace PayItOff.Domain.Enums
         Groups = 3,
         GroupMembers = 4,
         Settlements = 5,
-        Users = 6
+        Users = 6,
+        GroupDebts = 7
     }
 }

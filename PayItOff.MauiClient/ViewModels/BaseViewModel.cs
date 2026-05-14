@@ -3,11 +3,12 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace PayItOff.MauiClient.ViewModels;
 
-// To jest klasa bazowa. Piszesz logikę raz, używasz wszędzie.
 public partial class BaseViewModel : ObservableObject
 {
     [ObservableProperty]
     public partial bool IsMenuVisible { get; set; }
+    [ObservableProperty]
+    public partial bool IsBusy { get; set; }
 
     [RelayCommand]
     private void ToggleMenu()

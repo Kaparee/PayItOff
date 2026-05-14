@@ -1,4 +1,5 @@
 using PayItOff.Domain.Enums;
+using System.Security.Cryptography;
 
 namespace PayItOff.Domain.Entities
 {
@@ -52,12 +53,10 @@ namespace PayItOff.Domain.Entities
             return new Settlement(transferReference, sender, receiver, group, amount, description, SettlementStatus.Pending);
         }
 
-        private static string GenerateTransferReference(int length)
+        private static string GenerateTransferReference(int length = 10)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            var random = new Random();
-            return new string(Enumerable.Repeat(chars, length)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
+            return RandomNumberGenerator.GetString(chars, length);
         }
 
         public void Confirm()

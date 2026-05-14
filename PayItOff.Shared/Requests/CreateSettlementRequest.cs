@@ -1,6 +1,7 @@
 ﻿public class CreateSettlementRequest
 {
-    public int ReceiverId { get; set; }
-    public int GroupId { get; set; }
-    public decimal Amount { get; set; }
+    public required int ReceiverId { get; set; }
+    public required int GroupId { get; set; }
+    public required decimal Amount { get; set; }
+    public string? Description { get; set; }
 }
