@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Infrastructure.Persistence;
@@ -30,5 +30,17 @@ public class ExpenseRepository : IExpenseRepository
             .Include(e => e.Groups)
                 .ThenInclude(g => g.Items)
             .FirstOrDefaultAsync(x => x.Id == expenseId && x.DeletedAt == null);
+    }
+
+    public async Task<List<Expense>> GetExpensesByGroupIdAsync(int groupId)
+    {
+        return await _context.Expenses
+            .Include(e => e.Payer)
+            .Include(e => e.Items)
+                .ThenInclude(i => i.Splits)
+                    .ThenInclude(s => s.User)
+            .Where(e => e.GroupId == groupId && e.DeletedAt == null)
+            .OrderByDescending(e => e.PurchasedAt)
+            .ToListAsync();
     }
 }

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using PayItOff.MauiClient.Services;
 using PayItOff.Shared.Responses;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 
 namespace PayItOff.MauiClient.ViewModels;
 
@@ -140,4 +141,10 @@ public partial class MainViewModel : BaseViewModel
         }
         finally { IsBusy = false; }
     }
+
+    public ICommand NavigateToGroupDetailsCommand => new Command<ActiveGroupsDisplayResponse>(async (group) =>
+    {
+        if (group == null) return;
+        await Shell.Current.GoToAsync($"//GroupDetailsPage?groupId={group.Id}");
+    });
 }

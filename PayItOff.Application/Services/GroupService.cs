@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -172,5 +172,96 @@ public class GroupService : IGroupService
         group.Delete();
         await _groupRepository.UpdateAsync(group);
         await _unitOfWork.SaveChangesAsync();
+    }
+
+    public async Task<GroupDetailsResponse> GetGroupDetailsAsync(int groupId, int userId)
+    {
+        var group = await _groupRepository.GetGroupInfoByIdAsync(groupId);
+        if (group == null) throw new GroupNotFoundException();
+
+        var currentMember = await _groupMemberRepository.GetMemberAsync(groupId, userId);
+        if (currentMember == null) throw new GroupMemberNotFoundException();
+
+        var members = await _groupMemberRepository.GetAllActiveGroupMembersAsync(groupId);
+        var debts = await _groupDebtRepository.GetGroupDebtsByGroupIdAsync(groupId);
+        var expenses = await _expenseRepository.GetExpensesByGroupIdAsync(groupId);
+
+        var baseUrl = _configuration["AppUrls:BackendUrl"];
+
+        var memberDtos = new List<GroupMemberBalanceDto>();
+        foreach (var member in members)
+        {
+            var user = await _userRepository.GetUserByIdAsync(member.UserId);
+            if (user == null) continue;
+
+            var owedToUser = debts.Where(d => d.CreditorId == member.UserId).Sum(d => d.Amount);
+            var userOwes   = debts.Where(d => d.DebtorId  == member.UserId).Sum(d => d.Amount);
+            var overallBalance = owedToUser - userOwes;
+
+            var isCreditorToCurrent = debts.Any(d =>
+                d.CreditorId == member.UserId && d.DebtorId == userId && d.Amount > 0);
+
+            // Tylko wydatki: member był w splicie ale nie płacił → jest winny płatnikowi
+            var lines = expenses
+                .Where(e => e.PayerId != member.UserId)
+                .SelectMany(e => e.Items.SelectMany(i => i.Splits
+                    .Where(s => s.UserId == member.UserId && e.Payer != null)
+                    .Select(s => new { PayerId = e.PayerId, Payer = e.Payer!, Amount = s.OwedAmount })))
+                .GroupBy(x => x.PayerId)
+                .Select(g => new GroupMemberDebtLineDto
+                {
+                    CounterpartyName = ShortPersonLabel(g.First().Payer),
+                    Amount           = g.Sum(x => x.Amount),
+                    MemberOwes       = true
+                })
+                .OrderByDescending(l => l.Amount)
+                .ToList();
+
+            memberDtos.Add(new GroupMemberBalanceDto
+            {
+                UserId               = member.UserId,
+                FullName             = $"{user.Name} {user.Surname}",
+                AvatarUrl            = user.AvatarUrl != null
+                    ? $"{baseUrl}/avatars/{user.AvatarUrl}"
+                    : $"{baseUrl}/avatars/default-user-avatar.png",
+                OverallBalance       = overallBalance,
+                IsCurrentUser        = member.UserId == userId,
+                IsCreditorToCurrentUser = isCreditorToCurrent,
+                Lines                = lines,
+                LinesTotal           = lines.Sum(l => l.Amount),
+                Expenses             = new List<MemberExpenseLineDto>(),
+                ExpensesTotal        = 0
+            });
+        }
+
+        var expenseDtos = expenses
+            .SelectMany(e => e.Items.Select(i => new ExpenseSummaryDto
+            {
+                ExpenseId = e.Id,
+                Title = i.Name,
+                PayerName = e.Payer != null ? $"{e.Payer.Name} {e.Payer.Surname}" : "Nieznany",
+                TotalAmount = i.TotalPrice, // Używam TotalPrice z ExpenseItem
+                Date = e.PurchasedAt
+            }))
+            .OrderByDescending(dto => dto.Date)
+            .ToList();
+
+        return new GroupDetailsResponse
+        {
+            GroupId = group.Id,
+            GroupName = group.Name,
+            UserRole = currentMember.Role.ToString(),
+
+            Members = memberDtos.OrderByDescending(m => m.IsCurrentUser).ThenBy(m => m.FullName).ToList(),
+            Expenses = expenseDtos
+        };
+    }
+
+    private static string ShortPersonLabel(User u)
+    {
+        var name = (u.Name ?? string.Empty).Trim();
+        var sur = (u.Surname ?? string.Empty).Trim();
+        if (string.IsNullOrEmpty(sur)) return name;
+        return $"{name} {char.ToUpperInvariant(sur[0])}.";
     }
 }

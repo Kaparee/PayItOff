@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:PayItOff.MauiClient.Controls"
              xmlns:vm="clr-namespace:PayItOff.MauiClient.ViewModels"
-             xmlns:models="clr-namespace:PayItOff.Shared.Responses"
+             xmlns:models="using:PayItOff.Shared.Responses"
              x:Class="PayItOff.MauiClient.Views.GroupsPage"
              BackgroundColor="{StaticResource MainBackground}"
              Shell.NavBarIsVisible="False"
@@ -49,6 +49,11 @@
                                         <Border StrokeShape="RoundRectangle 15"
                                                 BackgroundColor="{StaticResource SurfaceDark}"
                                                 Padding="20" StrokeThickness="0">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GroupsViewModel}}, Path=NavigateToGroupDetailsCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
 
                                             <Grid ColumnDefinitions="60, *, Auto" ColumnSpacing="20">
                                                 <!-- AWATAR GRUPY -->
@@ -87,7 +92,7 @@
                                             </Grid>
                                         </Border>
 
-                                        <!-- PRZYCISK GWIAZDKI (ULUBIONE) - TERAZ JAKO TWARDY KSZTAŁT SVG -->
+                                        <!-- PRZYCISK GWIAZDKI (ULUBIONE) -->
                                         <Border HorizontalOptions="End" VerticalOptions="Start"
                                                 Margin="0,15,15,0" HeightRequest="30" WidthRequest="30"
                                                 BackgroundColor="Transparent" StrokeThickness="0">
@@ -95,7 +100,7 @@
                                                 <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GroupsViewModel}}, Path=ToggleFavoriteCommand}"
                                                                       CommandParameter="{Binding .}" />
                                             </Border.GestureRecognizers>
-                                            <!-- Kształt gwiazdki wyrysowany wektorowo - nie ma prawa zniknąć -->
+                                            <!-- Kształt gwiazdki wyrysowany wektorowo -->
                                             <Path Aspect="Uniform" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center"
                                                   Fill="Transparent" Stroke="#666" StrokeThickness="1.5"
                                                   Data="M 12 0 L 15.7 8.6 L 24 9.8 L 18 15.6 L 19.4 24 L 12 20.1 L 4.6 24 L 6 15.6 L 0 9.8 L 8.3 8.6 Z">

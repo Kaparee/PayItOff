@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PayItOff.MauiClient.ViewModels"
+             xmlns:controls="clr-namespace:PayItOff.MauiClient.Controls"
+             xmlns:dto="using:PayItOff.Shared.Responses"
+             x:Class="PayItOff.MauiClient.Views.GroupDetailsPage"
+             BackgroundColor="{StaticResource MainBackground}"
+             Shell.NavBarIsVisible="False">
+
+    <Grid>
+        <Grid ColumnDefinitions="{OnIdiom Phone='0, *', Default='360, *'}">
+            <controls:SidebarMenu Grid.Column="0" ActiveTab="Groups" IsVisible="{OnIdiom Phone=False, Default=True}" />
+
+            <ScrollView Grid.Column="1" VerticalScrollBarVisibility="Always">
+                <VerticalStackLayout Padding="{OnIdiom Phone='15', Default='30'}" Spacing="18">
+
+                    <!-- MENU MOBILNE -->
+                    <HorizontalStackLayout HorizontalOptions="End" IsVisible="{OnIdiom Phone=True, Default=False}" Margin="0,10,0,0">
+                        <HorizontalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
+                        </HorizontalStackLayout.GestureRecognizers>
+                        <Label Text="☰" TextColor="{StaticResource TextMain}" FontSize="28" VerticalOptions="Center"/>
+                        <Label Text="Menu" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" Margin="5,0,0,0" FontSize="18"/>
+                    </HorizontalStackLayout>
+
+                    <!-- GÓRNY PASEK: POWRÓT + ROLA + AKCJE -->
+                    <Grid ColumnDefinitions="Auto, *, Auto" VerticalOptions="Center">
+
+                        <!-- PRZYCISK POWROTU + ROLA -->
+                        <HorizontalStackLayout Grid.Column="0" Grid.ColumnSpan="2" Spacing="15" VerticalOptions="Center">
+                            <HorizontalStackLayout.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                            </HorizontalStackLayout.GestureRecognizers>
+                            <Label Text="← Powrót" TextColor="{StaticResource TextSubtle}" FontSize="16" VerticalOptions="Center" FontAttributes="Bold"/>
+                            <BoxView WidthRequest="1" HeightRequest="20" Color="{StaticResource Border}" VerticalOptions="Center" Margin="10,0"/>
+                            <Label Text="{Binding RoleSubtitle}" TextColor="{StaticResource TextMain}" FontSize="{OnIdiom Phone=20, Default=24}" FontAttributes="Bold" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+
+                        <!-- AKCJE ZARZĄDZANIA -->
+                        <HorizontalStackLayout Grid.Column="2" Spacing="20" VerticalOptions="Center"
+                                               IsVisible="{Binding IsAdminOrFounder}">
+                            <HorizontalStackLayout Spacing="6">
+                                <HorizontalStackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ManageSettlementCommand}" />
+                                </HorizontalStackLayout.GestureRecognizers>
+                                <Label Text="✎" TextColor="{StaticResource TextMain}" FontSize="18" VerticalOptions="Center"/>
+                                <VerticalStackLayout VerticalOptions="Center">
+                                    <Label Text="Zarządzaj" TextColor="{StaticResource TextMain}" FontSize="10" FontAttributes="Bold"/>
+                                    <Label Text="rozliczeniem" TextColor="{StaticResource TextMain}" FontSize="10" FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+
+                            <HorizontalStackLayout Spacing="6">
+                                <HorizontalStackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ManageMembersCommand}" />
+                                </HorizontalStackLayout.GestureRecognizers>
+                                <Label Text="👥" TextColor="{StaticResource TextMain}" FontSize="18" VerticalOptions="Center"/>
+                                <VerticalStackLayout VerticalOptions="Center">
+                                    <Label Text="Zarządzaj" TextColor="{StaticResource TextMain}" FontSize="10" FontAttributes="Bold"/>
+                                    <Label Text="członkami" TextColor="{StaticResource TextMain}" FontSize="10" FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                        </HorizontalStackLayout>
+                    </Grid>
+
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <!-- SEKCJA CZŁONKÓW GRUPY -->
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <Border StrokeShape="RoundRectangle 24" BackgroundColor="{StaticResource SurfaceDark}"
+                            Padding="0" StrokeThickness="0">
+                        <VerticalStackLayout Spacing="0">
+
+                            <!-- TYTUŁ + WYSZUKIWARKA -->
+                            <Grid Padding="30,24" ColumnDefinitions="*, Auto" ColumnSpacing="20">
+                                <Label Text="{Binding GroupName}"
+                                       FontSize="46" FontAttributes="Bold"
+                                       TextColor="White"
+                                       VerticalOptions="Center" HorizontalOptions="Start"/>
+                                
+                                <Border Grid.Column="1"
+                                        StrokeShape="RoundRectangle 20"
+                                        BackgroundColor="#0A000000"
+                                        StrokeThickness="1" Stroke="#33ffffff"
+                                        WidthRequest="280" HeightRequest="44"
+                                        Padding="15,0" VerticalOptions="Center">
+                                    <Grid ColumnDefinitions="30, *">
+                                        <Label Text="🔍" VerticalOptions="Center" HorizontalOptions="Start" FontSize="14" Opacity="0.5"/>
+                                        <SearchBar Grid.Column="1"
+                                                   Placeholder="Wpisz szukaną osobę..."
+                                                   Text="{Binding MemberSearchText}"
+                                                   TextColor="White"
+                                                   PlaceholderColor="#888"
+                                                   BackgroundColor="Transparent"
+                                                   CancelButtonColor="{StaticResource TextSubtle}"
+                                                   Margin="-10,0,0,0"/>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+
+                            <!-- KARUZELA CZŁONKÓW -->
+                            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="15" Padding="20,0,20,30">
+
+                                <!-- LEWA STRZAŁKA -->
+                                <Border Grid.Column="0"
+                                        HeightRequest="44" WidthRequest="44"
+                                        StrokeShape="RoundRectangle 22"
+                                        StrokeThickness="1" Stroke="{StaticResource Border}"
+                                        BackgroundColor="Transparent" VerticalOptions="Center">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnPrevMemberClicked" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="←" TextColor="{StaticResource TextSubtle}" FontSize="22"
+                                           HorizontalOptions="Center" VerticalOptions="Center" Margin="0,-2,0,0"/>
+                                </Border>
+
+                                <!-- KARTY CZŁONKÓW -->
+                                <CollectionView x:Name="MembersCollectionView"
+                                                Grid.Column="1"
+                                                ItemsSource="{Binding FilteredMembers}"
+                                                HeightRequest="390"
+                                                VerticalOptions="Center">
+                                    <CollectionView.ItemsLayout>
+                                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="16"
+                                                           SnapPointsType="MandatorySingle"
+                                                           SnapPointsAlignment="Center"/>
+                                    </CollectionView.ItemsLayout>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="dto:GroupMemberBalanceDto">
+                                            <!-- KARTA -->
+                                            <Border WidthRequest="320"
+                                                    StrokeShape="RoundRectangle 16"
+                                                    BackgroundColor="#15FFFFFF"
+                                                    StrokeThickness="1" Stroke="#11FFFFFF"
+                                                    Padding="0">
+                                                <VerticalStackLayout>
+                                                    <!-- NAGŁÓWEK IMIENIA -->
+                                                    <Grid Padding="16,14" ColumnDefinitions="Auto, *">
+                                                        <Border Grid.Column="0" HeightRequest="36" WidthRequest="36"
+                                                                StrokeShape="RoundRectangle 18" StrokeThickness="0" BackgroundColor="#22000000" Margin="0,0,12,0">
+                                                            <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
+                                                        </Border>
+                                                        <Label Grid.Column="1" Text="{Binding FullName}"
+                                                               FontSize="18" FontAttributes="Bold"
+                                                               TextColor="White"
+                                                               VerticalOptions="Center"/>
+                                                    </Grid>
+                                                    
+                                                    <!-- LINIA ROZDZIELAJĄCA -->
+                                                    <BoxView HeightRequest="1" Color="#11FFFFFF" />
+
+                                                    <!-- LISTA DŁUGÓW CZŁONKA -->
+                                                    <CollectionView ItemsSource="{Binding Lines}"
+                                                                    HeightRequest="240"
+                                                                    Margin="0" SelectionMode="None">
+                                                        <CollectionView.ItemTemplate>
+                                                            <DataTemplate x:DataType="dto:GroupMemberDebtLineDto">
+                                                                <Grid ColumnDefinitions="42, *, Auto"
+                                                                      ColumnSpacing="12" Padding="16,10">
+                                                                    <!-- IKONA -->
+                                                                    <Border Grid.Column="0"
+                                                                            HeightRequest="36" WidthRequest="36"
+                                                                            StrokeShape="RoundRectangle 18"
+                                                                            BackgroundColor="#22000000"
+                                                                            StrokeThickness="0">
+                                                                        <Label Text="👤" FontSize="16"
+                                                                               HorizontalOptions="Center"
+                                                                               VerticalOptions="Center"/>
+                                                                    </Border>
+                                                                    <!-- NAZWA -->
+                                                                    <Label Grid.Column="1"
+                                                                           Text="{Binding CounterpartyName}"
+                                                                           FontSize="15" FontAttributes="Bold"
+                                                                           TextColor="White"
+                                                                           VerticalOptions="Center"
+                                                                           LineBreakMode="TailTruncation"/>
+                                                                    <!-- KWOTA -->
+                                                                    <Label Grid.Column="2"
+                                                                           Text="{Binding Amount, StringFormat='{0:N2} zł'}"
+                                                                           FontSize="16" FontAttributes="Bold"
+                                                                           VerticalOptions="Center">
+                                                                        <Label.Triggers>
+                                                                            <DataTrigger TargetType="Label"
+                                                                                         Binding="{Binding MemberOwes}"
+                                                                                         Value="True">
+                                                                                <Setter Property="TextColor"
+                                                                                        Value="{StaticResource StatusRed}"/>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger TargetType="Label"
+                                                                                         Binding="{Binding MemberOwes}"
+                                                                                         Value="False">
+                                                                                <Setter Property="TextColor"
+                                                                                        Value="{StaticResource StatusGreen}"/>
+                                                                            </DataTrigger>
+                                                                        </Label.Triggers>
+                                                                    </Label>
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </CollectionView.ItemTemplate>
+                                                    </CollectionView>
+
+                                                    <!-- STOPKA (SUMA) -->
+                                                    <Border BackgroundColor="#22000000" Padding="16,14"
+                                                            StrokeThickness="0">
+                                                        <Label Text="{Binding LinesTotal, StringFormat='Suma: {0:N2} zł'}"
+                                                               FontSize="15" FontAttributes="Bold"
+                                                               TextColor="White"
+                                                               HorizontalOptions="End"/>
+                                                    </Border>
+                                                </VerticalStackLayout>
+                                            </Border>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+
+                                <!-- PRAWA STRZAŁKA -->
+                                <Border Grid.Column="2"
+                                        HeightRequest="44" WidthRequest="44"
+                                        StrokeShape="RoundRectangle 22"
+                                        StrokeThickness="1" Stroke="{StaticResource Border}"
+                                        BackgroundColor="Transparent" VerticalOptions="Center">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnNextMemberClicked" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="→" TextColor="{StaticResource TextSubtle}" FontSize="22"
+                                           HorizontalOptions="Center" VerticalOptions="Center" Margin="0,-2,0,0"/>
+                                </Border>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- PRZYCISK DODAWANIA WYDATKU -->
+                    <Border StrokeShape="RoundRectangle 28" BackgroundColor="#7F00FF" Padding="0"
+                            StrokeThickness="0" HeightRequest="56" WidthRequest="400" HorizontalOptions="Center" Margin="0,10">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding AddExpenseCommand}"/>
+                        </Border.GestureRecognizers>
+                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="10" VerticalOptions="Center">
+                            <Label Text="+" TextColor="White" FontSize="26" VerticalOptions="Center" Margin="0,-4,0,0" FontAttributes="Bold"/>
+                            <Label Text="Dodaj nowe wydatki" TextColor="White" FontAttributes="Bold" FontSize="18" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                    </Border>
+
+                    <!-- ══════════════════════════════════════════ -->
+                    <!-- SEKCJA TRANSAKCJI -->
+                    <!-- ══════════════════════════════════════════ -->
+                    <Border StrokeShape="RoundRectangle 24" BackgroundColor="{StaticResource SurfaceDark}"
+                            Padding="0" StrokeThickness="0" Margin="0,0,0,40">
+                        <VerticalStackLayout Spacing="0">
+
+                            <!-- NAGŁÓWEK TRANSAKCJI -->
+                            <VerticalStackLayout Padding="30,24" Spacing="16">
+                                <Label Text="Lista Transakcji"
+                                       FontSize="28" FontAttributes="Bold"
+                                       TextColor="White"
+                                       HorizontalOptions="Center"/>
+                                <Grid ColumnDefinitions="Auto, *" ColumnSpacing="15">
+                                    <Border Grid.Column="0" BackgroundColor="#15FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 20" HeightRequest="44">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding ToggleTransactionViewCommand}" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="Zmień widok" TextColor="White" FontSize="14" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="Center" Padding="20,0"/>
+                                    </Border>
+                                    
+                                    <Border Grid.Column="1"
+                                            StrokeShape="RoundRectangle 20"
+                                            BackgroundColor="#0A000000"
+                                            StrokeThickness="1" Stroke="#33ffffff"
+                                            HeightRequest="44" Padding="15,0">
+                                        <Grid ColumnDefinitions="30, *">
+                                            <Label Text="🔍" VerticalOptions="Center" HorizontalOptions="Start" FontSize="14" Opacity="0.5"/>
+                                            <SearchBar Grid.Column="1"
+                                                       Placeholder="Wpisz szukaną transakcję..."
+                                                       Text="{Binding TransactionSearchText}"
+                                                       TextColor="White"
+                                                       PlaceholderColor="#888"
+                                                       BackgroundColor="Transparent"
+                                                       CancelButtonColor="{StaticResource TextSubtle}"
+                                                       Margin="-10,0,0,0"/>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </VerticalStackLayout>
+                            
+                            <!-- LINIA ROZDZIELAJĄCA -->
+                            <BoxView HeightRequest="1" Color="#11FFFFFF" Margin="30,0" />
+
+                            <!-- LISTA TRANSAKCJI -->
+                            <CollectionView ItemsSource="{Binding TransactionSections}"
+                                            SelectionMode="None" Margin="0,15,0,30">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:TransactionGroup">
+                                        <VerticalStackLayout Spacing="15" Padding="30,10,30,20">
+                                            <!-- NAGŁÓWEK DATY -->
+                                            <Label Text="{Binding DateHeader}"
+                                                   FontSize="20" FontAttributes="Bold"
+                                                   TextColor="{StaticResource TextSubtle}"
+                                                   HorizontalOptions="Center" Margin="0,5"/>
+                                            <!-- SIATKA WYDATKÓW -->
+                                            <CollectionView ItemsSource="{Binding Children}"
+                                                            SelectionMode="None">
+                                                <CollectionView.ItemsLayout>
+                                                    <GridItemsLayout Orientation="Vertical" Span="2"
+                                                                     HorizontalItemSpacing="15"
+                                                                     VerticalItemSpacing="15"/>
+                                                </CollectionView.ItemsLayout>
+                                                <CollectionView.ItemTemplate>
+                                                    <DataTemplate x:DataType="dto:ExpenseSummaryDto">
+                                                        <Border StrokeShape="RoundRectangle 16"
+                                                                BackgroundColor="#15FFFFFF"
+                                                                StrokeThickness="1" Stroke="#11FFFFFF"
+                                                                Padding="16,12">
+                                                            <Grid ColumnDefinitions="Auto, *, *"
+                                                                  ColumnSpacing="10">
+                                                                <Label Grid.Column="0"
+                                                                       Text="{Binding TotalAmount, StringFormat='{0:N2} zł'}"
+                                                                       FontSize="15" FontAttributes="Bold"
+                                                                       TextColor="White"
+                                                                       VerticalOptions="Center"/>
+                                                                <Label Grid.Column="1"
+                                                                       Text="{Binding PayerName}"
+                                                                       FontSize="13" FontAttributes="Bold"
+                                                                       TextColor="White"
+                                                                       HorizontalOptions="Center"
+                                                                       VerticalOptions="Center"
+                                                                       HorizontalTextAlignment="Center"/>
+                                                                <Label Grid.Column="2"
+                                                                       Text="{Binding Title}"
+                                                                       FontSize="12"
+                                                                       TextColor="{StaticResource TextSubtle}"
+                                                                       HorizontalOptions="End"
+                                                                       VerticalOptions="Center"
+                                                                       HorizontalTextAlignment="End"
+                                                                       LineBreakMode="TailTruncation"/>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </CollectionView.ItemTemplate>
+                                            </CollectionView>
+                                        </VerticalStackLayout>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </Border>
+
+                </VerticalStackLayout>
+            </ScrollView>
+        </Grid>
+
+        <!-- MENU BOCZNE MOBILNE -->
+        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsMenuVisible}"
+              BackgroundColor="#CC121212" ZIndex="100">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
+            </Grid.GestureRecognizers>
+            <controls:SidebarMenu HorizontalOptions="Start" ActiveTab="Groups" WidthRequest="300"/>
+        </Grid>
+
+        <!-- EKRAN ŁADOWANIA -->
+        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsBusy}"
+              BackgroundColor="#CC121212" ZIndex="450">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="16">
+                <ActivityIndicator IsRunning="{Binding IsBusy}" Color="#7C3AED"
+                                   WidthRequest="56" HeightRequest="56" />
+                <Label Text="Wczytywanie grupy…" TextColor="White"
+                       FontAttributes="Bold" FontSize="15" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+
+</ContentPage>

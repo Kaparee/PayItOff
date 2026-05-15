@@ -14,6 +14,7 @@ namespace PayItOff.MauiClient
             Routing.RegisterRoute(nameof(AccountPage), typeof(AccountPage));
             Routing.RegisterRoute(nameof(NotificationsPage), typeof(NotificationsPage));
             Routing.RegisterRoute(nameof(ArchivePage), typeof(ArchivePage));
+            Routing.RegisterRoute(nameof(GroupDetailsPage), typeof(GroupDetailsPage));
         }
     }
 }

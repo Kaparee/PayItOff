@@ -7,16 +7,17 @@
              x:Class="PayItOff.MauiClient.Views.WalletPage"
              BackgroundColor="{StaticResource MainBackground}"
              Shell.NavBarIsVisible="False">
+
     <ContentPage.Resources>
         <converters:InverseBoolConverter x:Key="InverseBool" />
     </ContentPage.Resources>
+
     <Grid>
         <Grid ColumnDefinitions="{OnIdiom Phone='0, *', Default='360, *'}">
             <controls:SidebarMenu Grid.Column="0" ActiveTab="Wallet" IsVisible="{OnIdiom Phone=False, Default=True}" />
             <ScrollView Grid.Column="1" VerticalScrollBarVisibility="Always">
                 <Grid Padding="{OnIdiom Phone='15', Default='30'}" RowDefinitions="Auto, Auto, Auto, Auto, Auto, *, Auto" RowSpacing="20">
 
-                    <!-- Przycisk menu mobilnego -->
                     <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" IsVisible="{OnIdiom Phone=True, Default=False}" Margin="0,10,0,0">
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
@@ -25,7 +26,6 @@
                         <Label Text="Menu" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" Margin="5,0,0,0" FontSize="18"/>
                     </HorizontalStackLayout>
 
-                    <!-- Nagłówek -->
                     <HorizontalStackLayout Grid.Row="1" Spacing="15" VerticalOptions="Center">
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding GoBackCommand}" />
@@ -35,7 +35,6 @@
                         <Label Text="Portfel" TextColor="{StaticResource TextMain}" FontSize="{OnIdiom Phone=24, Default=32}" FontAttributes="Bold" VerticalOptions="Center"/>
                     </HorizontalStackLayout>
 
-                    <!-- SEKCJA KART -->
                     <Grid Grid.Row="2" ColumnDefinitions="*, *, *" ColumnSpacing="15">
                         <Border Grid.Column="0" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="15" StrokeThickness="2" Stroke="Transparent">
                             <Border.Triggers>
@@ -52,6 +51,7 @@
                                 <Label Text="Wszystkie" FontSize="12" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center"/>
                             </VerticalStackLayout>
                         </Border>
+
                         <Border Grid.Column="1" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="15" StrokeThickness="2" Stroke="Transparent">
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border" Binding="{Binding FilterType}" Value="Income">
@@ -67,6 +67,7 @@
                                 <Label Text="Przychody" FontSize="12" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center"/>
                             </VerticalStackLayout>
                         </Border>
+
                         <Border Grid.Column="2" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="15" StrokeThickness="2" Stroke="Transparent">
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border" Binding="{Binding FilterType}" Value="Expense">
@@ -84,37 +85,15 @@
                         </Border>
                     </Grid>
 
-                    <!-- Akcje na górze -->
                     <Grid Grid.Row="3" ColumnDefinitions="*, Auto" ColumnSpacing="15">
-                        <Button Grid.Column="0"
-                                Text="Opłać wydatki"
-                                BackgroundColor="#7F00FF"
-                                TextColor="White"
-                                FontAttributes="Bold"
-                                CornerRadius="10"
-                                HeightRequest="45"
-                                Command="{Binding OpenPaymentPopupCommand}" />
-                        <Button Grid.Column="1"
-                                Text="✖ Usuń filtry"
-                                BackgroundColor="{StaticResource SurfaceDark}"
-                                TextColor="{StaticResource TextMain}"
-                                CornerRadius="10"
-                                HeightRequest="45"
-                                Padding="20,0"
-                                Command="{Binding ClearFiltersCommand}" />
+                        <Button Grid.Column="0" Text="Opłać wydatki" BackgroundColor="#7F00FF" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="45" Command="{Binding OpenPaymentPopupCommand}" />
+                        <Button Grid.Column="1" Text="✖ Usuń filtry" BackgroundColor="{StaticResource SurfaceDark}" TextColor="{StaticResource TextMain}" CornerRadius="10" HeightRequest="45" Padding="20,0" Command="{Binding ClearFiltersCommand}" />
                     </Grid>
 
-                    <!-- Wyszukiwarka transakcji -->
                     <Border Grid.Row="4" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="5" StrokeThickness="0">
-                        <SearchBar Placeholder="Wpisz szukaną frazę..."
-                                   Text="{Binding SearchText}"
-                                   TextColor="{StaticResource TextMain}"
-                                   PlaceholderColor="{StaticResource TextSubtle}"
-                                   BackgroundColor="Transparent"
-                                   CancelButtonColor="{StaticResource TextSubtle}" />
+                        <SearchBar Placeholder="Wpisz szukaną frazę..." Text="{Binding SearchText}" TextColor="{StaticResource TextMain}" PlaceholderColor="{StaticResource TextSubtle}" BackgroundColor="Transparent" CancelButtonColor="{StaticResource TextSubtle}" />
                     </Border>
 
-                    <!-- Lista Długów -->
                     <CollectionView Grid.Row="5" ItemsSource="{Binding Transactions}" SelectionMode="None">
                         <CollectionView.EmptyView>
                             <Grid Padding="40">
@@ -124,10 +103,7 @@
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <ContentView Padding="0,0,0,15">
-                                    <Border BackgroundColor="{StaticResource SurfaceDark}"
-                                        Stroke="{Binding ItemBorderBrush}"
-                                        StrokeThickness="{Binding ItemBorderThickness}"
-                                        StrokeShape="RoundRectangle 10" Padding="0" MinimumHeightRequest="80">
+                                    <Border BackgroundColor="{StaticResource SurfaceDark}" Stroke="{Binding ItemBorderBrush}" StrokeThickness="{Binding ItemBorderThickness}" StrokeShape="RoundRectangle 10" Padding="0" MinimumHeightRequest="80">
                                         <Grid ColumnDefinitions="5, 80, 2*, 2*, 1.5*, 1.5*, Auto" ColumnSpacing="15">
                                             <BoxView Grid.Column="0" BackgroundColor="{Binding StatusColor}" IsVisible="{Binding ShowStatusBlock}"/>
                                             <Border Grid.Column="1" HeightRequest="50" WidthRequest="50" StrokeThickness="0" StrokeShape="RoundRectangle 25" BackgroundColor="#1E232D" HorizontalOptions="Center" VerticalOptions="Center">
@@ -157,18 +133,13 @@
                                             <Grid Grid.Column="6" VerticalOptions="Center" Padding="0,0,15,0">
                                                 <VerticalStackLayout Spacing="5" IsVisible="{Binding ShowAcceptRejectButtons}">
                                                     <Label Text="{Binding Amount, StringFormat='Kwota spłaty: {0:N2} zł'}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource StatusGreen}" HorizontalOptions="End" LineBreakMode="NoWrap"/>
-                                                    <Button Text="Zaakceptuj" HeightRequest="28" FontSize="11" Padding="15,0"
-                                                            BackgroundColor="{StaticResource StatusGreen}" TextColor="White" CornerRadius="10"
-                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WalletViewModel}}, Path=AcceptSettlementCommand}" CommandParameter="{Binding .}"/>
-                                                    <Button Text="Odrzuć" HeightRequest="28" FontSize="11" Padding="15,0"
-                                                            BackgroundColor="{StaticResource StatusRed}" TextColor="White" CornerRadius="10"
-                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WalletViewModel}}, Path=RejectSettlementCommand}" CommandParameter="{Binding .}"/>
+                                                    <Button Text="Zaakceptuj" HeightRequest="28" FontSize="11" Padding="15,0" BackgroundColor="{StaticResource StatusGreen}" TextColor="White" CornerRadius="10" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WalletViewModel}}, Path=AcceptSettlementCommand}" CommandParameter="{Binding .}"/>
+                                                    <Button Text="Odrzuć" HeightRequest="28" FontSize="11" Padding="15,0" BackgroundColor="{StaticResource StatusRed}" TextColor="White" CornerRadius="10" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WalletViewModel}}, Path=RejectSettlementCommand}" CommandParameter="{Binding .}"/>
                                                 </VerticalStackLayout>
                                                 <VerticalStackLayout Spacing="0" IsVisible="{Binding ShowNormalAmount}">
                                                     <Label Text="Kwota" FontSize="12" TextColor="{StaticResource TextMain}" FontAttributes="Bold" HorizontalOptions="End"/>
                                                     <Label Text="{Binding Amount, StringFormat='{0:N2} zł'}" FontSize="16" FontAttributes="Bold" TextColor="{Binding StatusColor}" Margin="0,2,0,0" HorizontalOptions="End"/>
-                                                    <Button Text="Przypomnij" HeightRequest="20" FontSize="9" Padding="10,0" BackgroundColor="{StaticResource StatusGreen}" TextColor="White" CornerRadius="10" Margin="0,5,0,0" IsVisible="{Binding ShowRemindButton}"
-                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WalletViewModel}}, Path=RemindDebtCommand}" CommandParameter="{Binding .}"/>
+                                                    <Button Text="Przypomnij" HeightRequest="20" FontSize="9" Padding="10,0" BackgroundColor="{StaticResource StatusGreen}" TextColor="White" CornerRadius="10" Margin="0,5,0,0" IsVisible="{Binding ShowRemindButton}" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WalletViewModel}}, Path=RemindDebtCommand}" CommandParameter="{Binding .}"/>
                                                 </VerticalStackLayout>
                                             </Grid>
                                         </Grid>
@@ -178,7 +149,6 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
-                    <!-- Paginacja -->
                     <Border Grid.Row="6" BackgroundColor="{StaticResource SurfaceDark}" StrokeShape="RoundRectangle 10" Padding="10" Margin="0,10,0,0" VerticalOptions="End">
                         <Grid ColumnDefinitions="Auto, *, Auto">
                             <Button Grid.Column="0" Text="← Poprzednia" Command="{Binding PreviousPageCommand}" BackgroundColor="#1E232D" TextColor="White" FontSize="12" HeightRequest="40"/>
@@ -196,18 +166,10 @@
         </Grid>
 
         <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsPaymentOverlayVisible}" ZIndex="600" BackgroundColor="#E6121212">
-            <Border StrokeShape="RoundRectangle 16"
-                    BackgroundColor="{StaticResource SurfaceDark}"
-                    Stroke="{StaticResource Border}"
-                    StrokeThickness="1"
-                    Padding="20"
-                    VerticalOptions="Center"
-                    HorizontalOptions="Center"
-                    MaximumWidthRequest="480"
-                    Margin="20">
+            <Border StrokeShape="RoundRectangle 16" BackgroundColor="{StaticResource SurfaceDark}" Stroke="{StaticResource Border}" StrokeThickness="1" Padding="20" VerticalOptions="Center" HorizontalOptions="Center" MaximumWidthRequest="480" Margin="20">
                 <VerticalStackLayout Spacing="14">
                     <Label Text="Opłać dług" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource TextMain}"/>
-                    <Label Text="Domyślnie: saldo netto (jak na pulpicie) — serwer rozłoży kwotę na grupy i rozliczy wzajemności. Najpierw wybierz tryb (jeśli dostępny), potem osobę lub grupę." FontSize="12" TextColor="{StaticResource TextSubtle}" LineBreakMode="WordWrap"/>
+                    <Label Text="Domyślnie: saldo netto (jak na Menu Głównym) — serwer rozłoży kwotę na grupy i rozliczy wszystko. Najpierw wybierz tryb spłaty, potem osobę lub grupę." FontSize="12" TextColor="{StaticResource TextSubtle}" LineBreakMode="WordWrap"/>
 
                     <HorizontalStackLayout Spacing="12" VerticalOptions="Center" IsVisible="{Binding CanSwitchToGrossPay}">
                         <Label Text="Spłata wg konkretnej grupy (brutto)" FontSize="14" TextColor="{StaticResource TextMain}" VerticalOptions="Center"/>
@@ -217,40 +179,58 @@
                     <VerticalStackLayout Spacing="10" IsVisible="{Binding IsNetPayMode}">
                         <Label Text="Wybierz wierzyciela (saldo netto)" FontSize="12" TextColor="{StaticResource TextSubtle}"/>
                         <Border StrokeShape="RoundRectangle 8" BackgroundColor="#1E232D" StrokeThickness="0" Padding="0">
-                            <SearchBar Placeholder="Szukaj po imieniu i nazwisku..."
-                                       Text="{Binding SearchDebtText}"
-                                       TextColor="{StaticResource TextMain}"
-                                       PlaceholderColor="{StaticResource TextSubtle}"
-                                       BackgroundColor="Transparent"
-                                       CancelButtonColor="{StaticResource TextSubtle}"/>
+                            <SearchBar Placeholder="Szukaj po imieniu i nazwisku..." Text="{Binding SearchDebtText}" TextColor="{StaticResource TextMain}" PlaceholderColor="{StaticResource TextSubtle}" BackgroundColor="Transparent" CancelButtonColor="{StaticResource TextSubtle}"/>
                         </Border>
                         <Border StrokeShape="RoundRectangle 8" BackgroundColor="Transparent" StrokeThickness="0" HeightRequest="220" Margin="0,5,0,5">
-                            <CollectionView ItemsSource="{Binding FilteredNetPayCreditors}"
-                                            SelectionMode="Single"
-                                            SelectedItem="{Binding SelectedNetPayCreditor}">
+                            <CollectionView ItemsSource="{Binding FilteredNetPayCreditors}" SelectionMode="Single" SelectedItem="{Binding SelectedNetPayCreditor}">
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate x:DataType="vm:DebtDisplayItem">
                                         <ContentView Padding="0,0,0,10">
-                                            <Border StrokeShape="RoundRectangle 12" StrokeThickness="2" Padding="15" BackgroundColor="#251E38">
+                                            <VisualStateManager.VisualStateGroups>
+                                                <VisualStateGroup Name="CommonStates">
+                                                    <VisualState Name="Normal" />
+                                                    <VisualState Name="Selected">
+                                                        <VisualState.Setters>
+                                                            <Setter Property="BackgroundColor" Value="Transparent" />
+                                                        </VisualState.Setters>
+                                                    </VisualState>
+                                                    <VisualState Name="PointerOver">
+                                                        <VisualState.Setters>
+                                                            <Setter Property="BackgroundColor" Value="Transparent" />
+                                                        </VisualState.Setters>
+                                                    </VisualState>
+                                                </VisualStateGroup>
+                                            </VisualStateManager.VisualStateGroups>
+
+                                            <Border StrokeShape="RoundRectangle 12" StrokeThickness="2" Padding="15" BackgroundColor="{StaticResource SurfaceDark}">
                                                 <VisualStateManager.VisualStateGroups>
                                                     <VisualStateGroup Name="CommonStates">
                                                         <VisualState Name="Normal">
                                                             <VisualState.Setters>
-                                                                <Setter Property="BackgroundColor" Value="#251E38" />
+                                                                <Setter Property="BackgroundColor" Value="{StaticResource SurfaceDark}" />
+                                                                <Setter Property="Stroke" Value="Transparent" />
+                                                            </VisualState.Setters>
+                                                        </VisualState>
+                                                        <VisualState Name="PointerOver">
+                                                            <VisualState.Setters>
+                                                                <Setter Property="BackgroundColor" Value="{StaticResource SurfaceLight}" />
                                                                 <Setter Property="Stroke" Value="Transparent" />
                                                             </VisualState.Setters>
                                                         </VisualState>
                                                         <VisualState Name="Selected">
                                                             <VisualState.Setters>
-                                                                <Setter Property="BackgroundColor" Value="#312252" />
-                                                                <Setter Property="Stroke" Value="#7F00FF" />
+                                                                <Setter Property="BackgroundColor" Value="{StaticResource SurfaceLight}" />
+                                                                <Setter Property="Stroke" Value="Transparent" />
                                                             </VisualState.Setters>
                                                         </VisualState>
                                                     </VisualStateGroup>
                                                 </VisualStateManager.VisualStateGroups>
                                                 <Grid ColumnDefinitions="Auto, *, Auto">
                                                     <Border Grid.Column="0" WidthRequest="40" HeightRequest="40" StrokeShape="RoundRectangle 20" BackgroundColor="#1E232D" StrokeThickness="0" Margin="0,0,15,0" VerticalOptions="Center">
-                                                        <Label Text="👤" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" FontSize="20"/>
+                                                        <Grid>
+                                                            <Path Aspect="Uniform" WidthRequest="26" HeightRequest="26" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444" Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                                            <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
+                                                        </Grid>
                                                     </Border>
                                                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                                                         <Label Text="{Binding FullName}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="14"/>
@@ -266,44 +246,61 @@
                         </Border>
                     </VerticalStackLayout>
 
-                    <!-- Wg konkretnej grupy (brutto) -->
                     <VerticalStackLayout Spacing="10" IsVisible="{Binding IsNetPayMode, Converter={StaticResource InverseBool}}">
                         <Label Text="Wybierz dług (grupa)" FontSize="12" TextColor="{StaticResource TextSubtle}"/>
                         <Border StrokeShape="RoundRectangle 8" BackgroundColor="#1E232D" StrokeThickness="0" Padding="0">
-                            <SearchBar Placeholder="Szukaj osoby lub grupy..."
-                                       Text="{Binding SearchDebtText}"
-                                       TextColor="{StaticResource TextMain}"
-                                       PlaceholderColor="{StaticResource TextSubtle}"
-                                       BackgroundColor="Transparent"
-                                       CancelButtonColor="{StaticResource TextSubtle}"/>
+                            <SearchBar Placeholder="Szukaj osoby lub grupy..." Text="{Binding SearchDebtText}" TextColor="{StaticResource TextMain}" PlaceholderColor="{StaticResource TextSubtle}" BackgroundColor="Transparent" CancelButtonColor="{StaticResource TextSubtle}"/>
                         </Border>
                         <Border StrokeShape="RoundRectangle 8" BackgroundColor="Transparent" StrokeThickness="0" HeightRequest="220" Margin="0,5,0,5">
-                            <CollectionView ItemsSource="{Binding FilteredPayableDebtOptions}"
-                                            SelectionMode="Single"
-                                            SelectedItem="{Binding SelectedPayableDebtOption}">
+                            <CollectionView ItemsSource="{Binding FilteredPayableDebtOptions}" SelectionMode="Single" SelectedItem="{Binding SelectedPayableDebtOption}">
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate>
                                         <ContentView Padding="0,0,0,10">
-                                            <Border StrokeShape="RoundRectangle 12" StrokeThickness="2" Padding="15">
+                                            <VisualStateManager.VisualStateGroups>
+                                                <VisualStateGroup Name="CommonStates">
+                                                    <VisualState Name="Normal" />
+                                                    <VisualState Name="Selected">
+                                                        <VisualState.Setters>
+                                                            <Setter Property="BackgroundColor" Value="Transparent" />
+                                                        </VisualState.Setters>
+                                                    </VisualState>
+                                                    <VisualState Name="PointerOver">
+                                                        <VisualState.Setters>
+                                                            <Setter Property="BackgroundColor" Value="Transparent" />
+                                                        </VisualState.Setters>
+                                                    </VisualState>
+                                                </VisualStateGroup>
+                                            </VisualStateManager.VisualStateGroups>
+
+                                            <Border StrokeShape="RoundRectangle 12" StrokeThickness="2" Padding="15" BackgroundColor="{StaticResource SurfaceDark}">
                                                 <VisualStateManager.VisualStateGroups>
                                                     <VisualStateGroup Name="CommonStates">
                                                         <VisualState Name="Normal">
                                                             <VisualState.Setters>
-                                                                <Setter Property="BackgroundColor" Value="#251E38" />
+                                                                <Setter Property="BackgroundColor" Value="{StaticResource SurfaceDark}" />
+                                                                <Setter Property="Stroke" Value="Transparent" />
+                                                            </VisualState.Setters>
+                                                        </VisualState>
+                                                        <VisualState Name="PointerOver">
+                                                            <VisualState.Setters>
+                                                                <Setter Property="BackgroundColor" Value="{StaticResource SurfaceLight}" />
                                                                 <Setter Property="Stroke" Value="Transparent" />
                                                             </VisualState.Setters>
                                                         </VisualState>
                                                         <VisualState Name="Selected">
                                                             <VisualState.Setters>
-                                                                <Setter Property="BackgroundColor" Value="#312252" />
-                                                                <Setter Property="Stroke" Value="#7F00FF" />
+                                                                <Setter Property="BackgroundColor" Value="{StaticResource SurfaceLight}" />
+                                                                <Setter Property="Stroke" Value="Transparent" />
                                                             </VisualState.Setters>
                                                         </VisualState>
                                                     </VisualStateGroup>
                                                 </VisualStateManager.VisualStateGroups>
                                                 <Grid ColumnDefinitions="Auto, *, Auto">
                                                     <Border Grid.Column="0" WidthRequest="40" HeightRequest="40" StrokeShape="RoundRectangle 20" BackgroundColor="#1E232D" StrokeThickness="0" Margin="0,0,15,0" VerticalOptions="Center">
-                                                        <Label Text="👤" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" FontSize="20"/>
+                                                        <Grid>
+                                                            <Path Aspect="Uniform" WidthRequest="26" HeightRequest="26" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444" Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                                            <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
+                                                        </Grid>
                                                     </Border>
                                                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                                                         <Label Text="{Binding CreditorName, StringFormat='{0}'}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="14"/>

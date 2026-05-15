@@ -11,5 +11,6 @@ namespace PayItOff.Application.Interfaces
         Task EditGroupInfoAsync(int userId, EditGroupInfoRequest request, IFormFile? avatar);
         Task DeleteGroupAsync(int userId, DeleteGroupRequest request);  // TU MUSZE DODAĆ WALIDACJE DLA SPRAWDZENIA CZY "BUDŻET" KONTA JEST RÓWNY ZERO
         Task<List<ActiveGroupsDisplayResponse>> GetTop4UserActiveGroupsAsync(int userId);
+        Task<GroupDetailsResponse> GetGroupDetailsAsync(int groupId, int userId);
     }
 }

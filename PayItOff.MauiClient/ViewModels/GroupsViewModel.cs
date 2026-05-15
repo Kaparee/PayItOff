@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using PayItOff.MauiClient.Services;
 using PayItOff.Shared.Responses;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 
 namespace PayItOff.MauiClient.ViewModels;
 
@@ -169,4 +170,10 @@ public partial class GroupsViewModel : BaseViewModel
             await Shell.Current.DisplayAlertAsync("Błąd", "Nie udało się zmienić statusu ulubionych.", "OK");
         }
     }
+
+    public ICommand NavigateToGroupDetailsCommand => new Command<GroupInfoResponse>(async (group) =>
+    {
+        if (group == null) return;
+        await Shell.Current.GoToAsync($"//GroupDetailsPage?groupId={group.Id}");
+    });
 }

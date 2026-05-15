@@ -66,4 +66,10 @@
         Title="Wallet"
         ContentTemplate="{DataTemplate views:WalletPage}"
         Route="WalletPage"/>
+
+    <!-- Strona Grupy -->
+    <ShellContent
+        Title="GroupDetails"
+        ContentTemplate="{DataTemplate views:GroupDetailsPage}"
+        Route="GroupDetailsPage"/>
 </Shell>

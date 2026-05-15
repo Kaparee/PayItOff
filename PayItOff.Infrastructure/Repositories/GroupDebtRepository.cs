@@ -229,4 +229,13 @@ public class GroupDebtRepository : IGroupDebtRepository
                     || (gd.DebtorId == userId2 && gd.CreditorId == userId1)))
             .ToListAsync();
     }
+
+    public async Task<List<GroupDebt>> GetGroupDebtsByGroupIdAsync(int groupId)
+    {
+        return await _context.GroupDebts
+            .Include(gd => gd.Debtor)
+            .Include(gd => gd.Creditor)
+            .Where(gd => gd.GroupId == groupId && gd.Amount > 0)
+            .ToListAsync();
+    }
 }

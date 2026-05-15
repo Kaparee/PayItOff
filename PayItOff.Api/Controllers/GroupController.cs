@@ -31,6 +31,13 @@ public class GroupController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("{groupId}/details")]
+    public async Task<ActionResult<GroupDetailsResponse>> GetGroupDetails(int groupId)
+    {
+        var response = await _groupService.GetGroupDetailsAsync(groupId, GetUserId());
+        return Ok(response);
+    }
+
     [HttpPost("create")]
     public async Task<IActionResult> Create([FromForm] CreateGroupRequest request, IFormFile? avatar = null)
     {

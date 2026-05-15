@@ -42,6 +42,7 @@ namespace PayItOff.MauiClient
             builder.Services.AddTransient<GroupsViewModel>();
             builder.Services.AddTransient<NotificationsViewModel>();
             builder.Services.AddTransient<WalletViewModel>();
+            builder.Services.AddTransient<GroupDetailsViewModel>();
 
             // Views
             builder.Services.AddTransient<RegisterPage>();
@@ -53,6 +54,7 @@ namespace PayItOff.MauiClient
             builder.Services.AddTransient<GroupsPage>();
             builder.Services.AddTransient<NotificationsPage>();
             builder.Services.AddTransient<WalletPage>();
+            builder.Services.AddTransient<GroupDetailsPage>();
 
             return builder.Build();
         }

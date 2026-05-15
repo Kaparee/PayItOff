@@ -45,8 +45,8 @@
                                         <DataTemplate>
                                             <ContentView Padding="0,0,0,5">
                                                 <ContentView.GestureRecognizers>
-                                                    <TapGestureRecognizer 
-                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.NavigateToPersonCommand}" 
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.NavigateToPersonCommand}"
                                                         CommandParameter="{Binding .}" />
                                                 </ContentView.GestureRecognizers>
                                                 <Border BackgroundColor="{StaticResource MainBackground}" Padding="15,15" StrokeThickness="0">
@@ -90,8 +90,8 @@
                                         <DataTemplate>
                                             <ContentView Padding="0,0,0,5">
                                                 <ContentView.GestureRecognizers>
-                                                    <TapGestureRecognizer 
-                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.NavigateToPersonCommand}" 
+                                                    <TapGestureRecognizer
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.NavigateToPersonCommand}"
                                                             CommandParameter="{Binding .}" />
                                                 </ContentView.GestureRecognizers>
                                                 <Border BackgroundColor="{StaticResource MainBackground}" Padding="15,15" StrokeThickness="0">
@@ -162,6 +162,11 @@
                                         <DataTemplate>
                                             <ContentView Padding="0,0,5,0">
                                                 <Border StrokeShape="RoundRectangle 20" BackgroundColor="{StaticResource MainBackground}" Padding="10" StrokeThickness="0" WidthRequest="150" HeightRequest="180">
+                                                    <Border.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=NavigateToGroupDetailsCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                                    </Border.GestureRecognizers>
                                                     <VerticalStackLayout Spacing="15" VerticalOptions="Center" HorizontalOptions="Center">
                                                         <Border HeightRequest="70" WidthRequest="70" StrokeShape="RoundRectangle 35" StrokeThickness="0" HorizontalOptions="Center" BackgroundColor="#1E232D">
                                                             <Grid>

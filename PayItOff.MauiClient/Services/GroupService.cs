@@ -19,22 +19,27 @@ public class GroupService
         };
     }
 
+    public async Task<GroupDetailsResponse?> GetGroupDetails(int groupId)
+    {
+        var response = await _httpClient.GetAsync($"Group/{groupId}/details");
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<GroupDetailsResponse>(_options);
+        }
+        return null;
+    }
+
     public async Task<List<GroupInfoResponse>> GetUserGroups()
     {
         var response = await _httpClient.GetAsync("Group/groups");
-
-        if (response.IsSuccessStatusCode)
-        {
-            return await response.Content.ReadFromJsonAsync<List<GroupInfoResponse>>(_options) ?? [];
-        }
-
-        return [];
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<List<GroupInfoResponse>>(_options) ?? []
+            : [];
     }
 
     public async Task<bool> CreateGroup(string groupName, Stream? avatarStream = null, string? fileName = null)
     {
         using var content = new MultipartFormDataContent();
-
         content.Add(new StringContent(groupName), "Name");
 
         if (avatarStream != null && !string.IsNullOrEmpty(fileName))
@@ -45,26 +50,20 @@ public class GroupService
         }
 
         var response = await _httpClient.PostAsync("Group/create", content);
-
         return response.IsSuccessStatusCode;
     }
 
     public async Task<bool> SetGroupFavorite(int groupId)
     {
         var response = await _httpClient.PatchAsync($"GroupMember/{groupId}/set-fav", null);
-
         return response.IsSuccessStatusCode;
     }
 
     public async Task<List<ActiveGroupsDisplayResponse>> Get4ActiveGroups()
     {
         var response = await _httpClient.GetAsync("Group/last-active-groups");
-
-        if (response.IsSuccessStatusCode)
-        {
-            return await response.Content.ReadFromJsonAsync<List<ActiveGroupsDisplayResponse>>(_options) ?? [];
-        }
-
-        return [];
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<List<ActiveGroupsDisplayResponse>>(_options) ?? []
+            : [];
     }
 }
