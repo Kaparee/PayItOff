@@ -38,6 +38,18 @@ public class GroupDebtRepository : IGroupDebtRepository
             .FirstOrDefaultAsync();
     }
 
+    public void ApplyDirectDebtReduction(GroupDebt debt, decimal reduction)
+    {
+        if (reduction <= 0) return;
+
+        debt.DecreaseAmount(reduction);
+
+        if (debt.Amount <= 0)
+            _context.GroupDebts.Remove(debt);
+        else
+            _context.GroupDebts.Update(debt);
+    }
+
     public async Task ApplyDebtChangeAsync(Group group, User debtor, User creditor, decimal amountChange)
     {
         if (amountChange == 0) return;

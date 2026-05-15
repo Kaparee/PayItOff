@@ -37,4 +37,25 @@ public class SettlementRepository : ISettlementRepository
             && s.ReceiverId == receiverId
             && s.GroupId == groupId
             && s.Status == SettlementStatus.Pending);
+
+    public async Task<HashSet<(int SenderId, int ReceiverId, int GroupId)>> GetPendingSettlementKeysForUserPairInGroupsAsync(
+        int userId1,
+        int userId2,
+        IReadOnlyCollection<int> groupIds)
+    {
+        if (groupIds.Count == 0)
+            return new HashSet<(int SenderId, int ReceiverId, int GroupId)>();
+
+        var rows = await _context.Settlements
+            .AsNoTracking()
+            .Where(s => s.Status == SettlementStatus.Pending)
+            .Where(s => groupIds.Contains(s.GroupId))
+            .Where(s =>
+                (s.SenderId == userId1 && s.ReceiverId == userId2)
+                || (s.SenderId == userId2 && s.ReceiverId == userId1))
+            .Select(s => new { s.SenderId, s.ReceiverId, s.GroupId })
+            .ToListAsync();
+
+        return rows.Select(r => (r.SenderId, r.ReceiverId, r.GroupId)).ToHashSet();
+    }
 }

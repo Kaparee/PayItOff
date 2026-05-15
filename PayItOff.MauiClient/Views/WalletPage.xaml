@@ -195,7 +195,6 @@
             </ScrollView>
         </Grid>
 
-        <!-- Nakładka: okno spłaty (dłużnik) -->
         <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsPaymentOverlayVisible}" ZIndex="600" BackgroundColor="#E6121212">
             <Border StrokeShape="RoundRectangle 16"
                     BackgroundColor="{StaticResource SurfaceDark}"
@@ -215,7 +214,6 @@
                         <Switch IsToggled="{Binding IsNetPayMode, Converter={StaticResource InverseBool}, Mode=TwoWay}" OnColor="#7F00FF" ThumbColor="White" VerticalOptions="Center"/>
                     </HorizontalStackLayout>
 
-                    <!-- Wg salda netto (wszystkie grupy z osobą) — domyślnie -->
                     <VerticalStackLayout Spacing="10" IsVisible="{Binding IsNetPayMode}">
                         <Label Text="Wybierz wierzyciela (saldo netto)" FontSize="12" TextColor="{StaticResource TextSubtle}"/>
                         <Border StrokeShape="RoundRectangle 8" BackgroundColor="#1E232D" StrokeThickness="0" Padding="0">
@@ -380,7 +378,7 @@
             <controls:SidebarMenu HorizontalOptions="Start" ActiveTab="Wallet" WidthRequest="300"/>
         </Grid>
 
-        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#CC121212" ZIndex="999">
+        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#CC121212" ZIndex="450">
             <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="20">
                 <ActivityIndicator IsRunning="{Binding IsBusy}" Color="#7F00FF" WidthRequest="60" HeightRequest="60" />
                 <Label Text="Pobieranie transakcji..." TextColor="White" FontAttributes="Bold" FontSize="16" HorizontalOptions="Center" />

@@ -1,16 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Maui.Controls;
 using PayItOff.MauiClient.Services;
 using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace PayItOff.MauiClient.ViewModels;
 
@@ -35,7 +29,7 @@ public partial class WalletPersonUiModel : ObservableObject
     public bool ShowAcceptRejectButtons => IsSettlement && IsIncome && IsPending;
     public bool ShowNormalAmount => !ShowAcceptRejectButtons;
 
-    public string StatusColor => IsIncome ? "#00FF7F" : "#FF4500";
+    public string StatusColor => IsIncome ? "#10B981" : "#EF4444";
     public bool ShowRemindButton => !IsSettlement && IsIncome && CanSendDebtReminder;
 
     public Microsoft.Maui.Controls.Brush ItemBorderBrush
@@ -49,8 +43,8 @@ public partial class WalletPersonUiModel : ObservableObject
                 return new Microsoft.Maui.Controls.SolidColorBrush(Microsoft.Maui.Graphics.Colors.Black);
 
             return IsIncome
-                ? new Microsoft.Maui.Controls.SolidColorBrush(Microsoft.Maui.Graphics.Color.FromArgb("#00FF7F"))
-                : new Microsoft.Maui.Controls.SolidColorBrush(Microsoft.Maui.Graphics.Color.FromArgb("#FF4500"));
+                ? new Microsoft.Maui.Controls.SolidColorBrush(Microsoft.Maui.Graphics.Color.FromArgb("#10B981"))
+                : new Microsoft.Maui.Controls.SolidColorBrush(Microsoft.Maui.Graphics.Color.FromArgb("#EF4444"));
         }
     }
 
