@@ -15,4 +15,5 @@ public interface IGroupDebtRepository
     Task<GroupDebt?> GetSpecificDebtAsync(int debtorId, int creditorId, int groupId);
 
     Task<List<(int GroupId, string GroupName, int CreditorId, string CreditorName, string CreditorSurname, decimal Amount)>> GetOpenDebtLinesForDebtorAsync(int debtorId);
+    Task<List<GroupDebt>> GetBilateralActiveDebtsBetweenUsersAsync(int userId1, int userId2);
 }

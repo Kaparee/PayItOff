@@ -107,6 +107,35 @@ public class SettlementService
         }
     }
 
+    public async Task<(bool Ok, PayNetDebtResponse? Result, string? Error)> CreateNetDebtSettlementsAsync(PayNetDebtRequest request)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync("Settlement/create-net-pay", request);
+            if (response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadFromJsonAsync<PayNetDebtResponse>();
+                return (true, body, null);
+            }
+
+            var raw = await response.Content.ReadAsStringAsync();
+            try
+            {
+                using var doc = JsonDocument.Parse(raw);
+                if (doc.RootElement.TryGetProperty("Error", out var err))
+                    return (false, null, err.GetString());
+            }
+            catch { }
+
+            return (false, null, "Nie udało się utworzyć spłaty netto.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating net settlements: {ex.Message}");
+            return (false, null, ex.Message);
+        }
+    }
+
     public async Task<List<PayableDebtOptionResponse>?> GetPayableDebtOptionsAsync()
     {
         try
@@ -145,6 +174,32 @@ public class SettlementService
         {
             Console.WriteLine($"Error rejecting settlement: {ex.Message}");
             return false;
+        }
+    }
+
+    public async Task<(bool Ok, string? ErrorMessage)> CompensateDebtsAsync(CompensateDebtsRequest request)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync("Settlement/compensate", request);
+            if (response.IsSuccessStatusCode)
+                return (true, null);
+
+            var raw = await response.Content.ReadAsStringAsync();
+            try
+            {
+                using var doc = JsonDocument.Parse(raw);
+                if (doc.RootElement.TryGetProperty("Error", out var err))
+                    return (false, err.GetString());
+            }
+            catch { }
+
+            return (false, "Nie udało się rozliczyć wzajemnych długów.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error compensating debts: {ex.Message}");
+            return (false, ex.Message);
         }
     }
 

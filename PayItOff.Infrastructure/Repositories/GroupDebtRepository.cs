@@ -42,6 +42,13 @@ public class GroupDebtRepository : IGroupDebtRepository
     {
         if (amountChange == 0) return;
 
+        if (amountChange < 0)
+        {
+            var forward = await GetDebtAsync(group.Id, debtor.Id, creditor.Id);
+            if (forward is null || forward.Amount + amountChange < 0)
+                throw new InvalidOperationException("Niewystarczające saldo długu do zmniejszenia (kwota większa niż zapisany dług).");
+        }
+
         var directDebt = await GetDebtAsync(group.Id, debtor.Id, creditor.Id);
 
         if (directDebt != null)
@@ -197,5 +204,17 @@ public class GroupDebtRepository : IGroupDebtRepository
             .ToListAsync();
 
         return rows.ConvertAll(x => (x.GroupId, x.GroupName, x.CreditorId, x.CreditorName, x.CreditorSurname, x.Amount));
+    }
+
+    public async Task<List<GroupDebt>> GetBilateralActiveDebtsBetweenUsersAsync(int userId1, int userId2)
+    {
+        return await _context.GroupDebts
+            .Include(gd => gd.Group)
+            .Include(gd => gd.Debtor)
+            .Include(gd => gd.Creditor)
+            .Where(gd => gd.Amount > 0
+                && ((gd.DebtorId == userId1 && gd.CreditorId == userId2)
+                    || (gd.DebtorId == userId2 && gd.CreditorId == userId1)))
+            .ToListAsync();
     }
 }

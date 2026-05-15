@@ -1,7 +1,9 @@
-﻿public class CreateSettlementRequest
+﻿namespace PayItOff.Shared.Requests
 {
-    public required int ReceiverId { get; set; }
-    public required int GroupId { get; set; }
-    public required decimal Amount { get; set; }
-    public string? Description { get; set; }
+    public class CreateSettlementRequest
+    {
+        public int GroupId { get; set; }
+        public int ReceiverId { get; set; }
+        public decimal Amount { get; set; }
+    }
 }

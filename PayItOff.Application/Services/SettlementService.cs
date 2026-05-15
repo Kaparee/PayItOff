@@ -139,7 +139,6 @@ public class SettlementService : ISettlementService
                     OtherAvatarUrl = $"{baseUrl}/avatars/{otherUser.AvatarUrl ?? "default-user-avatar.png"}",
                     IsSettlement = false,
                     Status = "Confirmed",
-                    SettlementBorderColor = string.Empty,
                     CanSendDebtReminder = false
                 };
             }).ToList();
@@ -172,12 +171,6 @@ public class SettlementService : ISettlementService
             if (otherUser.Id == userId)
                 throw new InvalidOperationException("Nie udało się ustalić drugiej strony spłaty.");
 
-            string borderColor = string.Empty;
-            if (s.Status == SettlementStatus.Pending)
-                borderColor = amISender ? "#FF4500" : "#00FF7F";
-            else if (s.Status == SettlementStatus.Rejected && amISender)
-                borderColor = "#000000";
-
             return new UserDebtComponentResponse
             {
                 ExpenseId = s.Id,
@@ -193,7 +186,6 @@ public class SettlementService : ISettlementService
                 OtherAvatarUrl = $"{baseUrl}/avatars/{otherUser.AvatarUrl ?? "default-user-avatar.png"}",
                 IsSettlement = true,
                 Status = s.Status.ToString(),
-                SettlementBorderColor = borderColor,
                 CanSendDebtReminder = false
             };
         }).ToList();
@@ -245,33 +237,43 @@ public class SettlementService : ISettlementService
         return list;
     }
 
-    public async Task CreateSettlementAsync(int userId, CreateSettlementRequest request)
+    public async Task<int> CreateSettlementAsync(int userId, CreateSettlementRequest request)
     {
-        if (request.Amount <= 0)
-            throw new SettlementOperationException("Kwota spłaty musi być większa od zera.");
+        if (request.Amount <= 0) throw new SettlementOperationException("Kwota musi być większa od zera.");
 
-        var sender = await _userRepository.GetUserByIdAsync(userId) ?? throw new UserNotFoundException();
-        var receiver = await _userRepository.GetUserByIdAsync(request.ReceiverId) ?? throw new UserNotFoundException();
-        var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId) ?? throw new SettlementOperationException("Nie znaleziono grupy.");
+        var groupInfo = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId) ?? throw new SettlementOperationException("Nie znaleziono grupy.");
 
-        if (await _groupMemberRepository.GetMemberAsync(request.GroupId, userId) is null)
-            throw new SettlementOperationException("Nie należysz do tej grupy.");
+        var groupMember = await _groupMemberRepository.GetMemberAsync(userId, request.GroupId);
+        if (groupMember == null) throw new UserNotFoundException();
 
-        if (await _groupMemberRepository.GetMemberAsync(request.GroupId, request.ReceiverId) is null)
-            throw new SettlementOperationException("Odbiorca nie należy do tej grupy.");
+        var creditorMember = await _groupMemberRepository.GetMemberAsync(request.ReceiverId, request.GroupId);
+        if (creditorMember == null) throw new UserNotFoundException();
 
-        var debt = await _groupDebtRepository.GetDebtAsync(request.GroupId, userId, request.ReceiverId)
-            ?? throw new SettlementOperationException("Brak zaksięgowanego długu do tej osoby w wybranej grupie.");
+        var debtRecord = await _groupDebtRepository.GetDebtAsync(request.GroupId, userId, request.ReceiverId);
+        decimal currentDebtAmount = debtRecord?.Amount ?? 0m;
 
-        if (debt.Amount < request.Amount)
-            throw new SettlementOperationException("Kwota przekracza aktualny dług w tej grupie.");
+        if (currentDebtAmount < request.Amount)
+        {
+            throw new SettlementOperationException($"Nie możesz spłacić więcej niż wynosi Twój dług wobec tego użytkownika w tej grupie. Aktualny dług: {currentDebtAmount}");
+        }
 
-        if (await _settlementRepository.HasPendingSettlementAsync(userId, request.ReceiverId, request.GroupId))
-            throw new SettlementOperationException("Masz już oczekującą spłatę do tej osoby w tej grupie — poczekaj na akceptację lub anuluj ją.");
+        var sender = await _userRepository.GetUserByIdAsync(userId)
+            ?? throw new SettlementOperationException("Nie znaleziono nadawcy w bazie.");
 
-        var settlement = Settlement.Create(sender, receiver, group, request.Amount, request.Description ?? "Spłata długu");
+        var receiver = await _userRepository.GetUserByIdAsync(request.ReceiverId)
+            ?? throw new SettlementOperationException("Nie znaleziono odbiorcy w bazie.");
+
+        var groupEntity = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId)
+            ?? throw new SettlementOperationException("Nie znaleziono encji grupy w bazie.");
+
+        string description = $"Spłata w grupie {groupInfo.Name}";
+
+        var settlement = Settlement.Create(sender, receiver, groupEntity, request.Amount, description);
+
         await _settlementRepository.AddAsync(settlement);
         await _unitOfWork.SaveChangesAsync();
+
+        return settlement.Id;
     }
 
     public async Task<bool> AcceptSettlementAsync(int userId, int settlementId)
@@ -279,13 +281,24 @@ public class SettlementService : ISettlementService
         await _unitOfWork.BeginTransactionAsync();
         try
         {
-            var settlement = await _settlementRepository.GetSettlementByIdAsync(userId, settlementId) ?? throw new Exception("Nie znaleziono spłaty.");
-            if (settlement.ReceiverId != userId) throw new UnauthorizedAccessException("Tylko odbiorca może zaakceptować spłatę.");
+            var settlement = await _settlementRepository.GetSettlementByIdAsync(userId, settlementId)
+                ?? throw new SettlementOperationException("Nie znaleziono spłaty.");
+
+            if (settlement.ReceiverId != userId)
+                throw new UnauthorizedAccessException("Tylko odbiorca może zaakceptować spłatę.");
+
+            if (settlement.Status != SettlementStatus.Pending)
+                throw new SettlementOperationException("Ta spłata nie oczekuje już na akceptację.");
+
+            var debt = await _groupDebtRepository.GetDebtAsync(settlement.GroupId, settlement.SenderId, settlement.ReceiverId);
+            if (debt is null || debt.Amount < settlement.Amount)
+                throw new SettlementOperationException(
+                    "Saldo długu w grupie jest mniejsze niż proponowana spłata (np. rozliczyły się nowe wydatki). Odrzuć tę propozycję lub poproś dłużnika o nową kwotę.");
 
             settlement.Confirm();
             var sender = await _userRepository.GetUserByIdAsync(settlement.SenderId) ?? throw new UserNotFoundException();
             var receiver = await _userRepository.GetUserByIdAsync(userId) ?? throw new UserNotFoundException();
-            var group = await _groupRepository.GetGroupInfoByIdAsync(settlement.GroupId) ?? throw new Exception("Brak grupy.");
+            var group = await _groupRepository.GetGroupInfoByIdAsync(settlement.GroupId) ?? throw new SettlementOperationException("Nie znaleziono grupy.");
 
             await _groupDebtRepository.ApplyDebtChangeAsync(group, sender, receiver, -settlement.Amount);
             await _unitOfWork.CommitAsync();
@@ -300,8 +313,11 @@ public class SettlementService : ISettlementService
 
     public async Task<bool> RejectSettlementAsync(int userId, int settlementId)
     {
-        var settlement = await _settlementRepository.GetSettlementByIdAsync(userId, settlementId) ?? throw new Exception("Nie znaleziono spłaty.");
+        var settlement = await _settlementRepository.GetSettlementByIdAsync(userId, settlementId)
+            ?? throw new SettlementOperationException("Nie znaleziono spłaty.");
         if (settlement.ReceiverId != userId) throw new UnauthorizedAccessException("Tylko odbiorca może odrzucić spłatę.");
+        if (settlement.Status != SettlementStatus.Pending)
+            throw new SettlementOperationException("Ta spłata nie oczekuje już na decyzję.");
         settlement.Reject();
         await _unitOfWork.SaveChangesAsync();
         return true;
@@ -345,5 +361,179 @@ public class SettlementService : ISettlementService
                 // ignorujemy błąd maila
             }
         }
+    }
+
+    public async Task<PayNetDebtResponse> CreateNetDebtSettlementsAsync(int userId, PayNetDebtRequest request)
+    {
+        const decimal tol = 0.01m;
+
+        if (request.Amount <= 0)
+            throw new SettlementOperationException("Kwota musi być większa od zera.");
+
+        if (request.CreditorId == userId)
+            throw new SettlementOperationException("Nie możesz spłacić długu samemu sobie.");
+
+        var bilateral = (await _groupDebtRepository.GetBilateralActiveDebtsBetweenUsersAsync(userId, request.CreditorId)).ToList();
+        var forwardSum = bilateral.Where(d => d.DebtorId == userId && d.CreditorId == request.CreditorId).Sum(d => d.Amount);
+        var reverseSum = bilateral.Where(d => d.DebtorId == request.CreditorId && d.CreditorId == userId).Sum(d => d.Amount);
+        var net = forwardSum - reverseSum;
+
+        if (net <= tol)
+            throw new SettlementOperationException("Brak dodatniego salda netto wobec wskazanego użytkownika.");
+
+        if (request.Amount > net + tol)
+            throw new SettlementOperationException($"Kwota ({request.Amount:N2} PLN) przekracza saldo netto ({net:N2} PLN).");
+
+        foreach (var row in bilateral.Where(d => d.DebtorId == userId && d.CreditorId == request.CreditorId))
+        {
+            if (await _settlementRepository.HasPendingSettlementAsync(userId, request.CreditorId, row.GroupId))
+                throw new SettlementOperationException("Masz już oczekującą spłatę do tej osoby w jednej z grup — rozlicz ją lub poczekaj na decyzję.");
+        }
+
+        await _unitOfWork.BeginTransactionAsync();
+        try
+        {
+            await CompensateBilateralDebtsAsync(userId, request.CreditorId);
+            await _unitOfWork.SaveChangesAsync();
+
+            var after = (await _groupDebtRepository.GetBilateralActiveDebtsBetweenUsersAsync(userId, request.CreditorId)).ToList();
+            var forwards = after
+                .Where(d => d.DebtorId == userId && d.CreditorId == request.CreditorId && d.Amount > 0)
+                .OrderByDescending(d => d.Amount)
+                .ToList();
+
+            var availableForward = forwards.Sum(d => d.Amount);
+            if (request.Amount > availableForward + tol)
+                throw new SettlementOperationException("Saldo długów zmieniło się w trakcie operacji. Spróbuj ponownie.");
+
+            var created = new List<Settlement>();
+            decimal remaining = request.Amount;
+
+            foreach (var row in forwards)
+            {
+                if (remaining <= tol)
+                    break;
+
+                var take = Math.Min(row.Amount, remaining);
+                if (take <= tol)
+                    continue;
+
+                var settlement = await BuildPendingSettlementForNetPayAsync(userId, request.CreditorId, row.GroupId, take);
+                created.Add(settlement);
+                remaining -= take;
+            }
+
+            if (remaining > tol)
+                throw new SettlementOperationException("Nie udało się rozłożyć kwoty na długi w poszczególnych grupach.");
+
+            await _unitOfWork.CommitAsync();
+            return new PayNetDebtResponse { SettlementIds = created.Select(s => s.Id).ToList() };
+        }
+        catch
+        {
+            await _unitOfWork.RollbackAsync();
+            throw;
+        }
+    }
+
+    public async Task CompensateMutualDebtsAsync(int userId, CompensateDebtsRequest request)
+    {
+        if (request.TargetUserId == userId)
+            throw new SettlementOperationException("Nie możesz rozliczyć wzajemności ze samym sobą.");
+
+        _ = await _userRepository.GetUserByIdAsync(request.TargetUserId)
+            ?? throw new SettlementOperationException("Nie znaleziono wybranego użytkownika.");
+
+        var bilateral = (await _groupDebtRepository.GetBilateralActiveDebtsBetweenUsersAsync(userId, request.TargetUserId)).ToList();
+        var forward = bilateral.Where(d => d.DebtorId == userId && d.CreditorId == request.TargetUserId).ToList();
+        var reverse = bilateral.Where(d => d.DebtorId == request.TargetUserId && d.CreditorId == userId).ToList();
+
+        if (forward.Count == 0 || reverse.Count == 0)
+            throw new SettlementOperationException(
+                "Brak wzajemnych należności do rozliczenia (musisz być dłużnikiem i jednocześnie wierzycielem tej osoby w różnych grupach).");
+
+        foreach (var row in bilateral.Where(d => d.Amount > 0))
+        {
+            if (await _settlementRepository.HasPendingSettlementAsync(row.DebtorId, row.CreditorId, row.GroupId))
+                throw new SettlementOperationException(
+                    "Jest oczekująca spłata powiązana z tymi długami — najpierw ją rozwiąż lub anuluj.");
+        }
+
+        await _unitOfWork.BeginTransactionAsync();
+        try
+        {
+            await CompensateBilateralDebtsAsync(userId, request.TargetUserId);
+            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.CommitAsync();
+        }
+        catch
+        {
+            await _unitOfWork.RollbackAsync();
+            throw;
+        }
+    }
+
+    private async Task CompensateBilateralDebtsAsync(int debtorId, int creditorId)
+    {
+        for (var safety = 0; safety < 500; safety++)
+        {
+            var debts = (await _groupDebtRepository.GetBilateralActiveDebtsBetweenUsersAsync(debtorId, creditorId)).ToList();
+            var forward = debts.Where(d => d.DebtorId == debtorId && d.CreditorId == creditorId).ToList();
+            var reverse = debts.Where(d => d.DebtorId == creditorId && d.CreditorId == debtorId).ToList();
+
+            if (forward.Count == 0 || reverse.Count == 0)
+                return;
+
+            var f = forward.OrderByDescending(x => x.Amount).First();
+            var r = reverse.OrderByDescending(x => x.Amount).First();
+            var x = Math.Min(f.Amount, r.Amount);
+
+            try
+            {
+                await _groupDebtRepository.ApplyDebtChangeAsync(r.Group, r.Debtor, r.Creditor, -x);
+                await _groupDebtRepository.ApplyDebtChangeAsync(f.Group, f.Debtor, f.Creditor, -x);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new SettlementOperationException($"Nie udało się rozliczyć wzajemnych długów: {ex.Message}");
+            }
+        }
+
+        throw new SettlementOperationException("Przekroczono limit bezpieczeństwa rozliczania wzajemnych długów.");
+    }
+
+    private async Task<Settlement> BuildPendingSettlementForNetPayAsync(int senderId, int creditorId, int groupId, decimal amount)
+    {
+        if (amount <= 0)
+            throw new SettlementOperationException("Kwota musi być większa od zera.");
+
+        var groupInfo = await _groupRepository.GetGroupInfoByIdAsync(groupId)
+            ?? throw new SettlementOperationException("Nie znaleziono grupy.");
+
+        var groupMember = await _groupMemberRepository.GetMemberAsync(senderId, groupId);
+        if (groupMember == null) throw new UserNotFoundException();
+
+        var creditorMember = await _groupMemberRepository.GetMemberAsync(creditorId, groupId);
+        if (creditorMember == null) throw new UserNotFoundException();
+
+        var debtRecord = await _groupDebtRepository.GetDebtAsync(groupId, senderId, creditorId);
+        var currentDebtAmount = debtRecord?.Amount ?? 0m;
+        if (currentDebtAmount < amount)
+            throw new SettlementOperationException($"Nie możesz spłacić więcej niż wynosi Twój dług wobec tego użytkownika w tej grupie. Aktualny dług: {currentDebtAmount:N2}");
+
+        if (await _settlementRepository.HasPendingSettlementAsync(senderId, creditorId, groupId))
+            throw new SettlementOperationException("Masz już oczekującą spłatę do tej osoby w tej grupie.");
+
+        var sender = await _userRepository.GetUserByIdAsync(senderId)
+            ?? throw new SettlementOperationException("Nie znaleziono nadawcy w bazie.");
+        var receiver = await _userRepository.GetUserByIdAsync(creditorId)
+            ?? throw new SettlementOperationException("Nie znaleziono odbiorcy w bazie.");
+        var groupEntity = await _groupRepository.GetGroupInfoByIdAsync(groupId)
+            ?? throw new SettlementOperationException("Nie znaleziono encji grupy w bazie.");
+
+        var description = $"Spłata salda netto — grupa {groupInfo.Name}";
+        var settlement = Settlement.Create(sender, receiver, groupEntity, amount, description);
+        await _settlementRepository.AddAsync(settlement);
+        return settlement;
     }
 }

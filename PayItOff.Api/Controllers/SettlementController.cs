@@ -60,6 +60,13 @@ public class SettlementController : ControllerBase
         return Ok();
     }
 
+    [HttpPost("create-net-pay")]
+    public async Task<ActionResult<PayNetDebtResponse>> CreateNetPay([FromBody] PayNetDebtRequest request)
+    {
+        var result = await _settlementService.CreateNetDebtSettlementsAsync(GetUserId(), request);
+        return Ok(result);
+    }
+
     [HttpPost("accept/{id}")]
     public async Task<IActionResult> Accept(int id)
     {
@@ -78,6 +85,13 @@ public class SettlementController : ControllerBase
     public async Task<IActionResult> RemindDebt([FromBody] RemindDebtRequest request)
     {
         await _settlementService.SendDebtReminderAsync(GetUserId(), request);
+        return Ok();
+    }
+
+    [HttpPost("compensate")]
+    public async Task<IActionResult> CompensateMutualDebts([FromBody] CompensateDebtsRequest request)
+    {
+        await _settlementService.CompensateMutualDebtsAsync(GetUserId(), request);
         return Ok();
     }
 }

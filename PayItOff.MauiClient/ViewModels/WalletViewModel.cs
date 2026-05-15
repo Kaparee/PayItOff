@@ -4,9 +4,13 @@ using Microsoft.Maui.Controls;
 using PayItOff.MauiClient.Services;
 using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace PayItOff.MauiClient.ViewModels;
 
@@ -25,23 +29,33 @@ public partial class WalletPersonUiModel : ObservableObject
     public bool IsSettlement { get; set; }
     public string Status { get; set; } = string.Empty;
     public int GroupId { get; set; }
-    public string SettlementBorderColor { get; set; } = string.Empty;
     public bool CanSendDebtReminder { get; set; }
 
     public bool IsPending => Status == "Pending";
     public bool ShowAcceptRejectButtons => IsSettlement && IsIncome && IsPending;
     public bool ShowNormalAmount => !ShowAcceptRejectButtons;
 
-    public string BorderStrokeColor =>
-        IsSettlement && !string.IsNullOrEmpty(SettlementBorderColor)
-            ? SettlementBorderColor
-            : "Transparent";
-
-    public int BorderStrokeThickness =>
-        IsSettlement && !string.IsNullOrEmpty(SettlementBorderColor) ? 3 : 0;
-
     public string StatusColor => IsIncome ? "#00FF7F" : "#FF4500";
     public bool ShowRemindButton => !IsSettlement && IsIncome && CanSendDebtReminder;
+
+    public Microsoft.Maui.Controls.Brush ItemBorderBrush
+    {
+        get
+        {
+            if (!IsSettlement)
+                return Microsoft.Maui.Controls.Brush.Transparent;
+
+            if (Status == "Rejected")
+                return new Microsoft.Maui.Controls.SolidColorBrush(Microsoft.Maui.Graphics.Colors.Black);
+
+            return IsIncome
+                ? new Microsoft.Maui.Controls.SolidColorBrush(Microsoft.Maui.Graphics.Color.FromArgb("#00FF7F"))
+                : new Microsoft.Maui.Controls.SolidColorBrush(Microsoft.Maui.Graphics.Color.FromArgb("#FF4500"));
+        }
+    }
+
+    public double ItemBorderThickness => IsSettlement ? 1.0 : 0.0;
+    public bool ShowStatusBlock => !IsSettlement;
 
     public bool ShowSettlementStatus => IsSettlement;
     public string SettlementStatusHint => IsSettlement
@@ -62,6 +76,13 @@ public partial class WalletViewModel : BaseViewModel
 {
     private readonly SettlementService _settlementService;
     private int _loadId = 0;
+    private CancellationTokenSource? _searchCts;
+    private List<WalletPersonUiModel> _allTransactions = new();
+    private List<PayableDebtOptionResponse> _allDebtOptions = new();
+    private List<DebtDisplayItem> _allNetPayCreditors = new();
+
+    private TaskCompletionSource<string>? _actionSheetTcs;
+    private TaskCompletionSource<bool>? _alertTcs;
 
     [ObservableProperty]
     public partial string? FilterType { get; set; }
@@ -84,21 +105,20 @@ public partial class WalletViewModel : BaseViewModel
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
 
-    private List<WalletPersonUiModel> _allTransactions = new();
-
     [ObservableProperty]
     public partial int CurrentPage { get; set; } = 1;
 
     [ObservableProperty]
     public partial int TotalPages { get; set; } = 1;
 
-    private CancellationTokenSource? _searchCts;
-
     [ObservableProperty]
     public partial bool IsPaymentOverlayVisible { get; set; }
 
     [ObservableProperty]
     public partial ObservableCollection<PayableDebtOptionResponse> PayableDebtOptions { get; set; } = new();
+
+    [ObservableProperty]
+    public partial ObservableCollection<PayableDebtOptionResponse> FilteredPayableDebtOptions { get; set; } = new();
 
     [ObservableProperty]
     public partial PayableDebtOptionResponse? SelectedPayableDebtOption { get; set; }
@@ -108,6 +128,35 @@ public partial class WalletViewModel : BaseViewModel
 
     [ObservableProperty]
     public partial string PaymentFormHint { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SearchDebtText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsNetPayMode { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool CanSwitchToGrossPay { get; set; }
+
+    [ObservableProperty]
+    public partial ObservableCollection<DebtDisplayItem> FilteredNetPayCreditors { get; set; } = new();
+
+    [ObservableProperty]
+    public partial DebtDisplayItem? SelectedNetPayCreditor { get; set; }
+
+    [ObservableProperty] public partial bool IsCustomAlertVisible { get; set; }
+    [ObservableProperty] public partial string CustomAlertTitle { get; set; } = string.Empty;
+    [ObservableProperty] public partial string CustomAlertMessage { get; set; } = string.Empty;
+    [ObservableProperty] public partial string CustomAlertAcceptText { get; set; } = "OK";
+    [ObservableProperty] public partial string CustomAlertCancelText { get; set; } = string.Empty;
+
+    [ObservableProperty] public partial bool IsActionSheetVisible { get; set; }
+    [ObservableProperty] public partial string ActionSheetTitle { get; set; } = string.Empty;
+    [ObservableProperty] public partial ObservableCollection<string> ActionSheetOptions { get; set; } = new();
+
+    public bool IsCustomAlertCancelVisible => !string.IsNullOrEmpty(CustomAlertCancelText);
+    public int AlertAcceptColumn => IsCustomAlertCancelVisible ? 1 : 0;
+    public int AlertAcceptColumnSpan => IsCustomAlertCancelVisible ? 1 : 2;
 
     public WalletViewModel(SettlementService settlementService)
     {
@@ -175,9 +224,13 @@ public partial class WalletViewModel : BaseViewModel
                     IsSettlement = item.IsSettlement,
                     Status = item.Status,
                     GroupId = item.GroupId,
-                    SettlementBorderColor = item.SettlementBorderColor,
                     CanSendDebtReminder = item.CanSendDebtReminder
                 }).ToList();
+
+                if (targetId.HasValue)
+                {
+                    newList = newList.Where(x => x.OtherUserId == targetId.Value).ToList();
+                }
 
                 _allTransactions = newList;
                 ApplySearchFilter();
@@ -198,7 +251,7 @@ public partial class WalletViewModel : BaseViewModel
         catch (Exception ex)
         {
             if (currentLoadId == _loadId)
-                await Shell.Current.DisplayAlertAsync("Błąd", ex.Message, "OK");
+                await ShowAlertAsync("Błąd", ex.Message, "OK");
         }
         finally
         {
@@ -253,31 +306,34 @@ public partial class WalletViewModel : BaseViewModel
 
     partial void OnSelectedPayableDebtOptionChanged(PayableDebtOptionResponse? value)
     {
-        if (value != null)
+        if (value != null && !IsNetPayMode)
             PaymentAmountText = value.Amount.ToString("F2", CultureInfo.InvariantCulture);
     }
 
-    [RelayCommand]
-    private async Task OpenPaymentPopup()
+    partial void OnSelectedNetPayCreditorChanged(DebtDisplayItem? value)
+    {
+        if (value != null && IsNetPayMode)
+            PaymentAmountText = value.Amount.ToString("F2", CultureInfo.InvariantCulture);
+    }
+
+    partial void OnIsNetPayModeChanged(bool value)
     {
         PaymentFormHint = string.Empty;
-        IsBusy = true;
-        try
+        if (value)
         {
-            var options = await _settlementService.GetPayableDebtOptionsAsync();
-            PayableDebtOptions = new ObservableCollection<PayableDebtOptionResponse>(options ?? new List<PayableDebtOptionResponse>());
-            if (PayableDebtOptions.Count == 0)
-            {
-                await Shell.Current.DisplayAlertAsync("Spłata", "Brak aktywnych długów do spłaty (albo wszystkie mają już oczekującą spłatę).", "OK");
-                return;
-            }
-
-            SelectedPayableDebtOption = PayableDebtOptions[0];
-            IsPaymentOverlayVisible = true;
+            SelectedPayableDebtOption = null;
+            ApplyNetPaySearchFilter();
+            if (SelectedNetPayCreditor != null)
+                PaymentAmountText = SelectedNetPayCreditor.Amount.ToString("F2", CultureInfo.InvariantCulture);
         }
-        finally
+        else
         {
-            IsBusy = false;
+            SelectedNetPayCreditor = null;
+            RefreshPayableDebtSearchFilter();
+            if (SelectedPayableDebtOption != null)
+                PaymentAmountText = SelectedPayableDebtOption.Amount.ToString("F2", CultureInfo.InvariantCulture);
+            else
+                PaymentAmountText = string.Empty;
         }
     }
 
@@ -286,24 +342,68 @@ public partial class WalletViewModel : BaseViewModel
     {
         IsPaymentOverlayVisible = false;
         PaymentFormHint = string.Empty;
+        IsNetPayMode = true;
     }
 
     [RelayCommand]
     private async Task SubmitSettlement()
     {
-        if (SelectedPayableDebtOption is null)
-        {
-            PaymentFormHint = "Wybierz linię długu.";
-            return;
-        }
-
         if (!decimal.TryParse(PaymentAmountText?.Replace(',', '.'), NumberStyles.Number, CultureInfo.InvariantCulture, out var amount) || amount <= 0)
         {
             PaymentFormHint = "Podaj poprawną kwotę większą od zera.";
             return;
         }
 
-        if (amount > SelectedPayableDebtOption.Amount)
+        const decimal tol = 0.01m;
+
+        if (IsNetPayMode)
+        {
+            if (SelectedNetPayCreditor is null)
+            {
+                PaymentFormHint = "Wybierz wierzyciela (saldo netto).";
+                return;
+            }
+
+            if (amount > SelectedNetPayCreditor.Amount + tol)
+            {
+                PaymentFormHint = $"Kwota nie może przekroczyć salda netto: {SelectedNetPayCreditor.Amount:N2} zł.";
+                return;
+            }
+
+            IsBusy = true;
+            PaymentFormHint = string.Empty;
+            try
+            {
+                var netReq = new PayNetDebtRequest { CreditorId = SelectedNetPayCreditor.UserId, Amount = amount };
+                var (ok, result, err) = await _settlementService.CreateNetDebtSettlementsAsync(netReq);
+                if (ok)
+                {
+                    var n = result?.SettlementIds?.Count ?? 0;
+                    var msg = n > 1
+                        ? $"Wysłano {n} propozycji spłaty w poszczególnych grupach (po rozliczeniu netto). Wierzyciel musi je zaakceptować."
+                        : "Wysłano propozycję spłaty do akceptacji przez wierzyciela.";
+                    IsPaymentOverlayVisible = false;
+                    await ShowAlertAsync("Spłata", msg, "OK");
+                    await LoadDataAsync();
+                }
+                else
+                    PaymentFormHint = err ?? "Nie udało się utworzyć spłaty netto.";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+
+            return;
+        }
+
+        if (SelectedPayableDebtOption is null)
+        {
+            PaymentFormHint = "Wybierz linię długu (konkretna grupa).";
+            return;
+        }
+
+        if (amount > SelectedPayableDebtOption.Amount + tol)
         {
             PaymentFormHint = $"Kwota nie może przekroczyć {SelectedPayableDebtOption.Amount:N2} zł.";
             return;
@@ -317,15 +417,14 @@ public partial class WalletViewModel : BaseViewModel
             {
                 GroupId = SelectedPayableDebtOption.GroupId,
                 ReceiverId = SelectedPayableDebtOption.CreditorId,
-                Amount = amount,
-                Description = "Spłata z portfela"
+                Amount = amount
             };
 
             var (ok, err) = await _settlementService.CreateSettlementAsync(request);
             if (ok)
             {
                 IsPaymentOverlayVisible = false;
-                await Shell.Current.DisplayAlertAsync("Spłata", "Wysłano propozycję spłaty do akceptacji przez wierzyciela.", "OK");
+                await ShowAlertAsync("Spłata", "Wysłano propozycję spłaty do akceptacji przez wierzyciela.", "OK");
                 await LoadDataAsync();
             }
             else
@@ -337,47 +436,72 @@ public partial class WalletViewModel : BaseViewModel
         }
     }
 
-
     [RelayCommand]
     private async Task AcceptSettlement(WalletPersonUiModel item)
     {
-        if (item == null) return;
+        if (item == null || !item.IsSettlement) return;
+
+        var confirm = await ShowAlertAsync(
+            "Akceptacja spłaty",
+            $"{item.FullName} wnioskuje o spłatę {item.Amount:N2} zł.\n\nZaakceptować?",
+            "Tak",
+            "Nie");
+
+        if (!confirm)
+            return;
+
         IsBusy = true;
 
-        var success = await _settlementService.AcceptSettlementAsync(item.ExpenseId);
-
-        if (success)
+        try
         {
-            await Shell.Current.DisplayAlertAsync("Sukces", "Spłata została zatwierdzona.", "OK");
-            await LoadDataAsync();
-        }
-        else
-        {
-            await Shell.Current.DisplayAlertAsync("Błąd", "Nie udało się zatwierdzić spłaty.", "OK");
-        }
+            var success = await _settlementService.AcceptSettlementAsync(item.ExpenseId);
 
-        IsBusy = false;
+            if (success)
+            {
+                await ShowAlertAsync("Sukces", $"Spłata {item.Amount:N2} zł została zatwierdzona.", "OK");
+                await LoadDataAsync();
+            }
+            else
+                await ShowAlertAsync("Błąd", "Nie udało się zatwierdzić spłaty.", "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand]
     private async Task RejectSettlement(WalletPersonUiModel item)
     {
-        if (item == null) return;
+        if (item == null || !item.IsSettlement) return;
+
+        var confirm = await ShowAlertAsync(
+            "Odrzucenie spłaty",
+            $"Odrzucić propozycję spłaty {item.Amount:N2} zł od {item.FullName}?",
+            "Odrzuć",
+            "Anuluj");
+
+        if (!confirm)
+            return;
+
         IsBusy = true;
 
-        var success = await _settlementService.RejectSettlementAsync(item.ExpenseId);
-
-        if (success)
+        try
         {
-            await Shell.Current.DisplayAlertAsync("Odrzucono", "Spłata została odrzucona.", "OK");
-            await LoadDataAsync();
-        }
-        else
-        {
-            await Shell.Current.DisplayAlertAsync("Błąd", "Wystąpił problem przy odrzucaniu.", "OK");
-        }
+            var success = await _settlementService.RejectSettlementAsync(item.ExpenseId);
 
-        IsBusy = false;
+            if (success)
+            {
+                await ShowAlertAsync("Odrzucono", $"Propozycja spłaty {item.Amount:N2} zł została odrzucona.", "OK");
+                await LoadDataAsync();
+            }
+            else
+                await ShowAlertAsync("Błąd", "Wystąpił problem przy odrzucaniu.", "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand]
@@ -391,13 +515,217 @@ public partial class WalletViewModel : BaseViewModel
 
         if (ok)
         {
-            await Shell.Current.DisplayAlertAsync("Przypomnienie", "Wysłano przypomnienie do dłużnika.", "OK");
+            await ShowAlertAsync("Przypomnienie", "Wysłano przypomnienie do dłużnika.", "OK");
             await LoadDataAsync();
         }
         else
-            await Shell.Current.DisplayAlertAsync("Błąd", err ?? "Nie udało się wysłać przypomnienia.", "OK");
+            await ShowAlertAsync("Błąd", err ?? "Nie udało się wysłać przypomnienia.", "OK");
 
         IsBusy = false;
+    }
+
+    [RelayCommand]
+    private async Task CompensateDebts()
+    {
+        IsBusy = true;
+        try
+        {
+            var options = await _settlementService.GetPayableDebtOptionsAsync();
+            if (options == null || options.Count == 0)
+            {
+                await ShowAlertAsync("Info", "Brak długów do kompensacji.", "OK");
+                return;
+            }
+
+            var uniqueCreditors = options.GroupBy(x => x.CreditorId).Select(g => g.First()).ToList();
+            var actionSheetButtons = uniqueCreditors.Select(c => $"{c.CreditorName} {c.CreditorSurname}").ToArray();
+
+            IsBusy = false;
+
+            var action = await ShowActionSheetAsync("Z kim chcesz uprościć długi?", actionSheetButtons);
+
+            if (action == "Anuluj" || string.IsNullOrEmpty(action)) return;
+
+            var selectedUser = uniqueCreditors.FirstOrDefault(c => $"{c.CreditorName} {c.CreditorSurname}" == action);
+            if (selectedUser != null)
+            {
+                IsBusy = true;
+                var request = new CompensateDebtsRequest { TargetUserId = selectedUser.CreditorId };
+
+                var (ok, err) = await _settlementService.CompensateDebtsAsync(request);
+                if (ok)
+                {
+                    await ShowAlertAsync("Sukces", "Długi zostały pomyślnie skompensowane!", "OK");
+                    await LoadDataAsync();
+                }
+                else
+                    await ShowAlertAsync("Błąd", err ?? "Nie udało się skompensować długów.", "OK");
+            }
+        }
+        catch (Exception)
+        {
+            await ShowAlertAsync("Błąd", "Nie udało się skompensować długów. Możliwe, że druga strona nie ma wobec Ciebie żadnych zobowiązań do odliczenia.", "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    partial void OnSearchDebtTextChanged(string value)
+    {
+        if (IsNetPayMode)
+            ApplyNetPaySearchFilter();
+        else
+            RefreshPayableDebtSearchFilter();
+    }
+
+    private void RefreshPayableDebtSearchFilter()
+    {
+        if (string.IsNullOrWhiteSpace(SearchDebtText))
+        {
+            FilteredPayableDebtOptions = new ObservableCollection<PayableDebtOptionResponse>(_allDebtOptions);
+            return;
+        }
+
+        var lower = SearchDebtText.ToLower();
+        FilteredPayableDebtOptions = new ObservableCollection<PayableDebtOptionResponse>(
+            _allDebtOptions.Where(x =>
+                x.CreditorName.ToLower().Contains(lower) ||
+                x.CreditorSurname.ToLower().Contains(lower) ||
+                x.GroupName.ToLower().Contains(lower)));
+    }
+
+    private void ApplyNetPaySearchFilter()
+    {
+        if (string.IsNullOrWhiteSpace(SearchDebtText))
+        {
+            FilteredNetPayCreditors = new ObservableCollection<DebtDisplayItem>(_allNetPayCreditors);
+            return;
+        }
+
+        var lower = SearchDebtText.ToLower();
+        FilteredNetPayCreditors = new ObservableCollection<DebtDisplayItem>(
+            _allNetPayCreditors.Where(x => x.FullName.ToLower().Contains(lower)));
+    }
+
+    private async Task LoadNetPayCreditorsAsync()
+    {
+        var summary = await _settlementService.GetUserAllExpensesSummaryAsync();
+        _allNetPayCreditors = (summary?.Items ?? []).Select(e => new DebtDisplayItem
+        {
+            UserId = e.UserId,
+            FullName = $"{e.Name} {e.Surname}",
+            AvatarUrl = e.AvatarUrl ?? string.Empty,
+            CategoriesDisplay = e.Categories != null && e.Categories.Count > 0 ? string.Join(", ", e.Categories) : "—",
+            Date = e.Date,
+            Amount = e.Amount
+        }).ToList();
+        ApplyNetPaySearchFilter();
+    }
+
+    [RelayCommand]
+    private async Task OpenPaymentPopup()
+    {
+        PaymentFormHint = string.Empty;
+        SearchDebtText = string.Empty;
+        SelectedPayableDebtOption = null;
+        SelectedNetPayCreditor = null;
+        PaymentAmountText = string.Empty;
+
+        IsBusy = true;
+        try
+        {
+            var options = await _settlementService.GetPayableDebtOptionsAsync();
+            _allDebtOptions = options ?? new List<PayableDebtOptionResponse>();
+            FilteredPayableDebtOptions = new ObservableCollection<PayableDebtOptionResponse>(_allDebtOptions);
+
+            await LoadNetPayCreditorsAsync();
+
+            var hasGross = _allDebtOptions.Count > 0;
+            var hasNet = _allNetPayCreditors.Count > 0;
+
+            if (!hasGross && !hasNet)
+            {
+                await ShowAlertAsync("Spłata", "Brak aktywnych długów do spłaty.", "OK");
+                return;
+            }
+
+            CanSwitchToGrossPay = hasGross && hasNet;
+            IsNetPayMode = hasNet;
+
+            if (int.TryParse(TargetIdFilter, out var tid) && tid > 0)
+            {
+                var match = _allNetPayCreditors.FirstOrDefault(x => x.UserId == tid);
+                if (match != null)
+                {
+                    IsNetPayMode = true;
+                    SelectedNetPayCreditor = match;
+                    ApplyNetPaySearchFilter();
+                    PaymentAmountText = match.Amount.ToString("F2", CultureInfo.InvariantCulture);
+                }
+            }
+
+            IsPaymentOverlayVisible = true;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    public async Task<bool> ShowAlertAsync(string title, string message, string accept = "OK", string cancel = "")
+    {
+        CustomAlertTitle = title;
+        CustomAlertMessage = message;
+        CustomAlertAcceptText = accept;
+        CustomAlertCancelText = cancel;
+
+        OnPropertyChanged(nameof(IsCustomAlertCancelVisible));
+        OnPropertyChanged(nameof(AlertAcceptColumn));
+        OnPropertyChanged(nameof(AlertAcceptColumnSpan));
+
+        _alertTcs = new TaskCompletionSource<bool>();
+        IsCustomAlertVisible = true;
+        return await _alertTcs.Task;
+    }
+
+    [RelayCommand]
+    private void CloseAlert(object result)
+    {
+        IsCustomAlertVisible = false;
+
+        bool parsedResult = false;
+        if (result is bool b)
+            parsedResult = b;
+        else if (result is string s)
+            parsedResult = s.Equals("True", StringComparison.OrdinalIgnoreCase);
+
+        _alertTcs?.TrySetResult(parsedResult);
+    }
+
+    public async Task<string> ShowActionSheetAsync(string title, params string[] options)
+    {
+        ActionSheetTitle = title;
+        ActionSheetOptions = new ObservableCollection<string>(options);
+
+        _actionSheetTcs = new TaskCompletionSource<string>();
+        IsActionSheetVisible = true;
+        return await _actionSheetTcs.Task;
+    }
+
+    [RelayCommand]
+    private void SelectActionSheetOption(string option)
+    {
+        IsActionSheetVisible = false;
+        _actionSheetTcs?.TrySetResult(option);
+    }
+
+    [RelayCommand]
+    private void CancelActionSheet()
+    {
+        IsActionSheetVisible = false;
+        _actionSheetTcs?.TrySetResult("Anuluj");
     }
 
     [RelayCommand]
@@ -424,6 +752,7 @@ public partial class WalletViewModel : BaseViewModel
     private async Task GoBack()
     {
         IsPaymentOverlayVisible = false;
+        IsNetPayMode = true;
         FilterType = "All";
         TargetIdFilter = null;
         Transactions = new ObservableCollection<WalletPersonUiModel>();

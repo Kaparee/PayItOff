@@ -69,5 +69,4 @@ public class GroupMemberRepository : IGroupMemberRepository
             .Where(x => x.GroupId == groupId && x.Status == GroupMemberStatus.Accepted)
             .ToListAsync();
     }
-
 }

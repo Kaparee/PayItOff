@@ -15,8 +15,5 @@ public class UserDebtComponentResponse
     public List<string> Categories { get; set; } = new();
     public bool IsSettlement { get; set; }
     public string Status { get; set; } = string.Empty;
-    /// <summary>Kolor obwódki kafelka spłaty (hex). Pusty = brak wyróżnienia.</summary>
-    public string SettlementBorderColor { get; set; } = string.Empty;
-    /// <summary>Wierzyciel może raz na 24h przypomnieć dłużnikowi o zapłacie (bez oczekującej spłaty od dłużnika).</summary>
     public bool CanSendDebtReminder { get; set; }
 }
