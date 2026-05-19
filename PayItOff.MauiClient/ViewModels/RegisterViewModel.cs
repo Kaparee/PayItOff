@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PayItOff.MauiClient.Services;
 using PayItOff.Shared.Requests;
@@ -124,7 +124,7 @@ public partial class RegisterViewModel : ObservableObject
             var stream = await photo.OpenReadAsync();
             AvatarPreviewSource = ImageSource.FromStream(() => stream);
 
-            // KLUCZ: Przełączamy widoczność ręcznie
+
             IsAvatarPlaceholderVisible = false;
             IsAvatarImageVisible = true;
         }
@@ -144,7 +144,7 @@ public partial class RegisterViewModel : ObservableObject
     [RelayCommand]
     private async Task GoToLogin()
     {
-        // Powrót do poprzedniej strony (LoginPage)
+
         await Shell.Current.GoToAsync("..");
     }
 }

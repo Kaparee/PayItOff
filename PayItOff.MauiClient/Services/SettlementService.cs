@@ -1,7 +1,7 @@
-﻿using System.Net.Http.Json;
-using System.Text.Json;
 using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
+using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace PayItOff.MauiClient.Services;
 
@@ -95,7 +95,6 @@ public class SettlementService
             }
             catch
             {
-                // ignore parse errors
             }
 
             return (false, "Nie udało się utworzyć spłaty.");

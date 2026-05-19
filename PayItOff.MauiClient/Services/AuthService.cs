@@ -31,14 +31,14 @@ public class AuthService
 
             try
             {
-                // Wyciągamy samą wiadomość z JSON-a
+
                 var json = JsonDocument.Parse(errorContent);
                 var errorMessage = json.RootElement.GetProperty("Error").GetString();
                 throw new Exception(errorMessage);
             }
             catch (KeyNotFoundException)
             {
-                // Jeśli serwer rzuci inny błąd (bez pola "Error"), łapiemy to bezpiecznie
+
                 throw new Exception("Wystąpił nieznany błąd serwera.");
             }
         }

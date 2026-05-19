@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace PayItOff.MauiClient.ViewModels;
@@ -26,12 +26,12 @@ public partial class BaseViewModel : ObservableObject
     [RelayCommand]
     private async Task Navigate(string route)
     {
-        IsMenuVisible = false; // Zamyka menu mobilne przed zmianą strony
+        IsMenuVisible = false;
 
         if (!string.IsNullOrWhiteSpace(route))
         {
-            // Przechodzi do wybranej strony.
-            // Upewnij się, że masz zarejestrowane ścieżki w AppShell.xaml!
+
+
             await Shell.Current.GoToAsync(route);
         }
     }

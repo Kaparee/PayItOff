@@ -18,7 +18,7 @@
         <Style x:Key="PasswordEntryBorderStyle" TargetType="Border" BasedOn="{StaticResource BaseEntryBorderStyle}">
             <Style.Triggers>
                 <DataTrigger TargetType="Border" Binding="{Binding HasError}" Value="True">
-                    <!-- Uproszczony zapis właściwości Stroke -->
+                    
                     <Setter Property="Stroke" Value="{StaticResource StatusRed}" />
                     <Setter Property="StrokeThickness" Value="2" />
                 </DataTrigger>
@@ -27,18 +27,18 @@
     </ContentPage.Resources>
 
     <ScrollView>
-        <!-- Zmiana MaximumWidthRequest zapobiega gigantycznym polom tekstowym na PC i tabletach -->
+        
         <VerticalStackLayout Spacing="25" Padding="{OnIdiom Phone='20', Default='30'}" VerticalOptions="Center" MaximumWidthRequest="450">
 
             <Label Text="PayItOff!" Style="{StaticResource Headline}" Margin="0,0,0,20" HorizontalOptions="Center" />
 
             <VerticalStackLayout Spacing="8">
-                <!-- Zrównano lewy margines (15) z paddingiem w Border, aby zachować linię pionową -->
+                
                 <Label Text="Adres E-Mail lub Nazwa Użytkownika"
                        TextColor="{StaticResource TextSubtle}"
                        Margin="15, 0, 0, 0" />
                 <Border Style="{StaticResource BaseEntryBorderStyle}">
-                    <!-- Dodano Keyboard="Email" oraz ReturnType="Next" dla lepszego UX na smartfonach -->
+                    
                     <Entry Text="{Binding EmailOrNickname}"
                            Placeholder="Wpisz email lub nickname..."
                            Keyboard="Email"
@@ -48,7 +48,7 @@
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="8">
-                <!-- Zrównano lewy margines (15) -->
+                
                 <Label Text="Hasło" TextColor="{StaticResource TextSubtle}" Margin="15, 0, 0, 0" />
                 <Border Style="{StaticResource PasswordEntryBorderStyle}">
                     <Grid ColumnDefinitions="*, Auto">
@@ -79,7 +79,7 @@
                                IsVisible="{Binding IsBusy}"
                                Color="{StaticResource PrimaryViolet}" />
 
-            <!-- Dodano margines od góry, by oddzielić przycisk od bloku formularza -->
+            
             <Button Text="Zaloguj się"
                     Command="{Binding LoginCommand}"
                     Margin="0,10,0,0" />

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using PayItOff.Application.Interfaces;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Enums;
@@ -360,7 +360,7 @@ public class SettlementService : ISettlementService
             }
             catch
             {
-                // ignorujemy błąd maila
+                // olewamy jak wysylka maila sie wywali
             }
         }
     }

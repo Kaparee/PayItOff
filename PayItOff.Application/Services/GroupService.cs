@@ -195,13 +195,13 @@ public class GroupService : IGroupService
             if (user == null) continue;
 
             var owedToUser = debts.Where(d => d.CreditorId == member.UserId).Sum(d => d.Amount);
-            var userOwes   = debts.Where(d => d.DebtorId  == member.UserId).Sum(d => d.Amount);
+            var userOwes = debts.Where(d => d.DebtorId == member.UserId).Sum(d => d.Amount);
             var overallBalance = owedToUser - userOwes;
 
             var isCreditorToCurrent = debts.Any(d =>
                 d.CreditorId == member.UserId && d.DebtorId == userId && d.Amount > 0);
 
-            // Tylko wydatki: member był w splicie ale nie płacił → jest winny płatnikowi
+
             var lines = expenses
                 .Where(e => e.PayerId != member.UserId)
                 .SelectMany(e => e.Items.SelectMany(i => i.Splits
@@ -211,26 +211,26 @@ public class GroupService : IGroupService
                 .Select(g => new GroupMemberDebtLineDto
                 {
                     CounterpartyName = ShortPersonLabel(g.First().Payer),
-                    Amount           = g.Sum(x => x.Amount),
-                    MemberOwes       = true
+                    Amount = g.Sum(x => x.Amount),
+                    MemberOwes = true
                 })
                 .OrderByDescending(l => l.Amount)
                 .ToList();
 
             memberDtos.Add(new GroupMemberBalanceDto
             {
-                UserId               = member.UserId,
-                FullName             = $"{user.Name} {user.Surname}",
-                AvatarUrl            = user.AvatarUrl != null
+                UserId = member.UserId,
+                FullName = $"{user.Name} {user.Surname}",
+                AvatarUrl = user.AvatarUrl != null
                     ? $"{baseUrl}/avatars/{user.AvatarUrl}"
                     : $"{baseUrl}/avatars/default-user-avatar.png",
-                OverallBalance       = overallBalance,
-                IsCurrentUser        = member.UserId == userId,
+                OverallBalance = overallBalance,
+                IsCurrentUser = member.UserId == userId,
                 IsCreditorToCurrentUser = isCreditorToCurrent,
-                Lines                = lines,
-                LinesTotal           = lines.Sum(l => l.Amount),
-                Expenses             = new List<MemberExpenseLineDto>(),
-                ExpensesTotal        = 0
+                Lines = lines,
+                LinesTotal = lines.Sum(l => l.Amount),
+                Expenses = new List<MemberExpenseLineDto>(),
+                ExpensesTotal = 0
             });
         }
 
@@ -240,7 +240,7 @@ public class GroupService : IGroupService
                 ExpenseId = e.Id,
                 Title = i.Name,
                 PayerName = e.Payer != null ? $"{e.Payer.Name} {e.Payer.Surname}" : "Nieznany",
-                TotalAmount = i.TotalPrice, // Używam TotalPrice z ExpenseItem
+                TotalAmount = i.TotalPrice,
                 Date = e.PurchasedAt
             }))
             .OrderByDescending(dto => dto.Date)

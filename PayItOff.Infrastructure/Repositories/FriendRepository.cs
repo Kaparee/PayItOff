@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Infrastructure.Persistence;
@@ -81,7 +81,7 @@ public class FriendRepository : IFriendRepository
         .Include(x => x.Inviter)
         .Include(x => x.Receiver)
         .Where(x => x.InviterId == userId || x.ReceiverId == userId)
-        .Where(x => x.AcceptedAt == null && x.DeclinedAt == null && x.DeletedAt == null) // Filtrujemy tylko OCZEKUJĄCE
+        .Where(x => x.AcceptedAt == null && x.DeclinedAt == null && x.DeletedAt == null)
         .ToListAsync();
     }
 }

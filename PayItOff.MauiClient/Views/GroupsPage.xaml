@@ -10,18 +10,18 @@
              x:Name="thisPage">
 
     <Grid>
-        <!-- WARSTWA 1: GŁÓWNY INTERFEJS -->
+        
         <Grid ColumnDefinitions="{OnIdiom Phone='0, *', Default='360, *'}">
 
-            <!-- MENU BOCZNE -->
+            
             <controls:SidebarMenu Grid.Column="0"
                                   ActiveTab="Groups"
                                   IsVisible="{OnIdiom Phone=False, Default=True}" />
 
-            <!-- ZAWARTOŚĆ GŁÓWNA -->
+            
             <Grid Grid.Column="1" RowDefinitions="80, Auto, *" Padding="40,0,40,40">
 
-                <!-- WYSZUKIWARKA -->
+                
                 <Border Grid.Row="0" HorizontalOptions="End" VerticalOptions="Center"
                         StrokeShape="RoundRectangle 20" BackgroundColor="Transparent"
                         Stroke="#444" StrokeThickness="1" WidthRequest="320" HeightRequest="40" Padding="15,0">
@@ -34,10 +34,10 @@
                     </Grid>
                 </Border>
 
-                <!-- LINIA ROZDZIELAJĄCA -->
+                
                 <BoxView Grid.Row="1" HeightRequest="1" Color="{StaticResource Border}" Opacity="0.5" Margin="-40,0"/>
 
-                <!-- OBSZAR LISTY -->
+                
                 <ScrollView Grid.Row="2" VerticalScrollBarVisibility="Never" Padding="0,30,0,0">
                     <VerticalStackLayout Spacing="20">
 
@@ -45,7 +45,7 @@
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="models:GroupInfoResponse">
                                     <Grid Padding="0,0,0,20">
-                                        <!-- KARTA GRUPY -->
+                                        
                                         <Border StrokeShape="RoundRectangle 15"
                                                 BackgroundColor="{StaticResource SurfaceDark}"
                                                 Padding="20" StrokeThickness="0">
@@ -56,11 +56,11 @@
                                             </Border.GestureRecognizers>
 
                                             <Grid ColumnDefinitions="60, *, Auto" ColumnSpacing="20">
-                                                <!-- AWATAR GRUPY -->
+                                                
                                                 <Border Grid.Column="0" HeightRequest="60" WidthRequest="60"
                                                         StrokeShape="RoundRectangle 30" StrokeThickness="0" BackgroundColor="#1E232D">
                                                     <Grid>
-                                                        <!-- TWARDA IKONA ZASTĘPCZA (SVG) - Wyświetli się, gdy zdjęcie nie załaduje się z localhosta -->
+                                                        
                                                         <Path Aspect="Uniform" WidthRequest="26" HeightRequest="26" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444"
                                                               Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
 
@@ -68,11 +68,11 @@
                                                     </Grid>
                                                 </Border>
 
-                                                <!-- NAZWA GRUPY -->
+                                                
                                                 <Label Grid.Column="1" Text="{Binding Name}" TextColor="White"
                                                        FontAttributes="Bold" FontSize="20" VerticalOptions="Center"/>
 
-                                                <!-- STATYSTYKI FINANSOWE -->
+                                                
                                                 <Grid Grid.Column="2" ColumnDefinitions="95, 95, 115" ColumnSpacing="10" VerticalOptions="Center" Margin="0,0,30,0">
                                                     <VerticalStackLayout Grid.Column="0">
                                                         <Label Text="Przychód" TextColor="{StaticResource TextSubtle}" FontSize="12" HorizontalOptions="Center"/>
@@ -92,7 +92,7 @@
                                             </Grid>
                                         </Border>
 
-                                        <!-- PRZYCISK GWIAZDKI (ULUBIONE) -->
+                                        
                                         <Border HorizontalOptions="End" VerticalOptions="Start"
                                                 Margin="0,15,15,0" HeightRequest="30" WidthRequest="30"
                                                 BackgroundColor="Transparent" StrokeThickness="0">
@@ -100,7 +100,7 @@
                                                 <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GroupsViewModel}}, Path=ToggleFavoriteCommand}"
                                                                       CommandParameter="{Binding .}" />
                                             </Border.GestureRecognizers>
-                                            <!-- Kształt gwiazdki wyrysowany wektorowo -->
+                                            
                                             <Path Aspect="Uniform" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center"
                                                   Fill="Transparent" Stroke="#666" StrokeThickness="1.5"
                                                   Data="M 12 0 L 15.7 8.6 L 24 9.8 L 18 15.6 L 19.4 24 L 12 20.1 L 4.6 24 L 6 15.6 L 0 9.8 L 8.3 8.6 Z">
@@ -117,7 +117,7 @@
                             </CollectionView.ItemTemplate>
                         </CollectionView>
 
-                        <!-- PRZYCISK: UTWÓRZ NOWĄ GRUPĘ -->
+                        
                         <Border StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="0"
                                 StrokeThickness="0" HeightRequest="70" Margin="0,10,0,0">
                             <Border.GestureRecognizers>
@@ -134,14 +134,14 @@
             </Grid>
         </Grid>
 
-        <!-- WARSTWA 2: CUSTOM POPUP TWORZENIA GRUPY -->
+        
         <Grid IsVisible="{Binding IsCreatePopupVisible}" BackgroundColor="#D9121212" ZIndex="200">
             <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="420"
                     BackgroundColor="{StaticResource SurfaceDark}" StrokeShape="RoundRectangle 20" Padding="35" StrokeThickness="0">
                 <VerticalStackLayout Spacing="30">
                     <Label Text="Nowa Grupa" FontSize="26" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
 
-                    <!-- WYBÓR AWATARA -->
+                    
                     <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
                         <Border Stroke="#7F00FF" StrokeThickness="2" HeightRequest="120" WidthRequest="120" HorizontalOptions="Center">
                             <Border.GestureRecognizers>
@@ -166,7 +166,7 @@
                         </Border>
                     </VerticalStackLayout>
 
-                    <!-- PRZYCISKI AKCJI POPUPA -->
+                    
                     <Grid ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,10,0,0">
                         <Button Grid.Column="0" Text="Anuluj" Command="{Binding ClosePopupCommand}"
                                 BackgroundColor="#1E232D" TextColor="White" BorderColor="#444" BorderWidth="1" HeightRequest="45" CornerRadius="10"/>

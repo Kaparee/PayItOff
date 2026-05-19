@@ -7,19 +7,19 @@
              Shell.NavBarIsVisible="False">
 
     <Grid>
-        <!-- WARSTWA 1: UKŁAD GŁÓWNY -->
+        
         <Grid ColumnDefinitions="{OnIdiom Phone='0, *', Default='360, *'}">
 
-            <!-- MENU BOCZNE (Zawsze to samo, zmieniasz tylko ActiveTab) -->
+            
             <controls:SidebarMenu Grid.Column="0"
                                   ActiveTab="Friends"
                                   IsVisible="{OnIdiom Phone=False, Default=True}" />
 
-            <!-- ZAWARTOŚĆ STRONY -->
+            
             <ScrollView Grid.Column="1" VerticalScrollBarVisibility="Always">
                 <Grid Padding="{OnIdiom Phone='15', Default='40'}" RowDefinitions="Auto, Auto, *" RowSpacing="30">
 
-                    <!-- NAGŁÓWEK MOBILNY (☰) -->
+                    
                     <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" IsVisible="{OnIdiom Phone=True, Default=False}" Margin="0,10,0,0">
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
@@ -28,27 +28,27 @@
                         <Label Text="Menu" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" Margin="5,0,0,0" FontSize="18"/>
                     </HorizontalStackLayout>
 
-                    <!-- LINIA ODCIĘCIA (PULPIT) -->
+                    
                     <BoxView Grid.Row="1" HeightRequest="1" Color="{StaticResource Border}" VerticalOptions="Start" Margin="-40,10,-40,0" IsVisible="{OnIdiom Phone=False, Default=True}" Opacity="0.5"/>
 
-                    <!-- ========================================== -->
-                    <!--          OBSZAR ROBOCZY (KONTENT)         -->
-                    <!-- ========================================== -->
+                    
+                    
+                    
                     <VerticalStackLayout Grid.Row="2" Spacing="20">
                         <Label Text="Tytuł Sekcji" TextColor="{StaticResource TextMain}" FontSize="32" FontAttributes="Bold" HorizontalOptions="Start"/>
 
-                        <!-- Tutaj wrzucaj swoje kontrolki, CollectionView, Bordery itd. -->
+                        
                         <Border StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" HeightRequest="200" Padding="20">
                             <Label Text="Miejsce na Twoją treść..." TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" VerticalOptions="Center"/>
                         </Border>
                     </VerticalStackLayout>
-                    <!-- ========================================== -->
+                    
 
                 </Grid>
             </ScrollView>
         </Grid>
 
-        <!-- WARSTWA 2: NAKŁADKA MENU (Dla telefonów - REUSE LOGIKI) -->
+        
         <Grid IsVisible="{Binding IsMenuVisible}" BackgroundColor="#CC121212" ZIndex="100">
             <Grid.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />

@@ -153,7 +153,7 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
                 || (e.PayerName ?? string.Empty).ToLowerInvariant().Contains(q)));
         }
 
-        // Tylko wydatki (kwoty dodatnie)
+
         src = src.Where(e => e.TotalAmount > 0);
 
         var grouped = src

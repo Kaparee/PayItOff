@@ -1,13 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Infrastructure.Persistence;
 
 namespace PayItOff.Infrastructure.Repositories;
 
-/// <summary>
-/// repo do historii portfela - laczy wydatki i splaty
-/// </summary>
 public class ExpenseSplitRepository : IExpenseSplitRepository
 {
     private readonly PayItOffDbContext _context;
@@ -17,9 +14,9 @@ public class ExpenseSplitRepository : IExpenseSplitRepository
         _context = context;
     }
 
-    // -------------------------------------------------------------------------
-    // glowna metoda - pobiera historie
-    // -------------------------------------------------------------------------
+
+
+
     public async Task<(List<ExpenseSplit> Splits, List<Settlement> Settlements, int TotalCount)> GetMixedHistoryAsync(
         int userId, int? targetId, string type, int page, int pageSize)
     {
@@ -130,9 +127,9 @@ public class ExpenseSplitRepository : IExpenseSplitRepository
         return (splitsResult, settlementsResult, howManyTotal);
     }
 
-    // -------------------------------------------------------------------------
-    // druga metoda - liczniki do kafelkow na gorze
-    // -------------------------------------------------------------------------
+
+
+
     public async Task<(int Total, int Incomes, int Expenses)> GetMixedHistoryCountsAsync(int userId, int? targetId)
     {
         IQueryable<ExpenseSplit> qSplits = _context.ExpenseSplits;
@@ -179,7 +176,7 @@ public class ExpenseSplitRepository : IExpenseSplitRepository
     }
 }
 
-// model pomocniczy - uzywany tylko w tym pliku
+
 internal class TransactionKeyModel
 {
     public bool IsSettlement { get; set; }

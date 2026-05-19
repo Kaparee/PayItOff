@@ -8,13 +8,13 @@
              Shell.NavBarIsVisible="False">
     <Grid>
         <Grid ColumnDefinitions="{OnIdiom Phone='0, *', Default='360, *'}">
-            <!-- Lewy Sidebar -->
+            
             <controls:SidebarMenu Grid.Column="0" ActiveTab="Home" IsVisible="{OnIdiom Phone=False, Default=True}" />
 
             <ScrollView Grid.Column="1" VerticalScrollBarVisibility="Always">
                 <Grid Padding="{OnIdiom Phone='15', Default='30'}" RowDefinitions="Auto, Auto, Auto, Auto, Auto" RowSpacing="30">
 
-                    <!-- Menu Mobile Hamburger -->
+                    
                     <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" IsVisible="{OnIdiom Phone=True, Default=False}" Margin="0,10,0,0">
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
@@ -25,10 +25,10 @@
 
                     <BoxView Grid.Row="1" HeightRequest="1" Color="{StaticResource Border}" VerticalOptions="Start" Margin="-30,10,-30,0" IsVisible="{OnIdiom Phone=False, Default=True}" />
 
-                    <!-- Sekcja: Przychody i Wydatki -->
+                    
                     <Grid Grid.Row="2" ColumnDefinitions="{OnIdiom Phone='*', Default='*, *'}" RowDefinitions="{OnIdiom Phone='Auto, Auto', Default='Auto'}" ColumnSpacing="25" RowSpacing="25">
 
-                        <!-- Panel Przychodów -->
+                        
                         <Border Grid.Row="0" Grid.Column="0" StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="5, 20" StrokeThickness="0">
                             <Grid RowDefinitions="Auto, *, Auto, Auto" RowSpacing="15">
                                 <Label Grid.Row="0" Text="Przychody" TextColor="{StaticResource StatusGreen}" FontSize="{OnIdiom Phone=22, Default=32}" HorizontalOptions="Center" FontAttributes="Bold">
@@ -74,7 +74,7 @@
                             </Grid>
                         </Border>
 
-                        <!-- Panel Wydatków -->
+                        
                         <Border Grid.Row="{OnIdiom Phone=1, Default=0}" Grid.Column="{OnIdiom Phone=0, Default=1}" StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="5, 20" StrokeThickness="0">
                             <Grid RowDefinitions="Auto, *, Auto, Auto" RowSpacing="15">
                                 <Label Grid.Row="0" Text="Wydatki" TextColor="{StaticResource StatusRed}" FontSize="{OnIdiom Phone=22, Default=32}" HorizontalOptions="Center" FontAttributes="Bold">
@@ -122,9 +122,9 @@
 
                     <BoxView Grid.Row="3" HeightRequest="1" Color="{StaticResource Border}" VerticalOptions="Center" Margin="-30,0,-30,0" />
 
-                    <!-- Ostatnia Aktywność i Aktywne Grupy -->
+                    
                     <Grid Grid.Row="4" ColumnDefinitions="*, *" ColumnSpacing="30">
-                        <!-- Lewy: Aktywność -->
+                        
                         <Border Grid.Column="0" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="25" StrokeThickness="0">
                             <Grid RowDefinitions="Auto, *">
                                 <Label Grid.Row="0" Text="Ostatnia aktywność" TextColor="{StaticResource TextMain}" FontSize="28" HorizontalOptions="Center" FontAttributes="Bold" Margin="0,0,0,15"/>
@@ -147,7 +147,7 @@
                             </Grid>
                         </Border>
 
-                        <!-- Prawy: Grupy -->
+                        
                         <Border Grid.Column="1" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="25" StrokeThickness="0">
                             <Grid RowDefinitions="Auto, *">
                                 <Label Grid.Row="0" Text="Aktywne Grupy" TextColor="{StaticResource TextMain}" FontSize="28" HorizontalOptions="Center" FontAttributes="Bold" Margin="0,0,0,5"/>
@@ -189,7 +189,7 @@
             </ScrollView>
         </Grid>
 
-        <!-- Mobilna warstwa blokująca pod Menu -->
+        
         <Grid IsVisible="{Binding IsMenuVisible}" BackgroundColor="#CC121212" ZIndex="100">
             <Grid.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
