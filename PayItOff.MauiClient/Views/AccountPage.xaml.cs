@@ -9,4 +9,13 @@ public partial class AccountPage : ContentPage
         InitializeComponent();
         BindingContext = vm;
     }
+
+    protected override async void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+        if (BindingContext is AccountsViewModel vm)
+        {
+            await vm.LoadProfileAsync();
+        }
+    }
 }

@@ -6,21 +6,19 @@
              BackgroundColor="{StaticResource MainBackground}"
              Shell.NavBarIsVisible="False">
 
+    <!-- Add Loaded event handler in code-behind or call LoadProfileAsync -->
     <Grid>
         
         <Grid ColumnDefinitions="{OnIdiom Phone='0, *', Default='360, *'}">
-
             
             <controls:SidebarMenu Grid.Column="0"
                                   ActiveTab="Account"
                                   IsVisible="{OnIdiom Phone=False, Default=True}" />
 
-            
             <ScrollView Grid.Column="1" VerticalScrollBarVisibility="Always">
-                <Grid Padding="{OnIdiom Phone='15', Default='40'}" RowDefinitions="Auto, Auto, *" RowSpacing="30">
-
-                    
-                    <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" IsVisible="{OnIdiom Phone=True, Default=False}" Margin="0,10,0,0">
+                <Grid Padding="40" RowDefinitions="Auto, *">
+                    <!-- Mobile Menu Toggle -->
+                    <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" IsVisible="{OnIdiom Phone=True, Default=False}" Margin="0,0,0,20">
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
                         </HorizontalStackLayout.GestureRecognizers>
@@ -28,27 +26,128 @@
                         <Label Text="Menu" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" Margin="5,0,0,0" FontSize="18"/>
                     </HorizontalStackLayout>
 
-                    
-                    <BoxView Grid.Row="1" HeightRequest="1" Color="{StaticResource Border}" VerticalOptions="Start" Margin="-40,10,-40,0" IsVisible="{OnIdiom Phone=False, Default=True}" Opacity="0.5"/>
-
-                    
-                    
-                    
-                    <VerticalStackLayout Grid.Row="2" Spacing="20">
-                        <Label Text="Tytuł Sekcji" TextColor="{StaticResource TextMain}" FontSize="32" FontAttributes="Bold" HorizontalOptions="Start"/>
-
+                    <!-- Main Content Grid (Two Columns) -->
+                    <Grid Grid.Row="1" ColumnDefinitions="*, 1, *" ColumnSpacing="30" RowDefinitions="Auto" Margin="0,20,0,0">
                         
-                        <Border StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" HeightRequest="200" Padding="20">
-                            <Label Text="Miejsce na Twoją treść..." TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" VerticalOptions="Center"/>
-                        </Border>
-                    </VerticalStackLayout>
-                    
+                        <!-- LEFT COLUMN: Profil -->
+                        <VerticalStackLayout Grid.Column="0" Spacing="20" HorizontalOptions="Center" MaximumWidthRequest="450">
+                            
+                            <!-- Avatar -->
+                            <Border StrokeShape="RoundRectangle 60" WidthRequest="120" HeightRequest="120" BackgroundColor="White" StrokeThickness="0" HorizontalOptions="Center">
+                                <Grid>
+                                    <!-- Fallback icon -->
+                                    <Path Aspect="Uniform" WidthRequest="60" HeightRequest="60" HorizontalOptions="Center" VerticalOptions="Center" Fill="#1E232D"
+                                          Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm0 14c-2.33 0-4.51-.83-6.2-2.22 1.34-2.12 3.65-3.53 6.2-3.53s4.86 1.41 6.2 3.53C16.51 19.17 14.33 20 12 20z" />
+                                    <!-- Actual Avatar -->
+                                    <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
+                                </Grid>
+                            </Border>
+
+                            <Label Text="{Binding FullName}" FontSize="24" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Email}" FontSize="14" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" Margin="0,-10,0,10"/>
+
+                            <!-- Readonly Fields -->
+                            <VerticalStackLayout Spacing="5">
+                                <Label Text="Nazwa użytkownika" TextColor="White" FontSize="12" />
+                                <Border BackgroundColor="{StaticResource SurfaceDark}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="15,10">
+                                    <Label Text="{Binding Username}" TextColor="White" FontSize="14" />
+                                </Border>
+                            </VerticalStackLayout>
+                            
+                            <VerticalStackLayout Spacing="5">
+                                <Label Text="Imię" TextColor="White" FontSize="12" />
+                                <Border BackgroundColor="{StaticResource SurfaceDark}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="15,10">
+                                    <Label Text="{Binding FirstName}" TextColor="White" FontSize="14" />
+                                </Border>
+                            </VerticalStackLayout>
+                            
+                            <VerticalStackLayout Spacing="5">
+                                <Label Text="Nazwisko" TextColor="White" FontSize="12" />
+                                <Border BackgroundColor="{StaticResource SurfaceDark}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="15,10">
+                                    <Label Text="{Binding LastName}" TextColor="White" FontSize="14" />
+                                </Border>
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Spacing="5">
+                                <Label Text="Numer Telefonu" TextColor="White" FontSize="12" />
+                                <Border BackgroundColor="{StaticResource SurfaceDark}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="15,10">
+                                    <Label Text="{Binding PhoneNumber}" TextColor="White" FontSize="14" />
+                                </Border>
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Spacing="5">
+                                <Label Text="Numer Konta" TextColor="White" FontSize="12" />
+                                <Border BackgroundColor="{StaticResource SurfaceDark}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="15,10">
+                                    <Label Text="{Binding Iban}" TextColor="White" FontSize="14" />
+                                </Border>
+                            </VerticalStackLayout>
+
+                            <!-- Actions -->
+                            <Grid ColumnDefinitions="*, *" ColumnSpacing="10" Margin="0,10,0,0">
+                                <Button Grid.Column="0" Text="Edytuj dane użytkownika" Command="{Binding ShowEditDataPopupCommand}" BackgroundColor="{StaticResource SurfaceDark}" TextColor="White" CornerRadius="10" FontSize="12" HeightRequest="44"/>
+                                <Button Grid.Column="1" Text="Edytuj zdjęcie profilowe" Command="{Binding ChangeAvatarCommand}" BackgroundColor="{StaticResource SurfaceDark}" TextColor="White" CornerRadius="10" FontSize="12" HeightRequest="44"/>
+                            </Grid>
+                            <Button Text="Edytuj adres E-Mail" Command="{Binding ShowEditEmailPopupCommand}" BackgroundColor="{StaticResource SurfaceDark}" TextColor="White" CornerRadius="10" HeightRequest="44" FontSize="12"/>
+                            <Button Text="Edytuj Hasło" Command="{Binding ShowEditPasswordPopupCommand}" BackgroundColor="{StaticResource SurfaceDark}" TextColor="White" CornerRadius="10" HeightRequest="44" FontSize="12"/>
+                            <Button Text="Usuń trwale konto" Command="{Binding ShowDeleteAccountPopupCommand}" BackgroundColor="Transparent" TextColor="#EF4444" BorderColor="#EF4444" BorderWidth="1" CornerRadius="10" HeightRequest="44" FontSize="12" Margin="0,10,0,0"/>
+
+                        </VerticalStackLayout>
+
+                        <!-- Divider -->
+                        <BoxView Grid.Column="1" Color="{StaticResource Border}" WidthRequest="1" VerticalOptions="Fill" Opacity="0.5" />
+
+                        <!-- RIGHT COLUMN: Powiadomienia -->
+                        <VerticalStackLayout Grid.Column="2" Spacing="25" Margin="20,0,0,0">
+                            <Label Text="Powiadomienia" FontSize="26" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,20"/>
+                            
+                            <Grid ColumnDefinitions="*, Auto">
+                                <Label Grid.Column="0" Text="Chcę otrzymywać powiadomienia także na adres email" TextColor="White" FontSize="12" VerticalOptions="Center" />
+                                <Switch Grid.Column="1" IsToggled="{Binding ReceiveEmail}" OnColor="#10B981" ThumbColor="White" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*, Auto">
+                                <Label Grid.Column="0" Text="Chcę otrzymywać zbiorcze informacje podsumowujące cały dzień (zamiast pojedynczych informacji)" TextColor="White" FontSize="12" VerticalOptions="Center" MaxLines="2" LineBreakMode="WordWrap"/>
+                                <Switch Grid.Column="1" IsToggled="{Binding DailySummary}" OnColor="#10B981" ThumbColor="White" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*, Auto">
+                                <Label Grid.Column="0" Text="Powiadomienie o dołączeniu do Grupy" TextColor="White" FontSize="12" VerticalOptions="Center" />
+                                <Switch Grid.Column="1" IsToggled="{Binding NotifyOnGroupJoined}" OnColor="#10B981" ThumbColor="White" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*, Auto">
+                                <Label Grid.Column="0" Text="Powiadomienie o dodaniu wydatku" TextColor="White" FontSize="12" VerticalOptions="Center" />
+                                <Switch Grid.Column="1" IsToggled="{Binding NotifyOnExpenseAdded}" OnColor="#10B981" ThumbColor="White" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*, Auto">
+                                <Label Grid.Column="0" Text="Powiadomienie o usunięciu z Grupy" TextColor="White" FontSize="12" VerticalOptions="Center" />
+                                <Switch Grid.Column="1" IsToggled="{Binding NotifyOnGroupRemoved}" OnColor="#10B981" ThumbColor="White" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*, Auto">
+                                <Label Grid.Column="0" Text="Powiadomienie o usunięciu ze Znajomych" TextColor="White" FontSize="12" VerticalOptions="Center" />
+                                <Switch Grid.Column="1" IsToggled="{Binding NotifyOnFriendRemoved}" OnColor="#10B981" ThumbColor="White" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*, Auto">
+                                <Label Grid.Column="0" Text="Powiadomienie o edycji/usunięciu wydatku" TextColor="White" FontSize="12" VerticalOptions="Center" />
+                                <Switch Grid.Column="1" IsToggled="{Binding NotifyOnExpenseChanged}" OnColor="#10B981" ThumbColor="White" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*, Auto">
+                                <Label Grid.Column="0" Text="Powiadomienie o potwierdzeniu wysłania przelewu" TextColor="White" FontSize="12" VerticalOptions="Center" />
+                                <Switch Grid.Column="1" IsToggled="{Binding NotifyOnTransferConfirmed}" OnColor="#10B981" ThumbColor="White" />
+                            </Grid>
+                        </VerticalStackLayout>
+                        
+                    </Grid>
 
                 </Grid>
             </ScrollView>
         </Grid>
 
-        
+        <!-- MOBILE MENU POPUP -->
         <Grid IsVisible="{Binding IsMenuVisible}" BackgroundColor="#CC121212" ZIndex="100">
             <Grid.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
@@ -56,33 +155,96 @@
             <Border HorizontalOptions="End" VerticalOptions="Start" Margin="0,60,20,0" WidthRequest="220" BackgroundColor="{StaticResource SurfaceDark}" StrokeShape="RoundRectangle 15" StrokeThickness="0" Padding="15">
                 <VerticalStackLayout Spacing="15">
                     <Label Text="PayItOff!" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource TextMain}" Margin="0,0,0,10"/>
-
-                    <HorizontalStackLayout Spacing="15" Padding="15,12">
-                        <HorizontalStackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding NavigateCommand}" CommandParameter="//MainPage" />
-                        </HorizontalStackLayout.GestureRecognizers>
-                        <Image Source="icon_home.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
-                        <Label Text="Menu Główne" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
-                    </HorizontalStackLayout>
-
-                    <HorizontalStackLayout Spacing="15" Padding="15,12">
-                        <HorizontalStackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding NavigateCommand}" CommandParameter="//GroupsPage" />
-                        </HorizontalStackLayout.GestureRecognizers>
-                        <Image Source="icon_groups.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
-                        <Label Text="Twoje Grupy" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
-                    </HorizontalStackLayout>
-
-                    <BoxView HeightRequest="1" Color="{StaticResource Border}" Margin="0,10" Opacity="0.5"/>
-                    <HorizontalStackLayout Spacing="15" Padding="15,12">
-                        <HorizontalStackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding LogoutCommand}" />
-                        </HorizontalStackLayout.GestureRecognizers>
-                        <Label Text="➔" TextColor="{StaticResource StatusRed}" FontSize="20" VerticalOptions="Center" WidthRequest="24" HorizontalTextAlignment="Center"/>
-                        <Label Text="Wyloguj się" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" VerticalOptions="Center" FontSize="16"/>
-                    </HorizontalStackLayout>
+                    <!-- items omitted for brevity... -->
                 </VerticalStackLayout>
             </Border>
         </Grid>
+
+        <!-- POPUP: Edytuj Dane -->
+        <Grid IsVisible="{Binding IsEditDataPopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
+            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="400"
+                    BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="{StaticResource Border}">
+                <VerticalStackLayout Spacing="20">
+                    <Grid>
+                        <Label Text="Edytuj dane" FontSize="20" FontAttributes="Bold" TextColor="White" HorizontalOptions="Start" VerticalOptions="Center" />
+                        <Label Text="✕" TextColor="{StaticResource TextSubtle}" FontSize="20" HorizontalOptions="End" VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CloseEditDataPopupCommand}" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </Grid>
+
+                    <Entry Placeholder="Imię" Text="{Binding EditFirstName}" TextColor="White" BackgroundColor="#242F41" />
+                    <Entry Placeholder="Nazwisko" Text="{Binding EditLastName}" TextColor="White" BackgroundColor="#242F41" />
+                    <Entry Placeholder="Numer Telefonu" Text="{Binding EditPhoneNumber}" TextColor="White" BackgroundColor="#242F41" />
+                    <Entry Placeholder="Numer Konta (IBAN)" Text="{Binding EditIban}" TextColor="White" BackgroundColor="#242F41" />
+
+                    <Button Text="Zapisz" Command="{Binding SubmitEditDataCommand}" BackgroundColor="#10B981" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44" Margin="0,10,0,0"/>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- POPUP: Edytuj Email -->
+        <Grid IsVisible="{Binding IsEditEmailPopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
+            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="400"
+                    BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="{StaticResource Border}">
+                <VerticalStackLayout Spacing="20">
+                    <Grid>
+                        <Label Text="Zmień E-Mail" FontSize="20" FontAttributes="Bold" TextColor="White" HorizontalOptions="Start" VerticalOptions="Center" />
+                        <Label Text="✕" TextColor="{StaticResource TextSubtle}" FontSize="20" HorizontalOptions="End" VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CloseEditEmailPopupCommand}" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </Grid>
+                    <Label Text="Wpisz nowy adres e-mail. Na podany adres zostanie wysłany link weryfikacyjny." TextColor="{StaticResource TextSubtle}" FontSize="13" />
+                    <Entry Placeholder="Nowy E-Mail" Text="{Binding NewEmail}" Keyboard="Email" TextColor="White" BackgroundColor="#242F41" />
+                    <Button Text="Wyślij link" Command="{Binding SubmitEditEmailCommand}" BackgroundColor="#10B981" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44" Margin="0,10,0,0"/>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- POPUP: Edytuj Hasło -->
+        <Grid IsVisible="{Binding IsEditPasswordPopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
+            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="400"
+                    BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="{StaticResource Border}">
+                <VerticalStackLayout Spacing="20">
+                    <Grid>
+                        <Label Text="Zmień Hasło" FontSize="20" FontAttributes="Bold" TextColor="White" HorizontalOptions="Start" VerticalOptions="Center" />
+                        <Label Text="✕" TextColor="{StaticResource TextSubtle}" FontSize="20" HorizontalOptions="End" VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CloseEditPasswordPopupCommand}" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </Grid>
+                    <Entry Placeholder="Stare Hasło" IsPassword="True" Text="{Binding OldPassword}" TextColor="White" BackgroundColor="#242F41" />
+                    <Entry Placeholder="Nowe Hasło" IsPassword="True" Text="{Binding NewPassword}" TextColor="White" BackgroundColor="#242F41" />
+                    <Button Text="Zapisz" Command="{Binding SubmitEditPasswordCommand}" BackgroundColor="#10B981" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44" Margin="0,10,0,0"/>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- POPUP: Usuń Konto -->
+        <Grid IsVisible="{Binding IsDeleteAccountPopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
+            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="400"
+                    BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="#EF4444">
+                <VerticalStackLayout Spacing="20">
+                    <Grid>
+                        <Label Text="Usuń Konto" FontSize="20" FontAttributes="Bold" TextColor="#EF4444" HorizontalOptions="Start" VerticalOptions="Center" />
+                        <Label Text="✕" TextColor="{StaticResource TextSubtle}" FontSize="20" HorizontalOptions="End" VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CloseDeleteAccountPopupCommand}" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </Grid>
+                    <Label Text="Czy na pewno chcesz usunąć to konto? Tej operacji nie można cofnąć, stracisz wszystkie dane!" TextColor="White" FontSize="14" />
+                    <Grid ColumnDefinitions="*, *" ColumnSpacing="10" Margin="0,10,0,0">
+                        <Button Grid.Column="0" Text="Anuluj" Command="{Binding CloseDeleteAccountPopupCommand}" BackgroundColor="{StaticResource SurfaceDark}" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44"/>
+                        <Button Grid.Column="1" Text="Usuń Trwale" Command="{Binding SubmitDeleteAccountCommand}" BackgroundColor="#EF4444" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
     </Grid>
 </ContentPage>

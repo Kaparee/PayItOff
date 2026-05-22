@@ -32,6 +32,7 @@ namespace PayItOff.MauiClient
             builder.Services.AddScoped<SettlementService>();
             builder.Services.AddScoped<GroupService>();
             builder.Services.AddScoped<FriendService>();
+            builder.Services.AddScoped<UserService>();
 
             // ViewModels
             builder.Services.AddTransient<RegisterViewModel>();

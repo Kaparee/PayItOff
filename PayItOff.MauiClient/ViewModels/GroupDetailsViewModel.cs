@@ -87,8 +87,8 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
     private async Task GoBackAsync() => await Shell.Current.GoToAsync("//GroupsPage");
 
     [RelayCommand]
-    private Task AddExpenseAsync() =>
-        Shell.Current.DisplayAlertAsync("Info", "Dodawanie wydatków z tego widoku — użyj listy wydatków w grupie (wkrótce).", "OK");
+    private async Task AddExpenseAsync() =>
+        await Shell.Current.GoToAsync($"{nameof(Views.AddExpensePage)}?groupId={GroupId}");
 
     [RelayCommand]
     private Task ManageSettlementAsync() => Shell.Current.DisplayAlertAsync("Info", "Zarządzanie rozliczeniem — wkrótce.", "OK");

@@ -1,4 +1,4 @@
-﻿using PayItOff.MauiClient.Views;
+using PayItOff.MauiClient.Views;
 
 namespace PayItOff.MauiClient
 {
@@ -15,6 +15,7 @@ namespace PayItOff.MauiClient
             Routing.RegisterRoute(nameof(NotificationsPage), typeof(NotificationsPage));
             Routing.RegisterRoute(nameof(ArchivePage), typeof(ArchivePage));
             Routing.RegisterRoute(nameof(GroupDetailsPage), typeof(GroupDetailsPage));
+            Routing.RegisterRoute(nameof(AddExpensePage), typeof(AddExpensePage));
         }
     }
 }
