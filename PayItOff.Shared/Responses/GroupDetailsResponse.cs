@@ -12,6 +12,7 @@ public class GroupDetailsResponse
 public class GroupMemberDebtLineDto
 {
     public string CounterpartyName { get; set; } = string.Empty;
+    public string AvatarUrl { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public bool MemberOwes { get; set; }
 }

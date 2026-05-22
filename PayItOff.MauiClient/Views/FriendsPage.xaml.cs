@@ -4,9 +4,18 @@ namespace PayItOff.MauiClient.Views;
 
 public partial class FriendsPage : ContentPage
 {
-    public FriendsPage(FriendsViewModel vm)
+    private readonly FriendsViewModel _viewModel;
+
+    public FriendsPage(FriendsViewModel viewModel)
     {
         InitializeComponent();
-        BindingContext = vm;
+        _viewModel = viewModel;
+        BindingContext = _viewModel;
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        _viewModel.LoadFriendsCommand.Execute(null);
     }
 }

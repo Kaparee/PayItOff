@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using PayItOff.Application.Interfaces;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Exceptions;
@@ -32,14 +32,21 @@ public class FriendService : IFriendService
         {
             FriendId = data.Friend!.Id,
             InviteId = data.InviteId,
-            AvatarUrl = data.Friend!.AvatarUrl!,
+            AvatarUrl = $"{baseUrl}/avatars/{data.Friend!.AvatarUrl ?? "default-user-avatar.png"}",
             Name = data.Friend.Name,
             Surname = data.Friend.Surname,
             Nickname = data.Friend.Nickname,
             PhoneNumber = data.Friend.PhoneNumber,
             Balance = data.Balance,
-            SharedGroupAvatars = data.SharedAvatars
-                .Select(avatar => $"{baseUrl}/avatars/{avatar ?? "default-avatar.png"}")
+            Income = data.Income,
+            Expense = data.Expense,
+            SharedGroups = data.SharedGroups
+                .Select(group => new SharedGroupResponse
+                {
+                    GroupId = group.GroupId,
+                    Name = group.Name,
+                    AvatarUrl = $"{baseUrl}/avatars/{group.AvatarUrl ?? "default-avatar.png"}"
+                })
                 .ToList()
         }).ToList();
 
@@ -51,18 +58,35 @@ public class FriendService : IFriendService
         var user = await _userRepository.GetUserByIdAsync(userId);
         if (user is null) { throw new UserNotFoundException(); }
 
-        var friend = await _userRepository.GetUserByIdAsync(request.TargetUserId);
+        User? friend = null;
+
+        if (request.TargetUserId.HasValue)
+        {
+            friend = await _userRepository.GetUserByIdAsync(request.TargetUserId.Value);
+        }
+        else if (!string.IsNullOrWhiteSpace(request.Nickname))
+        {
+            friend = await _userRepository.GetUserByNicknameAsync(request.Nickname.Trim());
+        }
+        else if (!string.IsNullOrWhiteSpace(request.Email))
+        {
+            friend = await _userRepository.GetUserByEmailAsync(request.Email.Trim());
+        }
+        else if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+        {
+            friend = await _userRepository.GetUserByPhoneNumberAsync(request.PhoneNumber.Trim());
+        }
+
         if (friend is null) { throw new UserNotFoundException(); }
+        if (friend.Id == userId) { throw new System.Exception("Nie możesz zaprosić samego siebie."); }
 
         var isExists = await _friendRepository.IsFriendInviteExistAsync(userId, friend.Id);
         if (isExists == true) { throw new FriendInvitationAlreadyExistsException(); }
 
-
-        var existingFriendship = await _friendRepository.GetUsersFriendshipAsync(userId, request.TargetUserId);
+        var existingFriendship = await _friendRepository.GetUsersFriendshipAsync(userId, friend.Id);
 
         if (existingFriendship is not null)
         {
-
             existingFriendship.ReInvite(user, friend);
             await _friendRepository.UpdateAsync(existingFriendship);
         }
@@ -70,13 +94,14 @@ public class FriendService : IFriendService
         {
             var invite = Friend.Invite(
                 user,
-                friend!
+                friend
             );
             await _friendRepository.AddAsync(invite);
         }
 
         await _unitOfWork.SaveChangesAsync();
     }
+
 
     public async Task AcceptInviteAsync(int userId, UpdateInviteRequest request)
     {
@@ -138,5 +163,35 @@ public class FriendService : IFriendService
                 IsIncoming = !isInviter
             };
         }).ToList();
+    }
+
+    public async Task<SearchUserResponse?> SearchUserAsync(string? nickname, string? email, string? phoneNumber)
+    {
+        User? friend = null;
+
+        if (!string.IsNullOrWhiteSpace(nickname))
+        {
+            friend = await _userRepository.GetUserByNicknameAsync(nickname.Trim());
+        }
+        else if (!string.IsNullOrWhiteSpace(email))
+        {
+            friend = await _userRepository.GetUserByEmailAsync(email.Trim());
+        }
+        else if (!string.IsNullOrWhiteSpace(phoneNumber))
+        {
+            friend = await _userRepository.GetUserByPhoneNumberAsync(phoneNumber.Trim());
+        }
+
+        if (friend is null) return null;
+
+        var baseUrl = _configuration["AppUrls:BackendUrl"];
+        return new SearchUserResponse
+        {
+            Id = friend.Id,
+            AvatarUrl = $"{baseUrl}/avatars/{friend.AvatarUrl ?? "default-user-avatar.png"}",
+            Name = friend.Name,
+            Surname = friend.Surname,
+            Nickname = friend.Nickname
+        };
     }
 }

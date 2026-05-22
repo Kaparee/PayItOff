@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PayItOff.Application.Interfaces;
 using PayItOff.Shared.Requests;
@@ -57,5 +57,13 @@ public class FriendController : ControllerBase
     {
         await _friendService.RemoveFriendAsync(GetUserId(), request);
         return NoContent();
+    }
+
+    [HttpGet("search-user")]
+    public async Task<ActionResult<SearchUserResponse>> SearchUser([FromQuery] string? nickname, [FromQuery] string? email, [FromQuery] string? phoneNumber)
+    {
+        var result = await _friendService.SearchUserAsync(nickname, email, phoneNumber);
+        if (result == null) return NotFound("Nie znaleziono użytkownika o podanych kryteriach.");
+        return Ok(result);
     }
 }

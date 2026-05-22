@@ -1,4 +1,4 @@
-﻿namespace PayItOff.Shared.Responses
+namespace PayItOff.Shared.Responses
 {
     public class FriendListResponse
     {
@@ -9,7 +9,9 @@
         public required string Surname { get; set; }
         public required string Nickname { get; set; }
         public string? PhoneNumber { get; set; }
-        public required List<string> SharedGroupAvatars { get; set; }
+        public required List<SharedGroupResponse> SharedGroups { get; set; }
         public required decimal Balance { get; set; }
+        public required decimal Income { get; set; }
+        public required decimal Expense { get; set; }
     }
 }

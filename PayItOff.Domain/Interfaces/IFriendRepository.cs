@@ -1,10 +1,10 @@
-﻿using PayItOff.Domain.Entities;
+using PayItOff.Domain.Entities;
 
 namespace PayItOff.Domain.Interfaces;
 
 public interface IFriendRepository
 {
-    Task<List<(User? Friend, int InviteId, decimal Balance, List<string> SharedAvatars)>> GetUserFriendListAsync(int userId);
+    Task<List<(User? Friend, int InviteId, decimal Balance, decimal Income, decimal Expense, List<(int GroupId, string Name, string? AvatarUrl)> SharedGroups)>> GetUserFriendListAsync(int userId);
     Task<bool> IsFriendInviteExistAsync(int userId, int targetUserId);
     Task AddAsync(Friend friend);
     Task UpdateAsync(Friend friend);

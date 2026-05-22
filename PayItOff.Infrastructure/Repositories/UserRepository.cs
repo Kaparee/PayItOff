@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Infrastructure.Persistence;
@@ -78,4 +78,19 @@ public class UserRepository : IUserRepository
             .Where(x => userIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id);
     }
+
+    public async Task<User?> GetUserByNicknameAsync(string nickname)
+    {
+        return await _context.Users
+            .Where(x => x.DeletedAt == null)
+            .FirstOrDefaultAsync(x => x.Nickname == nickname);
+    }
+
+    public async Task<User?> GetUserByPhoneNumberAsync(string phoneNumber)
+    {
+        return await _context.Users
+            .Where(x => x.DeletedAt == null)
+            .FirstOrDefaultAsync(x => x.PhoneNumber == phoneNumber);
+    }
 }
+

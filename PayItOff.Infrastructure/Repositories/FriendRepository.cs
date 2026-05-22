@@ -14,7 +14,7 @@ public class FriendRepository : IFriendRepository
         _context = context;
     }
 
-    public async Task<List<(User? Friend, int InviteId, decimal Balance, List<string> SharedAvatars)>> GetUserFriendListAsync(int userId)
+    public async Task<List<(User? Friend, int InviteId, decimal Balance, decimal Income, decimal Expense, List<(int GroupId, string Name, string? AvatarUrl)> SharedGroups)>> GetUserFriendListAsync(int userId)
     {
         var rawData = await _context.Friends
             .Where(x => x.InviterId == userId || x.ReceiverId == userId)
@@ -25,21 +25,41 @@ public class FriendRepository : IFriendRepository
 
                 InviteId = x.Id,
 
-                Balance = _context.GroupDebts
-                    .Where(gd => (gd.CreditorId == userId && gd.DebtorId == (x.InviterId == userId ? x.ReceiverId : x.InviterId)) ||
-                                 (gd.DebtorId == userId && gd.CreditorId == (x.InviterId == userId ? x.ReceiverId : x.InviterId)))
-                    .Sum(gd => gd.CreditorId == userId ? gd.Amount : -gd.Amount),
+                Balance = (_context.ExpenseSplits
+                    .Where(s => s.ExpenseItem.Expense.DeletedAt == null &&
+                                s.ExpenseItem.Expense.PayerId == userId &&
+                                s.UserId == (x.InviterId == userId ? x.ReceiverId : x.InviterId))
+                    .Sum(s => (decimal?)s.OwedAmount) ?? 0)
+                    -
+                    (_context.ExpenseSplits
+                    .Where(s => s.ExpenseItem.Expense.DeletedAt == null &&
+                                s.ExpenseItem.Expense.PayerId == (x.InviterId == userId ? x.ReceiverId : x.InviterId) &&
+                                s.UserId == userId)
+                    .Sum(s => (decimal?)s.OwedAmount) ?? 0),
 
-                SharedAvatars = _context.Groups
+                Income = _context.ExpenseSplits
+                    .Where(s => s.ExpenseItem.Expense.DeletedAt == null &&
+                                s.ExpenseItem.Expense.PayerId == userId &&
+                                s.UserId == (x.InviterId == userId ? x.ReceiverId : x.InviterId))
+                    .Sum(s => (decimal?)s.OwedAmount) ?? 0,
+
+                Expense = _context.ExpenseSplits
+                    .Where(s => s.ExpenseItem.Expense.DeletedAt == null &&
+                                s.ExpenseItem.Expense.PayerId == (x.InviterId == userId ? x.ReceiverId : x.InviterId) &&
+                                s.UserId == userId)
+                    .Sum(s => (decimal?)s.OwedAmount) ?? 0,
+
+                SharedGroups = _context.Groups
                     .Where(g => g.DeletedAt == null)
                     .Where(g => _context.GroupMembers.Any(gm => gm.GroupId == g.Id && gm.UserId == userId))
                     .Where(g => _context.GroupMembers.Any(gm => gm.GroupId == g.Id && gm.UserId == (x.InviterId == userId ? x.ReceiverId : x.InviterId)))
-                    .Select(g => g.AvatarUrl)
+                    .OrderByDescending(g => g.CreatedAt)
+                    .Select(g => new { GroupId = g.Id, Name = g.Name, AvatarUrl = g.AvatarUrl })
                     .ToList()
             })
             .ToListAsync();
 
-        return rawData.ConvertAll(x => (x.FriendEntity, x.InviteId, x.Balance, x.SharedAvatars));
+        return rawData.ConvertAll(x => (x.FriendEntity, x.InviteId, x.Balance, x.Income, x.Expense, x.SharedGroups.Select(g => (g.GroupId, g.Name, g.AvatarUrl)).ToList()));
     }
 
     public async Task<bool> IsFriendInviteExistAsync(int userId, int targetUserId)

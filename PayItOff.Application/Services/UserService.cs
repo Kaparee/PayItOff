@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using PayItOff.Application.Interfaces;
@@ -164,9 +164,12 @@ public class UserService : IUserService
         if (user is null) { throw new UserNotFoundException(); }
 
         var savedFileName = await _fileService.SaveAvatarAsync(avatar);
-        if (savedFileName != null && user!.AvatarUrl != null)
+        if (savedFileName != null)
         {
-            _fileService.DeleteFile(user.AvatarUrl);
+            if (user!.AvatarUrl != null)
+            {
+                _fileService.DeleteFile(user.AvatarUrl);
+            }
             user.UpdateAvatar(savedFileName);
         }
 

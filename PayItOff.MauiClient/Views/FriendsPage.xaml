@@ -2,87 +2,661 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:PayItOff.MauiClient.Controls"
+             xmlns:viewmodels="clr-namespace:PayItOff.MauiClient.ViewModels"
+             xmlns:converters="clr-namespace:PayItOff.MauiClient.Converters"
              x:Class="PayItOff.MauiClient.Views.FriendsPage"
+             Title="{Binding Title}"
              BackgroundColor="{StaticResource MainBackground}"
-             Shell.NavBarIsVisible="False">
+             Shell.NavBarIsVisible="False"
+             x:Name="thisPage">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:InverseBoolConverter x:Key="InverseBool" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <Grid>
-        
+        <!-- WARSTWA 1: GŁÓWNY INTERFEJS -->
         <Grid ColumnDefinitions="{OnIdiom Phone='0, *', Default='360, *'}">
 
-            
+            <!-- MENU BOCZNE -->
             <controls:SidebarMenu Grid.Column="0"
-                                  ActiveTab="Friends"
-                                  IsVisible="{OnIdiom Phone=False, Default=True}" />
+                                   ActiveTab="Friends"
+                                   IsVisible="{OnIdiom Phone=False, Default=True}" />
 
-            
-            <ScrollView Grid.Column="1" VerticalScrollBarVisibility="Always">
-                <Grid Padding="{OnIdiom Phone='15', Default='40'}" RowDefinitions="Auto, Auto, *" RowSpacing="30">
+            <!-- ZAWARTOŚĆ GŁÓWNA -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-                    
-                    <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" IsVisible="{OnIdiom Phone=True, Default=False}" Margin="0,10,0,0">
-                        <HorizontalStackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
-                        </HorizontalStackLayout.GestureRecognizers>
-                        <Label Text="☰" TextColor="{StaticResource TextMain}" FontSize="28" VerticalOptions="Center"/>
-                        <Label Text="Menu" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" Margin="5,0,0,0" FontSize="18"/>
-                    </HorizontalStackLayout>
+                <!-- Menu na telefonie -->
+                <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" IsVisible="{OnIdiom Phone=True, Default=False}" Margin="0,10,20,0">
+                    <HorizontalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
+                    </HorizontalStackLayout.GestureRecognizers>
+                    <Label Text="☰" TextColor="{StaticResource TextMain}" FontSize="28" VerticalOptions="Center"/>
+                    <Label Text="Menu" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" Margin="5,0,0,0" FontSize="18"/>
+                </HorizontalStackLayout>
 
-                    
-                    <BoxView Grid.Row="1" HeightRequest="1" Color="{StaticResource Border}" VerticalOptions="Start" Margin="-40,10,-40,0" IsVisible="{OnIdiom Phone=False, Default=True}" Opacity="0.5"/>
+                <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never">
+                    <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto" Padding="40,30,40,40">
 
-                    
-                    
-                    
-                    <VerticalStackLayout Grid.Row="2" Spacing="20">
-                        <Label Text="Tytuł Sekcji" TextColor="{StaticResource TextMain}" FontSize="32" FontAttributes="Bold" HorizontalOptions="Start"/>
+                <!-- Sekcja Podsumowania (Top Dłużnicy & Top Długi) -->
+                <Grid Grid.Row="0" ColumnDefinitions="*, *" ColumnSpacing="25" Margin="0,0,0,30">
+                    <!-- Karta Top Dłużnicy -->
+                    <Border Grid.Column="0" StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="5, 20" StrokeThickness="0">
+                        <Grid RowDefinitions="Auto, *, Auto, Auto" RowSpacing="15">
+                            <Label Grid.Row="0" Text="Top Dłużnicy" TextColor="{StaticResource StatusGreen}" FontSize="{OnIdiom Phone=22, Default=32}" HorizontalOptions="Center" FontAttributes="Bold" />
+                                    <CollectionView Grid.Row="1" ItemsSource="{Binding TopDebtors}">
+                                        <CollectionView.EmptyView>
+                                            <Label Text="Brak dłużników" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" Padding="30"/>
+                                        </CollectionView.EmptyView>
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate>
+                                                <ContentView Padding="0,0,0,5">
+                                                    <Border BackgroundColor="{StaticResource MainBackground}" Padding="15,15" StrokeThickness="0">
+                                                        <Grid ColumnDefinitions="70, *, Auto" ColumnSpacing="20">
+                                                            <!-- Awatar -->
+                                                            <Border Grid.Column="0" HeightRequest="70" WidthRequest="70" StrokeShape="RoundRectangle 15" StrokeThickness="0" VerticalOptions="Center" BackgroundColor="#1E232D">
+                                                                <Grid>
+                                                                    <Path Aspect="Uniform" WidthRequest="26" HeightRequest="26" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444" Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                                                    <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
+                                                                </Grid>
+                                                            </Border>
 
-                        
-                        <Border StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" HeightRequest="200" Padding="20">
-                            <Label Text="Miejsce na Twoją treść..." TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" VerticalOptions="Center"/>
-                        </Border>
-                    </VerticalStackLayout>
-                    
+                                                            <!-- Dane znajomego -->
+                                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                                                <Label Text="{Binding FullName}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=18}"/>
+                                                            </VerticalStackLayout>
 
+                                                            <!-- Kwota -->
+                                                            <Label Grid.Column="2" Text="{Binding IncomeFormatted}" TextColor="{StaticResource StatusGreen}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=20}" VerticalOptions="Center" HorizontalOptions="End"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </ContentView>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+
+                                    <BoxView Grid.Row="2" HeightRequest="1" Color="{StaticResource Border}" Margin="0,5"/>
+                            <Label Grid.Row="3" Text="{Binding BindingContext.TotalOwedToMe, Source={x:Reference thisPage}, StringFormat='Suma: {0:N2} zł'}" TextColor="{StaticResource TextMain}" HorizontalOptions="End" FontAttributes="Bold" FontSize="18" Padding="10,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Karta Top Długi -->
+                    <Border Grid.Column="1" StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="5, 20" StrokeThickness="0">
+                        <Grid RowDefinitions="Auto, *, Auto, Auto" RowSpacing="15">
+                            <Label Grid.Row="0" Text="Top Długi" TextColor="{StaticResource StatusRed}" FontSize="{OnIdiom Phone=22, Default=32}" HorizontalOptions="Center" FontAttributes="Bold" />
+                                    <CollectionView Grid.Row="1" ItemsSource="{Binding TopDebts}">
+                                        <CollectionView.EmptyView>
+                                            <Label Text="Brak wierzycieli" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" Padding="30"/>
+                                        </CollectionView.EmptyView>
+                                        <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                        <ContentView Padding="0,0,0,5">
+                                            <Border BackgroundColor="{StaticResource MainBackground}" Padding="15,15" StrokeThickness="0">
+                                                <Grid ColumnDefinitions="70, *, Auto" ColumnSpacing="20">
+                                                    <!-- Awatar -->
+                                                    <Border Grid.Column="0" HeightRequest="70" WidthRequest="70" StrokeShape="RoundRectangle 15" StrokeThickness="0" VerticalOptions="Center" BackgroundColor="#1E232D">
+                                                        <Grid>
+                                                            <Path Aspect="Uniform" WidthRequest="26" HeightRequest="26" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444" Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                                            <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <!-- Dane znajomego -->
+                                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                                        <Label Text="{Binding FullName}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=18}"/>
+                                                    </VerticalStackLayout>
+
+                                                    <!-- Kwota -->
+                                                    <Label Grid.Column="2" Text="{Binding ExpenseFormatted}" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=20}" VerticalOptions="Center" HorizontalOptions="End"/>
+                                                </Grid>
+                                            </Border>
+                                        </ContentView>
+                                    </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+
+                            <BoxView Grid.Row="2" HeightRequest="1" Color="{StaticResource Border}" Margin="0,5"/>
+                            <Label Grid.Row="3" Text="{Binding BindingContext.TotalOwed, Source={x:Reference thisPage}, StringFormat='Suma: {0:N2} zł'}" TextColor="{StaticResource TextMain}" HorizontalOptions="End" FontAttributes="Bold" FontSize="18" Padding="10,0"/>
+                        </Grid>
+                    </Border>
                 </Grid>
+
+                <!-- NAGŁÓWEK I WYSZUKIWARKA -->
+                <Grid Grid.Row="1" ColumnDefinitions="320, *, 320" ColumnSpacing="15" HeightRequest="60" Margin="0,0,0,20">
+                    <!-- Wyszukiwarka (po lewej) -->
+                    <Border Grid.Column="0" HorizontalOptions="Start" VerticalOptions="Center"
+                            StrokeShape="RoundRectangle 20" BackgroundColor="Transparent"
+                            Stroke="#444" StrokeThickness="1" WidthRequest="320" HeightRequest="40" Padding="15,0">
+                        <Grid ColumnDefinitions="30, *">
+                            <Label Text="🔍" VerticalOptions="Center" HorizontalOptions="Start" FontSize="14" Opacity="0.5"/>
+                            <Entry Grid.Column="1" Placeholder="Wpisz dane znajomego..."
+                                   PlaceholderColor="#666" TextColor="White" FontSize="14"
+                                   VerticalOptions="Center" BackgroundColor="Transparent"
+                                   Text="{Binding SearchQuery}"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Napis Znajomi (na środku) -->
+                    <Label Grid.Column="1" Text="Znajomi" TextColor="White" FontSize="26" FontAttributes="Bold"
+                            HorizontalOptions="Center" VerticalOptions="Center" />
+
+                    <!-- Przycisk zaproszenia (po prawej) -->
+                    <Border Grid.Column="2" BackgroundColor="Transparent" StrokeThickness="0" HeightRequest="45" WidthRequest="45"
+                            HorizontalOptions="End" VerticalOptions="Center" ToolTipProperties.Text="Dodaj znajomego">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ShowInvitePopupCommand}" />
+                        </Border.GestureRecognizers>
+                        <Image Source="icon_friends_green.png" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                </Grid>
+
+                <!-- TABY / FILTRY ZNAJOMYCH -->
+                <Grid Grid.Row="2" ColumnDefinitions="*, *, *" ColumnSpacing="15" Margin="0,0,0,20">
+                    <!-- Tab 1: Znajomi -->
+                    <Border Grid.Column="0" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="15" StrokeThickness="2" Stroke="Transparent">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding ActiveFilter}" Value="Friends">
+                                <Setter Property="Stroke" Value="#7F00FF" />
+                                <Setter Property="BackgroundColor" Value="#251E38" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ChangeFilterCommand}" CommandParameter="Friends" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout HorizontalOptions="Center">
+                            <Label Text="{Binding FriendsCount}" FontSize="{OnIdiom Phone=20, Default=24}" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
+                            <Label Text="Znajomi" FontSize="12" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Tab 2: Wysłane -->
+                    <Border Grid.Column="1" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="15" StrokeThickness="2" Stroke="Transparent">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding ActiveFilter}" Value="Sent">
+                                <Setter Property="Stroke" Value="#F59E0B" />
+                                <Setter Property="BackgroundColor" Value="#2A241A" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ChangeFilterCommand}" CommandParameter="Sent" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout HorizontalOptions="Center">
+                            <Label Text="{Binding SentCount}" FontSize="{OnIdiom Phone=20, Default=24}" FontAttributes="Bold" TextColor="#F59E0B" HorizontalOptions="Center"/>
+                            <Label Text="Wysłane" FontSize="12" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Tab 3: Oczekujące -->
+                    <Border Grid.Column="2" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="15" StrokeThickness="2" Stroke="Transparent">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding ActiveFilter}" Value="Pending">
+                                <Setter Property="Stroke" Value="{StaticResource StatusGreen}" />
+                                <Setter Property="BackgroundColor" Value="#1A2A22" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ChangeFilterCommand}" CommandParameter="Pending" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout HorizontalOptions="Center">
+                            <Label Text="{Binding PendingCount}" FontSize="{OnIdiom Phone=20, Default=24}" FontAttributes="Bold" TextColor="{StaticResource StatusGreen}" HorizontalOptions="Center"/>
+                            <Label Text="Oczekujące" FontSize="12" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <!-- NAGŁÓWKI KOLUMN TABELI -->
+                <Grid Grid.Row="3" ColumnDefinitions="60, 2*, 1.5*, 1.8*, 1.5*, 1.2*, 90" ColumnSpacing="15" Padding="20,0" Margin="0,0,0,15">
+                    <Label Grid.Column="1" Text="Imię i nazwisko" TextColor="{StaticResource TextSubtle}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
+                    <Label Grid.Column="2" Text="Nazwa użytkownika" TextColor="{StaticResource TextSubtle}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
+                    <Label Grid.Column="3" Text="Numer telefonu" TextColor="{StaticResource TextSubtle}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
+                    <Label Grid.Column="4" Text="Wspólne grupy" TextColor="{StaticResource TextSubtle}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
+                    <Label Grid.Column="5" Text="Różnica" TextColor="{StaticResource TextSubtle}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="Start"/>
+                </Grid>
+
+                <!-- OBSZAR LISTY -->
+                <VerticalStackLayout Grid.Row="4" BindableLayout.ItemsSource="{Binding Friends}" Spacing="0">
+                    <BindableLayout.EmptyView>
+                        <Label Text="{Binding EmptyListMessage}" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" Padding="40" FontSize="16" FontAttributes="Bold" />
+                    </BindableLayout.EmptyView>
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Padding="0,0,0,15">
+                                <!-- KARTA ZNAJOMEGO -->
+                                <Border StrokeShape="RoundRectangle 15"
+                                        BackgroundColor="{StaticResource SurfaceDark}"
+                                        Padding="20" StrokeThickness="1" Stroke="{StaticResource Border}">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsSentPending}" Value="True">
+                                            <Setter Property="Stroke" Value="#F59E0B" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsReceivedPending}" Value="True">
+                                            <Setter Property="Stroke" Value="#10B981" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Grid ColumnDefinitions="60, 2*, 1.5*, 1.8*, 1.5*, 1.2*, 90" ColumnSpacing="15">
+
+                                        <!-- Awatar Znajomego -->
+                                        <Border Grid.Column="0" HeightRequest="60" WidthRequest="60"
+                                                StrokeShape="RoundRectangle 30" StrokeThickness="0" BackgroundColor="#1E232D">
+                                            <Grid>
+                                                <Path Aspect="Uniform" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444"
+                                                      Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                                <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- Imię i nazwisko -->
+                                        <Label Grid.Column="1" Text="{Binding FullName, TargetNullValue='Brak danych'}" TextColor="White" FontSize="16" FontAttributes="Bold" VerticalOptions="Center" MaxLines="2" LineBreakMode="TailTruncation" />
+
+                                        <!-- Nazwa użytkownika -->
+                                        <Label Grid.Column="2" Text="{Binding Nickname, TargetNullValue='Brak danych'}" TextColor="White" FontSize="15" VerticalOptions="Center" MaxLines="1" LineBreakMode="TailTruncation">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding HasNickname}" Value="False">
+                                                    <Setter Property="TextColor" Value="{StaticResource TextSubtle}" />
+                                                    <Setter Property="FontSize" Value="13" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+
+                                        <!-- Numer telefonu -->
+                                        <Label Grid.Column="3" Text="{Binding PhoneNumber, TargetNullValue='Brak danych'}" TextColor="White" FontSize="15" VerticalOptions="Center" MaxLines="1" LineBreakMode="TailTruncation">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding HasPhoneNumber}" Value="False">
+                                                    <Setter Property="TextColor" Value="{StaticResource TextSubtle}" />
+                                                    <Setter Property="FontSize" Value="13" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+
+                                        <!-- Wspólne grupy -->
+                                        <Grid Grid.Column="4" VerticalOptions="Center">
+                                            <HorizontalStackLayout BindableLayout.ItemsSource="{Binding SharedGroupsDisplay}" Spacing="-12" IsVisible="{Binding HasSharedGroups}">
+                                                <HorizontalStackLayout.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding BindingContext.ShowSharedGroupsPopupCommand, Source={x:Reference thisPage}}" CommandParameter="{Binding .}" />
+                                                </HorizontalStackLayout.GestureRecognizers>
+                                                <BindableLayout.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border WidthRequest="44" HeightRequest="44" StrokeShape="RoundRectangle 22" Stroke="{StaticResource SurfaceDark}" StrokeThickness="2" BackgroundColor="#1E232D"
+                                                                ZIndex="{Binding ZIndex}">
+                                                            <Grid>
+                                                                <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" IsVisible="{Binding IsMoreIndicator, Converter={StaticResource InverseBool}}" />
+                                                                <Grid IsVisible="{Binding IsMoreIndicator}" BackgroundColor="#242F41">
+                                                                    <Label Text="{Binding MoreText}" TextColor="White" FontSize="14" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </BindableLayout.ItemTemplate>
+                                            </HorizontalStackLayout>
+                                            <Label Text="Brak wspólnych grup" TextColor="{StaticResource TextSubtle}" FontSize="13" VerticalOptions="Center" IsVisible="{Binding HasSharedGroups, Converter={StaticResource InverseBool}}" />
+                                        </Grid>
+
+                                        <!-- Różnica -->
+                                        <Label Grid.Column="5"
+                                               Text="{Binding BalanceAbsoluteFormatted}"
+                                               TextColor="{Binding BalanceColor}"
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               VerticalOptions="Center"
+                                               HorizontalOptions="Start"/>
+
+                                        <!-- Przyciski akcji -->
+                                        <HorizontalStackLayout Grid.Column="6" Spacing="10" VerticalOptions="Center" HorizontalOptions="Center">
+                                            <!-- ZAAKCEPTOWANI: Usuń -->
+                                            <Border WidthRequest="36" HeightRequest="36" StrokeShape="RoundRectangle 8" Stroke="#EF4444" StrokeThickness="1" BackgroundColor="Transparent" ToolTipProperties.Text="Usuń znajomego" IsVisible="{Binding IsAccepted}">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:FriendsViewModel}}, Path=RemoveFriendCommand}" CommandParameter="{Binding .}" />
+                                                </Border.GestureRecognizers>
+                                                <VisualStateManager.VisualStateGroups>
+                                                    <VisualStateGroupList>
+                                                        <VisualStateGroup Name="CommonStates">
+                                                            <VisualState Name="Normal">
+                                                                <VisualState.Setters>
+                                                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                                                    <Setter TargetName="removeIconPath" Property="Path.Fill" Value="#EF4444" />
+                                                                </VisualState.Setters>
+                                                            </VisualState>
+                                                            <VisualState Name="PointerOver">
+                                                                <VisualState.Setters>
+                                                                    <Setter Property="BackgroundColor" Value="#EF4444" />
+                                                                    <Setter TargetName="removeIconPath" Property="Path.Fill" Value="White" />
+                                                                </VisualState.Setters>
+                                                            </VisualState>
+                                                        </VisualStateGroup>
+                                                    </VisualStateGroupList>
+                                                </VisualStateManager.VisualStateGroups>
+                                                <Path x:Name="removeIconPath" Aspect="Uniform" WidthRequest="18" HeightRequest="18" HorizontalOptions="Center" VerticalOptions="Center" Fill="#EF4444"
+                                                      Data="M9 8c1.66 0 3-1.34 3-3S10.66 2 9 2 6 3.34 6 5s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V16h14v-2.5c0-2.33-4.67-3.5-7-3.5zm11.25 0l-1.41-1.41-2.09 2.08-2.09-2.08-1.41 1.41 2.08 2.09-2.08 2.09 1.41 1.41 2.09-2.08 2.09 2.08 1.41-1.41-2.08-2.09z" />
+                                            </Border>
+
+                                            <!-- WYSŁANE: Wycofaj -->
+                                            <Border WidthRequest="36" HeightRequest="36" StrokeShape="RoundRectangle 8" Stroke="#EF4444" StrokeThickness="1" BackgroundColor="Transparent" ToolTipProperties.Text="Wycofaj zaproszenie" IsVisible="{Binding IsSentPending}">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:FriendsViewModel}}, Path=RemoveFriendCommand}" CommandParameter="{Binding .}" />
+                                                </Border.GestureRecognizers>
+                                                <VisualStateManager.VisualStateGroups>
+                                                    <VisualStateGroupList>
+                                                        <VisualStateGroup Name="CommonStates">
+                                                            <VisualState Name="Normal">
+                                                                <VisualState.Setters>
+                                                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                                                    <Setter TargetName="cancelIconPath" Property="Path.Fill" Value="#EF4444" />
+                                                                </VisualState.Setters>
+                                                            </VisualState>
+                                                            <VisualState Name="PointerOver">
+                                                                <VisualState.Setters>
+                                                                    <Setter Property="BackgroundColor" Value="#EF4444" />
+                                                                    <Setter TargetName="cancelIconPath" Property="Path.Fill" Value="White" />
+                                                                </VisualState.Setters>
+                                                            </VisualState>
+                                                        </VisualStateGroup>
+                                                    </VisualStateGroupList>
+                                                </VisualStateManager.VisualStateGroups>
+                                                <Path x:Name="cancelIconPath" Aspect="Uniform" WidthRequest="18" HeightRequest="18" HorizontalOptions="Center" VerticalOptions="Center" Fill="#EF4444"
+                                                      Data="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                                            </Border>
+
+                                            <!-- OCZEKUJĄCE: Zaakceptuj -->
+                                            <Border WidthRequest="36" HeightRequest="36" StrokeShape="RoundRectangle 8" Stroke="#10B981" StrokeThickness="1" BackgroundColor="Transparent" ToolTipProperties.Text="Zaakceptuj zaproszenie" IsVisible="{Binding IsReceivedPending}">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:FriendsViewModel}}, Path=AcceptInviteCommand}" CommandParameter="{Binding .}" />
+                                                </Border.GestureRecognizers>
+                                                <VisualStateManager.VisualStateGroups>
+                                                    <VisualStateGroupList>
+                                                        <VisualStateGroup Name="CommonStates">
+                                                            <VisualState Name="Normal">
+                                                                <VisualState.Setters>
+                                                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                                                    <Setter TargetName="acceptIconPath" Property="Path.Fill" Value="#10B981" />
+                                                                </VisualState.Setters>
+                                                            </VisualState>
+                                                            <VisualState Name="PointerOver">
+                                                                <VisualState.Setters>
+                                                                    <Setter Property="BackgroundColor" Value="#10B981" />
+                                                                    <Setter TargetName="acceptIconPath" Property="Path.Fill" Value="White" />
+                                                                </VisualState.Setters>
+                                                            </VisualState>
+                                                        </VisualStateGroup>
+                                                    </VisualStateGroupList>
+                                                </VisualStateManager.VisualStateGroups>
+                                                <Path x:Name="acceptIconPath" Aspect="Uniform" WidthRequest="18" HeightRequest="18" HorizontalOptions="Center" VerticalOptions="Center" Fill="#10B981"
+                                                      Data="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                            </Border>
+
+                                            <!-- OCZEKUJĄCE: Odrzuć -->
+                                            <Border WidthRequest="36" HeightRequest="36" StrokeShape="RoundRectangle 8" Stroke="#EF4444" StrokeThickness="1" BackgroundColor="Transparent" ToolTipProperties.Text="Odrzuć zaproszenie" IsVisible="{Binding IsReceivedPending}">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:FriendsViewModel}}, Path=RemoveFriendCommand}" CommandParameter="{Binding .}" />
+                                                </Border.GestureRecognizers>
+                                                <VisualStateManager.VisualStateGroups>
+                                                    <VisualStateGroupList>
+                                                        <VisualStateGroup Name="CommonStates">
+                                                            <VisualState Name="Normal">
+                                                                <VisualState.Setters>
+                                                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                                                    <Setter TargetName="declineIconPath" Property="Path.Fill" Value="#EF4444" />
+                                                                </VisualState.Setters>
+                                                            </VisualState>
+                                                            <VisualState Name="PointerOver">
+                                                                <VisualState.Setters>
+                                                                    <Setter Property="BackgroundColor" Value="#EF4444" />
+                                                                    <Setter TargetName="declineIconPath" Property="Path.Fill" Value="White" />
+                                                                </VisualState.Setters>
+                                                            </VisualState>
+                                                        </VisualStateGroup>
+                                                    </VisualStateGroupList>
+                                                </VisualStateManager.VisualStateGroups>
+                                                <Path x:Name="declineIconPath" Aspect="Uniform" WidthRequest="18" HeightRequest="18" HorizontalOptions="Center" VerticalOptions="Center" Fill="#EF4444"
+                                                      Data="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                                            </Border>
+
+                                        </HorizontalStackLayout>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </Grid>
             </ScrollView>
+            </Grid>
         </Grid>
 
-        
-        <Grid IsVisible="{Binding IsMenuVisible}" BackgroundColor="#CC121212" ZIndex="100">
-            <Grid.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
-            </Grid.GestureRecognizers>
-            <Border HorizontalOptions="End" VerticalOptions="Start" Margin="0,60,20,0" WidthRequest="220" BackgroundColor="{StaticResource SurfaceDark}" StrokeShape="RoundRectangle 15" StrokeThickness="0" Padding="15">
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="PayItOff!" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource TextMain}" Margin="0,0,0,10"/>
+        <!-- WARSTWA 2: CUSTOM POPUP WYSZUKIWANIA ZNAJOMEGO -->
+        <Grid IsVisible="{Binding IsInvitePopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
+            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="450"
+                    BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="#2A3648">
+                <VerticalStackLayout Spacing="25">
+                    <!-- Nagłówek -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Wyszukaj znajomego" FontSize="22" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
+                        <Label Text="Wpisz dane do jednego z poniższych pól" FontSize="14" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
 
-                    <HorizontalStackLayout Spacing="15" Padding="15,12">
-                        <HorizontalStackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding NavigateCommand}" CommandParameter="//MainPage" />
-                        </HorizontalStackLayout.GestureRecognizers>
-                        <Image Source="icon_home.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
-                        <Label Text="Menu Główne" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
-                    </HorizontalStackLayout>
+                    <!-- Pole 1: Nazwa użytkownika -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Nazwa użytkownika" TextColor="{StaticResource TextSubtle}" FontSize="13" HorizontalOptions="Center"/>
+                        <Border StrokeShape="RoundRectangle 10" BackgroundColor="#242F41" StrokeThickness="0" Padding="15,0" HeightRequest="40">
+                            <Entry Text="{Binding InviteNickname}"
+                                   Placeholder="Wpisz tutaj nazwę użytkownika..."
+                                   TextColor="White"
+                                   PlaceholderColor="#666"
+                                   BackgroundColor="Transparent"
+                                   VerticalOptions="Center"
+                                   HorizontalTextAlignment="Center"/>
+                        </Border>
+                    </VerticalStackLayout>
 
-                    <HorizontalStackLayout Spacing="15" Padding="15,12">
-                        <HorizontalStackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding NavigateCommand}" CommandParameter="//GroupsPage" />
-                        </HorizontalStackLayout.GestureRecognizers>
-                        <Image Source="icon_groups.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
-                        <Label Text="Twoje Grupy" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
-                    </HorizontalStackLayout>
+                    <!-- Pole 2: Adres E-Mail -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Adres E-Mail" TextColor="{StaticResource TextSubtle}" FontSize="13" HorizontalOptions="Center"/>
+                        <Border StrokeShape="RoundRectangle 10" BackgroundColor="#242F41" StrokeThickness="0" Padding="15,0" HeightRequest="40">
+                            <Entry Text="{Binding InviteEmail}"
+                                   Placeholder="Wpisz tutaj adres email..."
+                                   Keyboard="Email"
+                                   TextColor="White"
+                                   PlaceholderColor="#666"
+                                   BackgroundColor="Transparent"
+                                   VerticalOptions="Center"
+                                   HorizontalTextAlignment="Center"/>
+                        </Border>
+                    </VerticalStackLayout>
 
-                    <BoxView HeightRequest="1" Color="{StaticResource Border}" Margin="0,10" Opacity="0.5"/>
-                    <HorizontalStackLayout Spacing="15" Padding="15,12">
-                        <HorizontalStackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding LogoutCommand}" />
-                        </HorizontalStackLayout.GestureRecognizers>
-                        <Label Text="➔" TextColor="{StaticResource StatusRed}" FontSize="20" VerticalOptions="Center" WidthRequest="24" HorizontalTextAlignment="Center"/>
-                        <Label Text="Wyloguj się" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" VerticalOptions="Center" FontSize="16"/>
-                    </HorizontalStackLayout>
+                    <!-- Pole 3: Numer Telefonu -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Numer Telefonu" TextColor="{StaticResource TextSubtle}" FontSize="13" HorizontalOptions="Center"/>
+                        <Border StrokeShape="RoundRectangle 10" BackgroundColor="#242F41" StrokeThickness="0" Padding="15,0" HeightRequest="40">
+                            <Entry Text="{Binding InvitePhoneNumber}"
+                                   Placeholder="Wpisz tutaj numer telefonu..."
+                                   Keyboard="Telephone"
+                                   TextColor="White"
+                                   PlaceholderColor="#666"
+                                   BackgroundColor="Transparent"
+                                   VerticalOptions="Center"
+                                   HorizontalTextAlignment="Center"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Znaleziony użytkownik (bloczek z awatarem, imieniem i nazwiskiem oraz nickiem) -->
+                    <Border IsVisible="{Binding IsSearchedUserVisible}" BackgroundColor="#242F41" Padding="15" StrokeShape="RoundRectangle 15" StrokeThickness="1" Stroke="#10B981">
+                        <Grid ColumnDefinitions="50, *, Auto" ColumnSpacing="15" VerticalOptions="Center">
+                            <!-- Awatar -->
+                            <Border Grid.Column="0" HeightRequest="50" WidthRequest="50" StrokeShape="RoundRectangle 25" StrokeThickness="0" BackgroundColor="#1E232D" VerticalOptions="Center">
+                                <Grid>
+                                    <Path Aspect="Uniform" WidthRequest="18" HeightRequest="18" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444" Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                    <Image Source="{Binding SearchedUser.AvatarUrl}" Aspect="AspectFill" />
+                                </Grid>
+                            </Border>
+                            <!-- Dane -->
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                <HorizontalStackLayout Spacing="5">
+                                    <Label Text="{Binding SearchedUser.Name}" TextColor="White" FontAttributes="Bold" FontSize="15" />
+                                    <Label Text="{Binding SearchedUser.Surname}" TextColor="White" FontAttributes="Bold" FontSize="15" />
+                                </HorizontalStackLayout>
+                                <Label Text="{Binding SearchedUser.Nickname, StringFormat='@{0}'}" TextColor="{StaticResource TextSubtle}" FontSize="12" />
+                            </VerticalStackLayout>
+                            <!-- Badge -->
+                            <Border Grid.Column="2" BackgroundColor="#1A2A22" Stroke="#10B981" StrokeThickness="1" StrokeShape="RoundRectangle 10" Padding="8,4" VerticalOptions="Center">
+                                <Label Text="Znaleziono" TextColor="{StaticResource StatusGreen}" FontSize="11" FontAttributes="Bold" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Przyciski akcji -->
+                    <Grid ColumnDefinitions="Auto, Auto" HorizontalOptions="Center" ColumnSpacing="20" Margin="0,10,0,0">
+                        <Button Grid.Column="0" Text="Cofnij" Command="{Binding CloseInvitePopupCommand}"
+                                BackgroundColor="#EF4444" TextColor="White" FontAttributes="Bold" HeightRequest="40" WidthRequest="120" CornerRadius="20"/>
+                        <Button Grid.Column="1" Text="Zatwierdź" Command="{Binding ConfirmInviteCommand}"
+                                BackgroundColor="#10B981" TextColor="White" FontAttributes="Bold" HeightRequest="40" WidthRequest="120" CornerRadius="20"/>
+                    </Grid>
                 </VerticalStackLayout>
             </Border>
         </Grid>
+
+        <!-- WARSTWA 3: CUSTOM POPUP POTWIERDZENIA USUNIĘCIA ZNAJOMEGO -->
+        <Grid IsVisible="{Binding IsDeletePopupVisible}" BackgroundColor="#D90C101A" ZIndex="210">
+            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="450"
+                    BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="#2A3648">
+                <VerticalStackLayout Spacing="25">
+                    <!-- Nagłówek -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding DeletePopupTitle}" FontSize="22" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
+                        <Label Text="{Binding DeletePopupSubtitle}" FontSize="14" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                    </VerticalStackLayout>
+
+                    <!-- Profil znajomego do usunięcia -->
+                    <Border BackgroundColor="{StaticResource MainBackground}" Padding="20" StrokeShape="RoundRectangle 15" StrokeThickness="0">
+                        <Grid ColumnDefinitions="60, *" ColumnSpacing="20">
+                            <!-- Awatar -->
+                            <Border Grid.Column="0" HeightRequest="60" WidthRequest="60" StrokeShape="RoundRectangle 30" StrokeThickness="0" BackgroundColor="#1E232D" VerticalOptions="Center">
+                                <Grid>
+                                    <Path Aspect="Uniform" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444" Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                    <Image Source="{Binding FriendToDelete.AvatarUrl}" Aspect="AspectFill" />
+                                </Grid>
+                            </Border>
+                            <!-- Dane -->
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                                <Label Text="{Binding FriendToDelete.FullName}" TextColor="White" FontAttributes="Bold" FontSize="18"/>
+                                <Label Text="{Binding FriendToDelete.Nickname, StringFormat='@{0}'}" TextColor="{StaticResource TextSubtle}" FontSize="14"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+
+                    <!-- Przyciski akcji -->
+                    <Grid ColumnDefinitions="Auto, Auto" HorizontalOptions="Center" ColumnSpacing="20" Margin="0,10,0,0">
+                        <Button Grid.Column="0" Text="Anuluj" Command="{Binding CancelDeleteFriendCommand}"
+                                BackgroundColor="#374151" TextColor="White" FontAttributes="Bold" HeightRequest="40" WidthRequest="120" CornerRadius="20"/>
+                        <Button Grid.Column="1" Text="Potwierdź" Command="{Binding ConfirmDeleteFriendCommand}"
+                                BackgroundColor="#EF4444" TextColor="White" FontAttributes="Bold" HeightRequest="40" WidthRequest="120" CornerRadius="20"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- WARSTWA 4: CUSTOM POPUP POWIADOMIENIA (ALERTU) -->
+        <Grid IsVisible="{Binding IsAlertPopupVisible}" BackgroundColor="#D90C101A" ZIndex="220">
+            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="450"
+                    BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1.5">
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding IsAlertError}" Value="True">
+                        <Setter Property="Stroke" Value="#EF4444" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding IsAlertError}" Value="False">
+                        <Setter Property="Stroke" Value="#10B981" />
+                    </DataTrigger>
+                </Border.Triggers>
+                <VerticalStackLayout Spacing="25" HorizontalOptions="Center">
+                    <!-- Ikona Statusu -->
+                    <Grid HeightRequest="70" WidthRequest="70" HorizontalOptions="Center">
+                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 35" WidthRequest="70" HeightRequest="70">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsAlertError}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="#2D1F24" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsAlertError}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="#1A2A22" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Grid>
+                                <!-- Wykrzyknik dla błędu -->
+                                <Path Aspect="Uniform" WidthRequest="30" HeightRequest="30" Fill="#EF4444" HorizontalOptions="Center" VerticalOptions="Center"
+                                      IsVisible="{Binding IsAlertError}"
+                                      Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                                <!-- Ptaszek dla sukcesu -->
+                                <Path Aspect="Uniform" WidthRequest="30" HeightRequest="30" Fill="#10B981" HorizontalOptions="Center" VerticalOptions="Center"
+                                      IsVisible="{Binding IsAlertError, Converter={StaticResource InverseBool}}"
+                                      Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <!-- Nagłówek i treść -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding AlertTitle}" FontSize="22" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                        <Label Text="{Binding AlertMessage}" FontSize="14" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" HorizontalTextAlignment="Center" MaxLines="5" LineBreakMode="WordWrap"/>
+                    </VerticalStackLayout>
+
+                    <!-- Przycisk Zamknięcia -->
+                    <Button Text="OK" Command="{Binding CloseAlertPopupCommand}"
+                            TextColor="White" FontAttributes="Bold" HeightRequest="40" WidthRequest="120" CornerRadius="20" HorizontalOptions="Center">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsAlertError}" Value="True">
+                                <Setter Property="BackgroundColor" Value="#EF4444" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsAlertError}" Value="False">
+                                <Setter Property="BackgroundColor" Value="#10B981" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- WARSTWA 5: CUSTOM POPUP WSPÓLNYCH GRUP -->
+        <Grid IsVisible="{Binding IsSharedGroupsPopupVisible}" BackgroundColor="#D90C101A" ZIndex="230">
+            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="400"
+                    BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="#2A3648">
+                <VerticalStackLayout Spacing="20">
+                    <Grid>
+                        <Label Text="{Binding SelectedFriendFullName, StringFormat='Wspólne grupy z: {0}'}" FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Start" VerticalOptions="Center" MaxLines="1" LineBreakMode="TailTruncation" Margin="0,0,30,0"/>
+                        <Label Text="✕" TextColor="{StaticResource TextSubtle}" FontSize="20" HorizontalOptions="End" VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CloseSharedGroupsPopupCommand}" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </Grid>
+
+                    <CollectionView ItemsSource="{Binding SelectedFriendSharedGroups}" HeightRequest="250" Margin="0,10,0,0">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <ContentView Padding="0,0,0,10">
+                                    <Border StrokeShape="RoundRectangle 12" BackgroundColor="{StaticResource SurfaceDark}" StrokeThickness="1" Stroke="{StaticResource Border}" Padding="15">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding BindingContext.GoToGroupCommand, Source={x:Reference thisPage}}" CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                        <Grid ColumnDefinitions="Auto, *">
+                                            <Border Grid.Column="0" HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0" Margin="0,0,15,0" BackgroundColor="#1E232D">
+                                                <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
+                                            </Border>
+                                            <Label Grid.Column="1" Text="{Binding Name}" TextColor="White" FontSize="16" FontAttributes="Bold" VerticalOptions="Center" />
+                                        </Grid>
+                                    </Border>
+                                </ContentView>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Button Text="Zamknij" Command="{Binding CloseSharedGroupsPopupCommand}"
+                            BackgroundColor="#2D3A54" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44" Margin="0,10,0,0"/>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
     </Grid>
 </ContentPage>

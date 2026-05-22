@@ -1,4 +1,4 @@
-﻿using PayItOff.Shared.Requests;
+using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
 
 namespace PayItOff.Application.Interfaces
@@ -11,5 +11,6 @@ namespace PayItOff.Application.Interfaces
         Task AcceptInviteAsync(int userId, UpdateInviteRequest request);
         Task DeclineInviteAsync(int userId, UpdateInviteRequest request);
         Task RemoveFriendAsync(int userId, UpdateInviteRequest request);
+        Task<SearchUserResponse?> SearchUserAsync(string? nickname, string? email, string? phoneNumber);
     }
 }

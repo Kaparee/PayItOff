@@ -1,4 +1,4 @@
-﻿using PayItOff.MauiClient.Services;
+using PayItOff.MauiClient.Services;
 using PayItOff.MauiClient.ViewModels;
 using PayItOff.MauiClient.Views;
 
@@ -31,6 +31,7 @@ namespace PayItOff.MauiClient
             builder.Services.AddScoped<AuthService>();
             builder.Services.AddScoped<SettlementService>();
             builder.Services.AddScoped<GroupService>();
+            builder.Services.AddScoped<FriendService>();
 
             // ViewModels
             builder.Services.AddTransient<RegisterViewModel>();

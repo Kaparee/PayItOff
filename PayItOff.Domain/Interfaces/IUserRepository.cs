@@ -1,4 +1,4 @@
-﻿using PayItOff.Domain.Entities;
+using PayItOff.Domain.Entities;
 
 namespace PayItOff.Domain.Interfaces;
 
@@ -14,4 +14,7 @@ public interface IUserRepository
     Task<User?> GetUserByPasswordResetTokenAsync(string token);
     Task<User?> GetUserByEmailChangeTokenAsync(string token);
     Task<Dictionary<int, User>> GetUsersByIdsAsync(IEnumerable<int> userIds);
+    Task<User?> GetUserByNicknameAsync(string nickname);
+    Task<User?> GetUserByPhoneNumberAsync(string phoneNumber);
 }
+
