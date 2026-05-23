@@ -211,8 +211,8 @@ public class GroupService : IGroupService
                 .Select(g => new GroupMemberDebtLineDto
                 {
                     CounterpartyName = ShortPersonLabel(g.First().Payer),
-                    AvatarUrl = g.First().Payer.AvatarUrl != null 
-                        ? $"{baseUrl}/avatars/{g.First().Payer.AvatarUrl}" 
+                    AvatarUrl = g.First().Payer.AvatarUrl != null
+                        ? $"{baseUrl}/avatars/{g.First().Payer.AvatarUrl}"
                         : $"{baseUrl}/avatars/default-user-avatar.png",
                     Amount = g.Sum(x => x.Amount),
                     MemberOwes = true

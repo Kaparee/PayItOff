@@ -1,7 +1,7 @@
 using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
-using System.Net.Http.Json;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace PayItOff.MauiClient.Services;
@@ -50,7 +50,7 @@ public class UserService
         var response = await _httpClient.PatchAsJsonAsync("User/modify-password", request);
         if (response.IsSuccessStatusCode)
             return true;
-            
+
         var error = await response.Content.ReadAsStringAsync();
         throw new Exception(ExtractErrorMessage(error, "Nie udało się zmienić hasła."));
     }
@@ -61,7 +61,7 @@ public class UserService
         var response = await _httpClient.PostAsJsonAsync("User/request-email-change", request);
         if (response.IsSuccessStatusCode)
             return true;
-            
+
         var error = await response.Content.ReadAsStringAsync();
         throw new Exception(ExtractErrorMessage(error, "Nie udało się wysłać żądania zmiany email."));
     }
@@ -72,8 +72,6 @@ public class UserService
         return response.IsSuccessStatusCode;
     }
 
-    // Avatar update requires multipart form data, similar to other endpoints if needed.
-    // Assuming we have a path or a stream for the file.
     public async Task<bool> UpdateAvatarAsync(FileResult file)
     {
         using var content = new MultipartFormDataContent();

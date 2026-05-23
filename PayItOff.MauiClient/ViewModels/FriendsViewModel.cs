@@ -164,7 +164,6 @@ public partial class FriendsViewModel : BaseViewModel
             }
             catch (TaskCanceledException)
             {
-                // Ignored
             }
             catch (Exception ex)
             {
@@ -558,14 +557,13 @@ public class FriendDisplayModel
             return string.IsNullOrWhiteSpace(nick) ? null : nick;
         }
     }
-    // SharedGroupAvatars removed in favor of SharedGroupsList
 
     public FriendshipStatus Status { get; set; }
 
     public bool IsAccepted => Status == FriendshipStatus.Accepted;
     public bool IsSentPending => Status == FriendshipStatus.SentPending;
     public bool IsReceivedPending => Status == FriendshipStatus.ReceivedPending;
-    
+
     public List<SharedGroupResponse> SharedGroupsList => _friend?.SharedGroups ?? new List<SharedGroupResponse>();
     public bool HasSharedGroups => SharedGroupsList.Count > 0;
     public bool HasNickname => !string.IsNullOrWhiteSpace(_friend?.Nickname ?? _pending?.Nickname);

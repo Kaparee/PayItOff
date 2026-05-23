@@ -38,10 +38,9 @@ public partial class AccountsViewModel : BaseViewModel
     [ObservableProperty]
     public partial string Iban { get; set; } = string.Empty;
 
-    // Notifications
     [ObservableProperty]
     public partial bool ReceiveEmail { get; set; }
-    
+
     [ObservableProperty]
     public partial bool DailySummary { get; set; }
 
@@ -99,7 +98,6 @@ public partial class AccountsViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            // Handle error
             Console.WriteLine(ex.Message);
         }
         finally
@@ -150,7 +148,6 @@ public partial class AccountsViewModel : BaseViewModel
         }
     }
 
-    // Popup Logic for Editing (Placeholders for next steps)
     [ObservableProperty]
     public partial bool IsEditDataPopupVisible { get; set; }
 
@@ -163,7 +160,6 @@ public partial class AccountsViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool IsDeleteAccountPopupVisible { get; set; }
 
-    // Forms
     [ObservableProperty]
     public partial string EditFirstName { get; set; } = string.Empty;
 

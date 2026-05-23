@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:PayItOff.MauiClient.ViewModels"
+             xmlns:models="clr-namespace:PayItOff.MauiClient.Models"
+             xmlns:converters="clr-namespace:PayItOff.MauiClient.Converters"
+             x:Class="PayItOff.MauiClient.Views.AddExpensePage"
+             Title=""
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource BackgroundDark}">
+             
+    <ContentPage.Resources>
+        <converters:DecimalConverter x:Key="DecimalConverter" />
+    </ContentPage.Resources>
+
+    <Grid>
+        <!-- Tło i główny grid -->
+        <Grid RowDefinitions="Auto, *">
+
+        <!-- Nagłówek -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, *" Padding="20" BackgroundColor="#1E232D">
+            <HorizontalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
+                <HorizontalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding GoBackCommand}"/>
+                </HorizontalStackLayout.GestureRecognizers>
+                <Label Text="&#x2190;" FontSize="24" TextColor="White" VerticalOptions="Center"/>
+                <Label Text="Powrót" FontSize="20" FontAttributes="Bold" TextColor="White" VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+
+            <Label Grid.Column="1" Text="{Binding GroupName}" FontSize="28" FontAttributes="Bold"
+                   TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"/>
+        </Grid>
+
+        <!-- Główna zawartość -->
+        <Grid Grid.Row="1" ColumnDefinitions="600, *, 350">
+
+            <!-- LEWA KOLUMNA: pozycje i kategorie -->
+            <Grid Grid.Column="0" RowDefinitions="Auto, *, Auto" Padding="20" BackgroundColor="#2A303C">
+
+                <Frame Grid.Row="0" BackgroundColor="#1A1F27" BorderColor="Transparent" CornerRadius="10" Padding="15,5">
+                    <Entry Placeholder="Wpisz tutaj nazwę produktu..."
+                           Text="{Binding NewItemName}"
+                           ReturnCommand="{Binding AddNewItemCommand}"
+                           TextColor="White" PlaceholderColor="#888"/>
+                </Frame>
+
+                <ScrollView Grid.Row="1" Margin="0,20,0,0">
+                    <VerticalStackLayout Spacing="20">
+                        <!-- Bufor: nowo dodane (edytowalne) -->
+                        <VerticalStackLayout Spacing="10">
+                            <Grid ColumnDefinitions="3*, 2.5*, 1.2*, 1.2*, 35" ColumnSpacing="5" Padding="15,0,15,0">
+                                <Label Grid.Column="1" Text="Kto zapłacił" FontSize="10" TextColor="#AAA" HorizontalOptions="Start"/>
+                                <Label Grid.Column="2" Text="Szt." FontSize="10" TextColor="#AAA" HorizontalOptions="Center"/>
+                                <Label Grid.Column="3" Text="Cena/szt." FontSize="10" TextColor="#AAA" HorizontalOptions="Center"/>
+                            </Grid>
+                            
+                            <Border BackgroundColor="Transparent" StrokeThickness="0">
+                                <Border.GestureRecognizers>
+                                    <DropGestureRecognizer AllowDrop="True" Drop="OnUncategorizedDrop" DragOver="OnDragOver" DragLeave="OnDragLeave"/>
+                                </Border.GestureRecognizers>
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding BufferItems}" Spacing="5" MinimumHeightRequest="40">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="models:ReceiptItem">
+                                            <Frame BackgroundColor="#353D4A" CornerRadius="8" BorderColor="{Binding GroupColor}" Padding="10,6" Margin="0">
+                                                <Frame.GestureRecognizers>
+                                                    <DragGestureRecognizer CanDrag="True" DragStarting="OnItemDragStarting"/>
+                                                    <DropGestureRecognizer AllowDrop="True" Drop="OnItemDrop" DragOver="OnDragOver" DragLeave="OnDragLeave"/>
+                                                </Frame.GestureRecognizers>
+                                                <Grid ColumnDefinitions="3*, 2.5*, 1.2*, 1.2*, 35" ColumnSpacing="5">
+                                                    <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" FontSize="13" LineBreakMode="TailTruncation"/>
+                                                    
+                                                    <Picker Grid.Column="1" ItemsSource="{Binding BindingContext.GroupMembers, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                            SelectedIndexChanged="OnPayerSelectedIndexChanged"
+                                                            Loaded="OnPayerPickerLoaded"
+                                                            TextColor="White" FontSize="12" HeightRequest="36" VerticalOptions="Center" HorizontalOptions="Fill"/>
+                                                    
+                                                    <Entry Grid.Column="2" Text="{Binding Quantity, Converter={StaticResource DecimalConverter}}" Keyboard="Numeric" TextColor="White" FontSize="12" HeightRequest="36" VerticalOptions="Center" HorizontalTextAlignment="Center"/>
+                                                    
+                                                    <Entry Grid.Column="3" Text="{Binding UnitPrice, Converter={StaticResource DecimalConverter}}" Keyboard="Numeric" TextColor="White" FontSize="12" HeightRequest="36" VerticalOptions="Center" HorizontalTextAlignment="Center"/>
+
+                                                    <Button Grid.Column="4" Text="✓" Command="{Binding BindingContext.ConfirmItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="{StaticResource StatusGreen}" TextColor="White" FontSize="13" FontAttributes="Bold" WidthRequest="32" HeightRequest="32" CornerRadius="8" Padding="0" VerticalOptions="Center" HorizontalOptions="End"/>
+                                                </Grid>
+                                            </Frame>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- BEZ KATEGORII -->
+                        <VerticalStackLayout Spacing="5" Margin="0,0,0,20">
+                            <Label Text="Bez Kategorii" FontSize="16" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
+                            <Border BackgroundColor="Transparent" StrokeThickness="0" Padding="5,10,5,20">
+                                <Border.GestureRecognizers>
+                                    <DropGestureRecognizer AllowDrop="True" Drop="OnUncategorizedDrop" DragOver="OnDragOver" DragLeave="OnDragLeave"/>
+                                </Border.GestureRecognizers>
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding UncategorizedItems}" Spacing="5" MinimumHeightRequest="40">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="models:ReceiptItem">
+                                            <Frame BackgroundColor="#353D4A" CornerRadius="8" BorderColor="{Binding GroupColor}" Padding="10,5">
+                                                <Frame.GestureRecognizers>
+                                                    <DragGestureRecognizer CanDrag="True" DragStarting="OnItemDragStarting"/>
+                                                    <DropGestureRecognizer AllowDrop="True" Drop="OnItemDrop" DragOver="OnDragOver" DragLeave="OnDragLeave"/>
+                                                </Frame.GestureRecognizers>
+                                                <Grid ColumnDefinitions="*, Auto, Auto, Auto, Auto">
+                                                    <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" FontSize="12"/>
+                                                    <Label Grid.Column="1" Text="{Binding PayerDisplayName}" FontSize="10" Margin="5,0" VerticalOptions="Center">
+                                                        <Label.Triggers>
+                                                            <DataTrigger TargetType="Label" Binding="{Binding HasNoPayer}" Value="True">
+                                                                <Setter Property="TextColor" Value="#EF4444" />
+                                                            </DataTrigger>
+                                                            <DataTrigger TargetType="Label" Binding="{Binding HasNoPayer}" Value="False">
+                                                                <Setter Property="TextColor" Value="#AAA" />
+                                                            </DataTrigger>
+                                                        </Label.Triggers>
+                                                    </Label>
+                                                    <Label Grid.Column="2" Text="{Binding TotalPrice, StringFormat='{0:N2} zł'}" TextColor="White" FontAttributes="Bold" FontSize="12" Margin="5,0" VerticalOptions="Center"/>
+                                                    
+                                                    <Button Grid.Column="3" Text="✎" Command="{Binding BindingContext.EditCategorizedItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="Transparent" TextColor="#AAA" FontSize="14" WidthRequest="30" Padding="0"/>
+                                                    <Button Grid.Column="4" Text="✕" Command="{Binding BindingContext.DeleteCategorizedItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="Transparent" TextColor="#EF4444" FontSize="14" WidthRequest="30" Padding="0"/>
+                                                </Grid>
+                                            </Frame>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- KATEGORIE -->
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Categories}" Spacing="10">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:ReceiptCategory">
+                                <VerticalStackLayout Spacing="5">
+                                    <Label Text="{Binding Name}" FontSize="16" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center">
+                                        <Label.GestureRecognizers>
+                                            <DragGestureRecognizer CanDrag="True" DragStarting="OnCategoryDragStarting"/>
+                                        </Label.GestureRecognizers>
+                                    </Label>
+
+                                    <Border BackgroundColor="Transparent" StrokeThickness="0" Padding="5,10,5,20">
+                                        <Border.GestureRecognizers>
+                                            <DropGestureRecognizer AllowDrop="True" Drop="OnCategoryDrop" DragOver="OnDragOver" DragLeave="OnDragLeave"/>
+                                        </Border.GestureRecognizers>
+                                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Items}" Spacing="5" MinimumHeightRequest="40">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate x:DataType="models:ReceiptItem">
+                                                    <Frame BackgroundColor="#353D4A" CornerRadius="8" BorderColor="{Binding GroupColor}" Padding="10,5">
+                                                        <Frame.GestureRecognizers>
+                                                            <DragGestureRecognizer CanDrag="True" DragStarting="OnItemDragStarting"/>
+                                                            <DropGestureRecognizer AllowDrop="True" Drop="OnItemDrop" DragOver="OnDragOver" DragLeave="OnDragLeave"/>
+                                                        </Frame.GestureRecognizers>
+                                                        <Grid ColumnDefinitions="*, Auto, Auto, Auto, Auto">
+                                                            <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" FontSize="12"/>
+                                                            <Label Grid.Column="1" Text="{Binding PayerDisplayName}" FontSize="10" Margin="5,0" VerticalOptions="Center">
+                                                                <Label.Triggers>
+                                                                    <DataTrigger TargetType="Label" Binding="{Binding HasNoPayer}" Value="True">
+                                                                        <Setter Property="TextColor" Value="#EF4444" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger TargetType="Label" Binding="{Binding HasNoPayer}" Value="False">
+                                                                        <Setter Property="TextColor" Value="#AAA" />
+                                                                    </DataTrigger>
+                                                                </Label.Triggers>
+                                                            </Label>
+                                                            <Label Grid.Column="2" Text="{Binding TotalPrice, StringFormat='{0:N2} zł'}" TextColor="White" FontAttributes="Bold" FontSize="12" Margin="5,0" VerticalOptions="Center"/>
+                                                            
+                                                            <Button Grid.Column="3" Text="✎" Command="{Binding BindingContext.EditCategorizedItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="Transparent" TextColor="#AAA" FontSize="14" WidthRequest="30" Padding="0"/>
+                                                            <Button Grid.Column="4" Text="✕" Command="{Binding BindingContext.DeleteCategorizedItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="Transparent" TextColor="#EF4444" FontSize="14" WidthRequest="30" Padding="0"/>
+                                                        </Grid>
+                                                    </Frame>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <Button Grid.Row="2" Text="Dodaj nową kategorie" Command="{Binding ShowAddCategoryPopupCommand}" BackgroundColor="Transparent" TextColor="#AAA" FontAttributes="Bold"/>
+            </Grid>
+
+            <!-- ŚRODKOWA KOLUMNA: aparat i zdjęcie -->
+            <Grid Grid.Column="1" BackgroundColor="{StaticResource BackgroundDark}" RowDefinitions="*, Auto">
+                <Grid Grid.Row="0">
+                    <Label Text="Miejsce na podgląd paragonu" TextColor="#555" HorizontalOptions="Center" VerticalOptions="Center" IsVisible="False">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding ReceiptImageSource}" Value="{x:Null}">
+                                <Setter Property="IsVisible" Value="True" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    <Image Source="{Binding ReceiptImageSource}" Aspect="AspectFit" Margin="20"/>
+                </Grid>
+
+                <HorizontalStackLayout Grid.Row="1" Spacing="40" HorizontalOptions="Center" Margin="0,0,0,40">
+                    <ImageButton Source="json_icon.png" Command="{Binding UploadJsonCommand}" WidthRequest="50" HeightRequest="50"/>
+                    <ImageButton Source="camera_icon.png" Command="{Binding TakePhotoCommand}" WidthRequest="60" HeightRequest="60"/>
+                    <ImageButton Source="gallery_icon.png" Command="{Binding PickGalleryCommand}" WidthRequest="50" HeightRequest="50"/>
+                </HorizontalStackLayout>
+            </Grid>
+
+            <!-- PRAWA KOLUMNA: osoby i sumy -->
+            <Grid Grid.Column="2" RowDefinitions="Auto, *, Auto" Padding="20" BackgroundColor="#2A303C">
+
+                <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,10">
+                    <Label Grid.Column="0" Text="Uczestnicy rozliczenia" TextColor="White" FontAttributes="Bold" FontSize="16" VerticalOptions="Center"/>
+                    <Button Grid.Column="1" Text="+" Command="{Binding ShowMissingMembersPopupCommand}" BackgroundColor="#1E232D" TextColor="White" CornerRadius="20" WidthRequest="40" HeightRequest="40" Padding="0" FontSize="20" FontAttributes="Bold"/>
+                </Grid>
+
+                <ScrollView Grid.Row="1">
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding GroupMembers}" Spacing="15">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:DisplayGroupMember">
+                                <Frame BackgroundColor="#1E232D" BorderColor="Transparent" CornerRadius="10" Padding="15">
+                                    <Frame.GestureRecognizers>
+                                        <DragGestureRecognizer CanDrag="True" DragStarting="OnMemberDragStarting"/>
+                                        <DropGestureRecognizer AllowDrop="True" Drop="OnMemberDrop" DragOver="OnDragOver" DragLeave="OnDragLeave"/>
+                                    </Frame.GestureRecognizers>
+
+                                    <VerticalStackLayout>
+                                        <!-- Nagłówek: imię -->
+                                        <Grid ColumnDefinitions="Auto, *, Auto, Auto" Margin="0,0,0,10">
+                                            <Image Grid.Column="0" Source="{Binding AvatarUrl}" WidthRequest="30" HeightRequest="30">
+                                                <Image.Clip>
+                                                    <EllipseGeometry Center="15,15" RadiusX="15" RadiusY="15"/>
+                                                </Image.Clip>
+                                            </Image>
+                                            <Label Grid.Column="1" Text="{Binding FullName}" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" Margin="10,0,0,0"/>
+                                            <Label Grid.Column="2" Text="{Binding TotalOwed, StringFormat='{0:N2} zł'}" FontAttributes="Bold" TextColor="{StaticResource StatusRed}" VerticalOptions="Center" Margin="0,0,10,0"/>
+                                            <Button Grid.Column="3" Text="✕" Command="{Binding BindingContext.RemoveMemberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="Transparent" TextColor="#EF4444" FontSize="16" WidthRequest="30" Padding="0"/>
+                                        </Grid>
+
+                                        <BoxView HeightRequest="1" Color="#333" Margin="0,5,0,10"/>
+
+                                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding AssignedShares}" Spacing="5">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate x:DataType="models:ReceiptMemberShare">
+                                                    <SwipeView>
+                                                        <SwipeView.RightItems>
+                                                            <SwipeItems>
+                                                                <SwipeItem Text="Usuń" BackgroundColor="#EF4444" 
+                                                                           Command="{Binding BindingContext.RemoveMemberShareCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" 
+                                                                           CommandParameter="{Binding .}"/>
+                                                            </SwipeItems>
+                                                        </SwipeView.RightItems>
+                                                        <Grid ColumnDefinitions="*, Auto, Auto" Padding="5,0">
+                                                            <Label Grid.Column="0" Text="{Binding ItemName}" TextColor="#AAA" FontSize="12"/>
+                                                            <Label Grid.Column="1" Text="{Binding PayerName}" TextColor="#AAA" FontSize="12" Margin="10,0"/>
+                                                            <Label Grid.Column="2" Text="{Binding OwedAmount, StringFormat='{0:N2} zł'}" TextColor="White" FontSize="12" FontAttributes="Bold"/>
+                                                        </Grid>
+                                                    </SwipeView>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </VerticalStackLayout>
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <Button Grid.Row="2" Text="Zatwierdź" Command="{Binding SubmitExpenseCommand}" BackgroundColor="{StaticResource StatusGreen}" TextColor="White" FontAttributes="Bold" FontSize="20" CornerRadius="25" HeightRequest="50" Margin="0,20,0,0"/>
+            </Grid>
+        </Grid>
+    </Grid>
+
+        <!-- Popup: nowa kategoria -->
+        <Grid IsVisible="{Binding IsAddCategoryPopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CloseAddCategoryPopupCommand}" />
+            </Grid.GestureRecognizers>
+            <Frame BackgroundColor="#1E232D" CornerRadius="20" BorderColor="#333" Padding="30"
+                   WidthRequest="350" HorizontalOptions="Center" VerticalOptions="Center">
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer />
+                </Frame.GestureRecognizers>
+                <VerticalStackLayout Spacing="20">
+                    <Label Text="Nowa Kategoria" FontSize="22" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
+                    <Entry Placeholder="Nazwa Kategorii" Text="{Binding NewCategoryName}" PlaceholderColor="#888" TextColor="White" BackgroundColor="#2A303C" />
+
+                    <Grid ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,10,0,0">
+                        <Button Grid.Column="0" Text="Anuluj" Command="{Binding CloseAddCategoryPopupCommand}" BackgroundColor="{StaticResource SurfaceDark}" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44"/>
+                        <Button Grid.Column="1" Text="Utwórz" Command="{Binding AddNewCategoryCommand}" BackgroundColor="{StaticResource StatusGreen}" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+        </Grid>
+
+        <!-- Popup: nowa grupa -->
+        <Grid IsVisible="{Binding IsAddGroupPopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CancelAddGroupCommand}" />
+            </Grid.GestureRecognizers>
+            <Frame BackgroundColor="#1E232D" CornerRadius="20" BorderColor="#333" Padding="30"
+                   WidthRequest="350" HorizontalOptions="Center" VerticalOptions="Center">
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer />
+                </Frame.GestureRecognizers>
+                <VerticalStackLayout Spacing="20">
+                    <Label Text="Nowa Grupa" FontSize="22" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
+                    <Entry Placeholder="Nazwa dla złączonych przedmiotów" Text="{Binding NewGroupName}" PlaceholderColor="#888" TextColor="White" BackgroundColor="#2A303C" />
+
+                    <Grid ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,10,0,0">
+                        <Button Grid.Column="0" Text="Anuluj" Command="{Binding CancelAddGroupCommand}" BackgroundColor="{StaticResource SurfaceDark}" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44"/>
+                        <Button Grid.Column="1" Text="Zatwierdź" Command="{Binding ConfirmAddGroupCommand}" BackgroundColor="{StaticResource StatusGreen}" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+        </Grid>
+
+        <!-- Popup: brakujący członkowie -->
+        <Grid IsVisible="{Binding IsMissingMembersPopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CloseMissingMembersPopupCommand}" />
+            </Grid.GestureRecognizers>
+            <Frame BackgroundColor="#1E232D" CornerRadius="20" BorderColor="#333" Padding="30"
+                   WidthRequest="400" MaximumHeightRequest="500" HorizontalOptions="Center" VerticalOptions="Center">
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer />
+                </Frame.GestureRecognizers>
+                <Grid RowDefinitions="Auto, *, Auto">
+                    <Label Grid.Row="0" Text="Przywróć Użytkowników" FontSize="22" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,20"/>
+
+                    <ScrollView Grid.Row="1">
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding MissingGroupMembers}" Spacing="10">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:DisplayGroupMember">
+                                    <Grid ColumnDefinitions="Auto, *, Auto" BackgroundColor="#2A303C" Padding="15" HeightRequest="60">
+                                        <Image Grid.Column="0" Source="{Binding AvatarUrl}" WidthRequest="30" HeightRequest="30">
+                                            <Image.Clip>
+                                                <EllipseGeometry Center="15,15" RadiusX="15" RadiusY="15"/>
+                                            </Image.Clip>
+                                        </Image>
+                                        <Label Grid.Column="1" Text="{Binding FullName}" TextColor="White" VerticalOptions="Center" Margin="10,0,0,0"/>
+                                        <Button Grid.Column="2" Text="Dodaj" Command="{Binding BindingContext.RestoreMemberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="{StaticResource StatusGreen}" TextColor="White" CornerRadius="10" HeightRequest="30" Padding="10,0"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </ScrollView>
+
+                    <Button Grid.Row="2" Text="Zamknij" Command="{Binding CloseMissingMembersPopupCommand}" BackgroundColor="{StaticResource SurfaceDark}" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44" Margin="0,20,0,0"/>
+                </Grid>
+            </Frame>
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

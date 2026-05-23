@@ -6,7 +6,6 @@
              BackgroundColor="{StaticResource MainBackground}"
              Shell.NavBarIsVisible="False">
 
-    <!-- Add Loaded event handler in code-behind or call LoadProfileAsync -->
     <Grid>
         
         <Grid ColumnDefinitions="{OnIdiom Phone='0, *', Default='360, *'}">
@@ -17,7 +16,7 @@
 
             <ScrollView Grid.Column="1" VerticalScrollBarVisibility="Always">
                 <Grid Padding="40" RowDefinitions="Auto, *">
-                    <!-- Mobile Menu Toggle -->
+                    <!-- Menu mobilne -->
                     <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" IsVisible="{OnIdiom Phone=True, Default=False}" Margin="0,0,0,20">
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
@@ -26,19 +25,19 @@
                         <Label Text="Menu" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" Margin="5,0,0,0" FontSize="18"/>
                     </HorizontalStackLayout>
 
-                    <!-- Main Content Grid (Two Columns) -->
+                    <!-- Siatka główna (dwie kolumny) -->
                     <Grid Grid.Row="1" ColumnDefinitions="*, 1, *" ColumnSpacing="30" RowDefinitions="Auto" Margin="0,20,0,0">
                         
-                        <!-- LEFT COLUMN: Profil -->
+                        <!-- LEWA KOLUMNA: profil -->
                         <VerticalStackLayout Grid.Column="0" Spacing="20" HorizontalOptions="Center" MaximumWidthRequest="450">
                             
-                            <!-- Avatar -->
+                            <!-- Awatar -->
                             <Border StrokeShape="RoundRectangle 60" WidthRequest="120" HeightRequest="120" BackgroundColor="White" StrokeThickness="0" HorizontalOptions="Center">
                                 <Grid>
-                                    <!-- Fallback icon -->
+                                    <!-- Ikona zastępcza -->
                                     <Path Aspect="Uniform" WidthRequest="60" HeightRequest="60" HorizontalOptions="Center" VerticalOptions="Center" Fill="#1E232D"
                                           Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm0 14c-2.33 0-4.51-.83-6.2-2.22 1.34-2.12 3.65-3.53 6.2-3.53s4.86 1.41 6.2 3.53C16.51 19.17 14.33 20 12 20z" />
-                                    <!-- Actual Avatar -->
+                                    <!-- Awatar -->
                                     <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
                                 </Grid>
                             </Border>
@@ -46,7 +45,7 @@
                             <Label Text="{Binding FullName}" FontSize="24" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
                             <Label Text="{Binding Email}" FontSize="14" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" Margin="0,-10,0,10"/>
 
-                            <!-- Readonly Fields -->
+                            <!-- Pola tylko do odczytu -->
                             <VerticalStackLayout Spacing="5">
                                 <Label Text="Nazwa użytkownika" TextColor="White" FontSize="12" />
                                 <Border BackgroundColor="{StaticResource SurfaceDark}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="15,10">
@@ -82,7 +81,7 @@
                                 </Border>
                             </VerticalStackLayout>
 
-                            <!-- Actions -->
+                            <!-- Akcje -->
                             <Grid ColumnDefinitions="*, *" ColumnSpacing="10" Margin="0,10,0,0">
                                 <Button Grid.Column="0" Text="Edytuj dane użytkownika" Command="{Binding ShowEditDataPopupCommand}" BackgroundColor="{StaticResource SurfaceDark}" TextColor="White" CornerRadius="10" FontSize="12" HeightRequest="44"/>
                                 <Button Grid.Column="1" Text="Edytuj zdjęcie profilowe" Command="{Binding ChangeAvatarCommand}" BackgroundColor="{StaticResource SurfaceDark}" TextColor="White" CornerRadius="10" FontSize="12" HeightRequest="44"/>
@@ -93,10 +92,10 @@
 
                         </VerticalStackLayout>
 
-                        <!-- Divider -->
+                        <!-- Separator -->
                         <BoxView Grid.Column="1" Color="{StaticResource Border}" WidthRequest="1" VerticalOptions="Fill" Opacity="0.5" />
 
-                        <!-- RIGHT COLUMN: Powiadomienia -->
+                        <!-- PRAWA KOLUMNA: powiadomienia -->
                         <VerticalStackLayout Grid.Column="2" Spacing="25" Margin="20,0,0,0">
                             <Label Text="Powiadomienia" FontSize="26" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,20"/>
                             
@@ -147,7 +146,7 @@
             </ScrollView>
         </Grid>
 
-        <!-- MOBILE MENU POPUP -->
+        <!-- Popup: menu mobilne -->
         <Grid IsVisible="{Binding IsMenuVisible}" BackgroundColor="#CC121212" ZIndex="100">
             <Grid.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
@@ -155,12 +154,11 @@
             <Border HorizontalOptions="End" VerticalOptions="Start" Margin="0,60,20,0" WidthRequest="220" BackgroundColor="{StaticResource SurfaceDark}" StrokeShape="RoundRectangle 15" StrokeThickness="0" Padding="15">
                 <VerticalStackLayout Spacing="15">
                     <Label Text="PayItOff!" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource TextMain}" Margin="0,0,0,10"/>
-                    <!-- items omitted for brevity... -->
                 </VerticalStackLayout>
             </Border>
         </Grid>
 
-        <!-- POPUP: Edytuj Dane -->
+        <!-- Popup: edytuj dane -->
         <Grid IsVisible="{Binding IsEditDataPopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
             <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="400"
                     BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="{StaticResource Border}">
@@ -184,7 +182,7 @@
             </Border>
         </Grid>
 
-        <!-- POPUP: Edytuj Email -->
+        <!-- Popup: edytuj e-mail -->
         <Grid IsVisible="{Binding IsEditEmailPopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
             <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="400"
                     BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="{StaticResource Border}">
@@ -204,7 +202,7 @@
             </Border>
         </Grid>
 
-        <!-- POPUP: Edytuj Hasło -->
+        <!-- Popup: edytuj hasło -->
         <Grid IsVisible="{Binding IsEditPasswordPopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
             <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="400"
                     BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="{StaticResource Border}">
@@ -224,7 +222,7 @@
             </Border>
         </Grid>
 
-        <!-- POPUP: Usuń Konto -->
+        <!-- Popup: usuń konto -->
         <Grid IsVisible="{Binding IsDeleteAccountPopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
             <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="400"
                     BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="#EF4444">

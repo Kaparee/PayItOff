@@ -15,6 +15,12 @@ public partial class ReceiptMemberShare : ObservableObject
     private string _avatarUrl = string.Empty;
 
     [ObservableProperty]
+    private string _itemName = string.Empty;
+
+    [ObservableProperty]
+    private string _payerName = string.Empty;
+
+    [ObservableProperty]
     private decimal _owedAmount;
 
     [ObservableProperty]
@@ -29,10 +35,7 @@ public partial class ReceiptItem : ObservableObject
     private string _name = string.Empty;
 
     [ObservableProperty]
-    private int? _payerId;
-
-    [ObservableProperty]
-    private string _payerName = string.Empty;
+    private DisplayGroupMember? _payer;
 
     [ObservableProperty]
     private decimal _quantity = 1;
@@ -43,9 +46,21 @@ public partial class ReceiptItem : ObservableObject
     [ObservableProperty]
     private string _categoryId = string.Empty;
 
+    [ObservableProperty]
+    private string _itemGroupId = string.Empty;
+
+    [ObservableProperty]
+    private string _itemGroupName = string.Empty;
+
+    [ObservableProperty]
+    private string _groupColor = "Transparent";
+
     public decimal TotalPrice => Quantity * UnitPrice;
 
-    // List of members who are assigned to this item
+    public string PayerDisplayName => Payer?.FullName ?? "Brak";
+
+    public bool HasNoPayer => Payer == null;
+
     public ObservableCollection<ReceiptMemberShare> AssignedMembers { get; } = new();
 
     protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
@@ -56,17 +71,24 @@ public partial class ReceiptItem : ObservableObject
             OnPropertyChanged(nameof(TotalPrice));
             RecalculateShares();
         }
+        else if (e.PropertyName == nameof(Payer))
+        {
+            OnPropertyChanged(nameof(PayerDisplayName));
+            OnPropertyChanged(nameof(HasNoPayer));
+        }
     }
 
     public void AssignMember(int memberId, string memberName, string avatarUrl)
     {
         if (!AssignedMembers.Any(m => m.MemberId == memberId))
         {
-            AssignedMembers.Add(new ReceiptMemberShare 
-            { 
-                MemberId = memberId, 
+            AssignedMembers.Add(new ReceiptMemberShare
+            {
+                MemberId = memberId,
                 MemberName = memberName,
-                AvatarUrl = avatarUrl
+                AvatarUrl = avatarUrl,
+                ItemName = this.Name,
+                PayerName = this.Payer?.FullName ?? string.Empty
             });
             RecalculateShares();
         }
@@ -82,7 +104,7 @@ public partial class ReceiptItem : ObservableObject
         }
     }
 
-    private void RecalculateShares()
+    public void RecalculateShares()
     {
         if (AssignedMembers.Count == 0) return;
 
@@ -96,7 +118,6 @@ public partial class ReceiptItem : ObservableObject
             totalAllocated += share;
         }
 
-        // Handle remainder pennies (e.g. 10 / 3 = 3.33 * 3 = 9.99, missing 0.01)
         decimal remainder = TotalPrice - totalAllocated;
         if (remainder != 0 && AssignedMembers.Count > 0)
         {
@@ -131,13 +152,19 @@ public partial class DisplayGroupMember : ObservableObject
     [ObservableProperty]
     private bool _isVisible = true;
 
-    // Items specifically assigned to this user
-    public ObservableCollection<ReceiptItem> AssignedItems { get; } = new();
+    public ObservableCollection<ReceiptMemberShare> AssignedShares { get; } = new();
 
-    public decimal TotalOwed => AssignedItems.Sum(i => i.AssignedMembers.FirstOrDefault(m => m.MemberId == UserId)?.OwedAmount ?? 0);
+    public DisplayGroupMember()
+    {
+        AssignedShares.CollectionChanged += (_, _) => OnPropertyChanged(nameof(TotalOwed));
+    }
+
+    public decimal TotalOwed => AssignedShares.Sum(s => s.OwedAmount);
 
     public void RefreshTotal()
     {
         OnPropertyChanged(nameof(TotalOwed));
     }
+
+    public override string ToString() => FullName;
 }

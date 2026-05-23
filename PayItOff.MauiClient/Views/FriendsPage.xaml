@@ -44,9 +44,9 @@
                 <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never">
                     <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto" Padding="40,30,40,40">
 
-                <!-- Sekcja Podsumowania (Top Dłużnicy & Top Długi) -->
+                <!-- Sekcja podsumowania (top dłużnicy i top długi) -->
                 <Grid Grid.Row="0" ColumnDefinitions="*, *" ColumnSpacing="25" Margin="0,0,0,30">
-                    <!-- Karta Top Dłużnicy -->
+                    <!-- Karta: top dłużnicy -->
                     <Border Grid.Column="0" StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="5, 20" StrokeThickness="0">
                         <Grid RowDefinitions="Auto, *, Auto, Auto" RowSpacing="15">
                             <Label Grid.Row="0" Text="Top Dłużnicy" TextColor="{StaticResource StatusGreen}" FontSize="{OnIdiom Phone=22, Default=32}" HorizontalOptions="Center" FontAttributes="Bold" />
@@ -86,7 +86,7 @@
                         </Grid>
                     </Border>
 
-                    <!-- Karta Top Długi -->
+                    <!-- Karta: top długi -->
                     <Border Grid.Column="1" StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="5, 20" StrokeThickness="0">
                         <Grid RowDefinitions="Auto, *, Auto, Auto" RowSpacing="15">
                             <Label Grid.Row="0" Text="Top Długi" TextColor="{StaticResource StatusRed}" FontSize="{OnIdiom Phone=22, Default=32}" HorizontalOptions="Center" FontAttributes="Bold" />
@@ -156,9 +156,9 @@
                     </Border>
                 </Grid>
 
-                <!-- TABY / FILTRY ZNAJOMYCH -->
+                <!-- Zakładki / filtry znajomych -->
                 <Grid Grid.Row="2" ColumnDefinitions="*, *, *" ColumnSpacing="15" Margin="0,0,0,20">
-                    <!-- Tab 1: Znajomi -->
+                    <!-- Zakładka 1: znajomi -->
                     <Border Grid.Column="0" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="15" StrokeThickness="2" Stroke="Transparent">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" Binding="{Binding ActiveFilter}" Value="Friends">
@@ -175,7 +175,7 @@
                         </VerticalStackLayout>
                     </Border>
 
-                    <!-- Tab 2: Wysłane -->
+                    <!-- Zakładka 2: wysłane -->
                     <Border Grid.Column="1" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="15" StrokeThickness="2" Stroke="Transparent">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" Binding="{Binding ActiveFilter}" Value="Sent">
@@ -192,7 +192,7 @@
                         </VerticalStackLayout>
                     </Border>
 
-                    <!-- Tab 3: Oczekujące -->
+                    <!-- Zakładka 3: oczekujące -->
                     <Border Grid.Column="2" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="15" StrokeThickness="2" Stroke="Transparent">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" Binding="{Binding ActiveFilter}" Value="Pending">
@@ -428,7 +428,7 @@
             </Grid>
         </Grid>
 
-        <!-- WARSTWA 2: CUSTOM POPUP WYSZUKIWANIA ZNAJOMEGO -->
+        <!-- WARSTWA 2: popup wyszukiwania znajomego -->
         <Grid IsVisible="{Binding IsInvitePopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
             <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="450"
                     BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="#2A3648">
@@ -453,7 +453,7 @@
                         </Border>
                     </VerticalStackLayout>
 
-                    <!-- Pole 2: Adres E-Mail -->
+                    <!-- Pole 2: adres e-mail -->
                     <VerticalStackLayout Spacing="8">
                         <Label Text="Adres E-Mail" TextColor="{StaticResource TextSubtle}" FontSize="13" HorizontalOptions="Center"/>
                         <Border StrokeShape="RoundRectangle 10" BackgroundColor="#242F41" StrokeThickness="0" Padding="15,0" HeightRequest="40">
@@ -468,7 +468,7 @@
                         </Border>
                     </VerticalStackLayout>
 
-                    <!-- Pole 3: Numer Telefonu -->
+                    <!-- Pole 3: numer telefonu -->
                     <VerticalStackLayout Spacing="8">
                         <Label Text="Numer Telefonu" TextColor="{StaticResource TextSubtle}" FontSize="13" HorizontalOptions="Center"/>
                         <Border StrokeShape="RoundRectangle 10" BackgroundColor="#242F41" StrokeThickness="0" Padding="15,0" HeightRequest="40">
@@ -501,7 +501,7 @@
                                 </HorizontalStackLayout>
                                 <Label Text="{Binding SearchedUser.Nickname, StringFormat='@{0}'}" TextColor="{StaticResource TextSubtle}" FontSize="12" />
                             </VerticalStackLayout>
-                            <!-- Badge -->
+                            <!-- Odznaka -->
                             <Border Grid.Column="2" BackgroundColor="#1A2A22" Stroke="#10B981" StrokeThickness="1" StrokeShape="RoundRectangle 10" Padding="8,4" VerticalOptions="Center">
                                 <Label Text="Znaleziono" TextColor="{StaticResource StatusGreen}" FontSize="11" FontAttributes="Bold" />
                             </Border>
@@ -519,7 +519,7 @@
             </Border>
         </Grid>
 
-        <!-- WARSTWA 3: CUSTOM POPUP POTWIERDZENIA USUNIĘCIA ZNAJOMEGO -->
+        <!-- WARSTWA 3: popup potwierdzenia usunięcia znajomego -->
         <Grid IsVisible="{Binding IsDeletePopupVisible}" BackgroundColor="#D90C101A" ZIndex="210">
             <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="450"
                     BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="#2A3648">
@@ -559,7 +559,7 @@
             </Border>
         </Grid>
 
-        <!-- WARSTWA 4: CUSTOM POPUP POWIADOMIENIA (ALERTU) -->
+        <!-- WARSTWA 4: popup powiadomienia (alert) -->
         <Grid IsVisible="{Binding IsAlertPopupVisible}" BackgroundColor="#D90C101A" ZIndex="220">
             <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="450"
                     BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1.5">
@@ -572,7 +572,7 @@
                     </DataTrigger>
                 </Border.Triggers>
                 <VerticalStackLayout Spacing="25" HorizontalOptions="Center">
-                    <!-- Ikona Statusu -->
+                    <!-- Ikona statusu -->
                     <Grid HeightRequest="70" WidthRequest="70" HorizontalOptions="Center">
                         <Border StrokeThickness="0" StrokeShape="RoundRectangle 35" WidthRequest="70" HeightRequest="70">
                             <Border.Triggers>
@@ -618,7 +618,7 @@
             </Border>
         </Grid>
 
-        <!-- WARSTWA 5: CUSTOM POPUP WSPÓLNYCH GRUP -->
+        <!-- WARSTWA 5: popup wspólnych grup -->
         <Grid IsVisible="{Binding IsSharedGroupsPopupVisible}" BackgroundColor="#D90C101A" ZIndex="230">
             <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="400"
                     BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="#2A3648">
