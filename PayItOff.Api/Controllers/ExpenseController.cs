@@ -45,7 +45,16 @@ public class ExpenseController : ControllerBase
     [EndpointDescription("Endpoint zwracający detale konkretnego wydatku po ID, wraz z informacją kto za niego zapłacił i jacy użytkownicy biorą w nim udział.")]
     public async Task<IActionResult> GetExpenseDetails(int id)
     {
-        var response = await _expenseService.GetExpenseDetailsAsync(id);
+        var response = await _expenseService.GetExpenseDetailsAsync(GetUserId(), id);
+        return Ok(response);
+    }
+
+    [HttpGet("{expenseId}/item/{itemId}")]
+    [EndpointSummary("Szczegóły konkretnej pozycji z wydatku")]
+    [EndpointDescription("Endpoint zwracający detale konkretnej pozycji z wydatku (produktu z paragonu) wraz z informacją o jej podziale.")]
+    public async Task<IActionResult> GetExpenseItemDetails(int expenseId, int itemId)
+    {
+        var response = await _expenseService.GetExpenseItemDetailsAsync(GetUserId(), expenseId, itemId);
         return Ok(response);
     }
 }

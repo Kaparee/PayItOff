@@ -19,7 +19,7 @@ public partial class BaseViewModel : ObservableObject
     [RelayCommand]
     private async Task Logout()
     {
-        SecureStorage.Default.Remove("auth_token");
+        SecureStorage.Default.Remove("jwt_token");
         await Shell.Current.GoToAsync("//LoginPage");
     }
 

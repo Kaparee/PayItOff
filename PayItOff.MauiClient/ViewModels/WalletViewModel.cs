@@ -67,7 +67,7 @@ public partial class WalletPersonUiModel : ObservableObject
 
 [QueryProperty(nameof(FilterType), "filter")]
 [QueryProperty(nameof(TargetIdFilter), "targetId")]
-public partial class WalletViewModel : BaseViewModel
+public partial class WalletViewModel : PopupViewModelBase
 {
     private readonly SettlementService _settlementService;
     private readonly ExpenseService _expenseService;
@@ -77,8 +77,6 @@ public partial class WalletViewModel : BaseViewModel
     private List<PayableDebtOptionResponse> _allDebtOptions = new();
     private List<DebtDisplayItem> _allNetPayCreditors = new();
 
-    private TaskCompletionSource<string>? _actionSheetTcs;
-    private TaskCompletionSource<bool>? _alertTcs;
 
     [ObservableProperty]
     public partial string? FilterType { get; set; }
@@ -140,29 +138,18 @@ public partial class WalletViewModel : BaseViewModel
     [ObservableProperty]
     public partial DebtDisplayItem? SelectedNetPayCreditor { get; set; }
 
-    [ObservableProperty] public partial bool IsCustomAlertVisible { get; set; }
-    [ObservableProperty] public partial string CustomAlertTitle { get; set; } = string.Empty;
-    [ObservableProperty] public partial string CustomAlertMessage { get; set; } = string.Empty;
-    [ObservableProperty] public partial string CustomAlertAcceptText { get; set; } = "OK";
-    [ObservableProperty] public partial string CustomAlertCancelText { get; set; } = string.Empty;
-
-    [ObservableProperty] public partial bool IsActionSheetVisible { get; set; }
-    [ObservableProperty] public partial string ActionSheetTitle { get; set; } = string.Empty;
-    [ObservableProperty] public partial ObservableCollection<string> ActionSheetOptions { get; set; } = new();
 
     [ObservableProperty] public partial bool IsTransactionDetailsPopupVisible { get; set; }
     [ObservableProperty] public partial WalletPersonUiModel? SelectedTransactionDetails { get; set; }
     [ObservableProperty] public partial ExpenseDetailsResponse? SelectedExpenseDetails { get; set; }
 
-    public bool IsCustomAlertCancelVisible => !string.IsNullOrEmpty(CustomAlertCancelText);
-    public int AlertAcceptColumn => IsCustomAlertCancelVisible ? 1 : 0;
-    public int AlertAcceptColumnSpan => IsCustomAlertCancelVisible ? 1 : 2;
 
     public WalletViewModel(SettlementService settlementService, ExpenseService expenseService)
     {
         _settlementService = settlementService;
         _expenseService = expenseService;
         FilterType = "All";
+        IsCustomAlertSupported = true;
     }
 
     [RelayCommand]
@@ -712,71 +699,7 @@ public partial class WalletViewModel : BaseViewModel
         }
     }
 
-    public async Task<bool> ShowAlertAsync(string title, string message, string accept = "OK", string cancel = "")
-    {
-        bool wasBusy = IsBusy;
-        if (wasBusy) IsBusy = false;
 
-        CustomAlertTitle = title;
-        CustomAlertMessage = message;
-        CustomAlertAcceptText = accept;
-        CustomAlertCancelText = cancel;
-
-        OnPropertyChanged(nameof(IsCustomAlertCancelVisible));
-        OnPropertyChanged(nameof(AlertAcceptColumn));
-        OnPropertyChanged(nameof(AlertAcceptColumnSpan));
-
-        _alertTcs = new TaskCompletionSource<bool>();
-        IsCustomAlertVisible = true;
-        var result = await _alertTcs.Task;
-        
-        if (wasBusy) IsBusy = true;
-        return result;
-    }
-
-    [RelayCommand]
-    private void CloseAlert(object result)
-    {
-        IsCustomAlertVisible = false;
-
-        bool parsedResult = false;
-        if (result is bool b)
-            parsedResult = b;
-        else if (result is string s)
-            parsedResult = s.Equals("True", StringComparison.OrdinalIgnoreCase);
-
-        _alertTcs?.TrySetResult(parsedResult);
-    }
-
-    public async Task<string> ShowActionSheetAsync(string title, params string[] options)
-    {
-        bool wasBusy = IsBusy;
-        if (wasBusy) IsBusy = false;
-
-        ActionSheetTitle = title;
-        ActionSheetOptions = new ObservableCollection<string>(options);
-
-        _actionSheetTcs = new TaskCompletionSource<string>();
-        IsActionSheetVisible = true;
-        var result = await _actionSheetTcs.Task;
-        
-        if (wasBusy) IsBusy = true;
-        return result;
-    }
-
-    [RelayCommand]
-    private void SelectActionSheetOption(string option)
-    {
-        IsActionSheetVisible = false;
-        _actionSheetTcs?.TrySetResult(option);
-    }
-
-    [RelayCommand]
-    private void CancelActionSheet()
-    {
-        IsActionSheetVisible = false;
-        _actionSheetTcs?.TrySetResult("Anuluj");
-    }
 
     [RelayCommand]
     private async Task NextPage()

@@ -5,7 +5,7 @@ using PayItOff.Shared.Requests;
 
 namespace PayItOff.MauiClient.ViewModels;
 
-public partial class RegisterViewModel : ObservableObject
+public partial class RegisterViewModel : PopupViewModelBase
 {
     private readonly RegisterService _registerService;
 
@@ -40,8 +40,7 @@ public partial class RegisterViewModel : ObservableObject
     [ObservableProperty]
     public partial bool IsAvatarImageVisible { get; set; } = false;
 
-    [ObservableProperty]
-    public partial bool IsBusy { get; set; }
+
 
     [ObservableProperty]
     public partial bool HasError { get; set; }
@@ -72,7 +71,7 @@ public partial class RegisterViewModel : ObservableObject
 
         if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
         {
-            await Shell.Current.DisplayAlertAsync("Błąd", "Email i Hasło są wymagane!", "OK");
+            await ShowAlertAsync("Błąd", "Email i Hasło są wymagane!", "OK");
             return;
         }
 
@@ -95,14 +94,14 @@ public partial class RegisterViewModel : ObservableObject
 
             if (result == true)
             {
-                await Shell.Current.DisplayAlertAsync("Sukces", "Konto założone! Potwierdz rejestrację na mailu aby móc się zalogować..", "OK");
+                await ShowAlertAsync("Sukces", "Konto założone! Potwierdz rejestrację na mailu aby móc się zalogować..", "OK");
                 await Shell.Current.GoToAsync("..");
             }
         }
         catch (Exception ex)
         {
             HasError = true;
-            await Shell.Current.DisplayAlertAsync("Błąd", ex.Message, "OK");
+            await ShowAlertAsync("Błąd", ex.Message, "OK");
         }
         finally
         {
@@ -130,7 +129,7 @@ public partial class RegisterViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            await Shell.Current.DisplayAlertAsync("Błąd", ex.Message, "OK");
+            await ShowAlertAsync("Błąd", ex.Message, "OK");
         }
     }
 

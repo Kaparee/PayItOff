@@ -173,7 +173,7 @@
             </ScrollView>
         </Grid>
 
-        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsPaymentOverlayVisible}" Style="{StaticResource PopupOverlayStyle}">
+        <Grid IsVisible="{Binding IsPaymentOverlayVisible}" Style="{StaticResource PopupOverlayStyle}">
             <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="480">
                 <VerticalStackLayout Spacing="14">
                     <Label Text="Opłać dług" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource TextMain}"/>
@@ -337,7 +337,7 @@
             </Border>
         </Grid>
 
-        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsTransactionDetailsPopupVisible}" Style="{StaticResource PopupOverlayStyle}" ZIndex="200">
+        <Grid IsVisible="{Binding IsTransactionDetailsPopupVisible}" Style="{StaticResource PopupOverlayStyle}" ZIndex="200">
             <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400" HorizontalOptions="Center">
                 <VerticalStackLayout Spacing="15">
                     <Label Text="Szczegóły transakcji" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
@@ -399,7 +399,7 @@
             </Border>
         </Grid>
 
-        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsCustomAlertVisible}" Style="{StaticResource PopupOverlayStyle}">
+        <Grid IsVisible="{Binding IsCustomAlertVisible}" Style="{StaticResource PopupOverlayStyle}">
             <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400">
                 <VerticalStackLayout Spacing="15">
                     <Label Text="{Binding CustomAlertTitle}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
@@ -413,7 +413,7 @@
             </Border>
         </Grid>
 
-        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsActionSheetVisible}" Style="{StaticResource PopupOverlayStyle}">
+        <Grid IsVisible="{Binding IsActionSheetVisible}" Style="{StaticResource PopupOverlayStyle}">
             <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400">
                 <VerticalStackLayout Spacing="15">
                     <Label Text="{Binding ActionSheetTitle}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>

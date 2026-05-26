@@ -44,6 +44,7 @@ public class GroupMemberBalanceDto
 public class ExpenseSummaryDto
 {
     public int ExpenseId { get; set; }
+    public int ItemId { get; set; }
     public string Title { get; set; }
     public string PayerName { get; set; }
     public decimal TotalAmount { get; set; }

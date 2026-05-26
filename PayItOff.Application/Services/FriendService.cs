@@ -32,7 +32,7 @@ public class FriendService : IFriendService
         {
             FriendId = data.Friend!.Id,
             InviteId = data.InviteId,
-            AvatarUrl = $"{baseUrl}/avatars/{data.Friend!.AvatarUrl ?? "default-user-avatar.png"}",
+            AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, data.Friend!.AvatarUrl),
             Name = data.Friend.Name,
             Surname = data.Friend.Surname,
             Nickname = data.Friend.Nickname,
@@ -45,7 +45,7 @@ public class FriendService : IFriendService
                 {
                     GroupId = group.GroupId,
                     Name = group.Name,
-                    AvatarUrl = $"{baseUrl}/avatars/{group.AvatarUrl ?? "default-avatar.png"}"
+                    AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildGroupAvatarUrl(baseUrl, group.AvatarUrl)
                 })
                 .ToList()
         }).ToList();
@@ -87,7 +87,7 @@ public class FriendService : IFriendService
 
         if (existingFriendship is not null)
         {
-            existingFriendship.ReInvite(user, friend);
+            existingFriendship.ReInvite();
             await _friendRepository.UpdateAsync(existingFriendship);
         }
         else
@@ -155,7 +155,7 @@ public class FriendService : IFriendService
             {
                 InvitationId = x.Id,
                 FriendId = targetUser.Id,
-                AvatarUrl = $"{baseUrl}/avatars/{targetUser.AvatarUrl ?? "default-avatar.png"}",
+                AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, targetUser.AvatarUrl),
                 Name = targetUser.Name,
                 Surname = targetUser.Surname,
                 Nickname = targetUser.Nickname,
@@ -188,7 +188,7 @@ public class FriendService : IFriendService
         return new SearchUserResponse
         {
             Id = friend.Id,
-            AvatarUrl = $"{baseUrl}/avatars/{friend.AvatarUrl ?? "default-user-avatar.png"}",
+            AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, friend.AvatarUrl),
             Name = friend.Name,
             Surname = friend.Surname,
             Nickname = friend.Nickname

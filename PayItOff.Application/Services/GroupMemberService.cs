@@ -29,38 +29,47 @@ public class GroupMemberService : IGroupMemberService
 
     public async Task InviteUserAsync(GroupInviteUserRequest request)
     {
-        var user = await _userRepository.GetUserByIdAsync(request.UserId);
-        if (user is null) { throw new UserNotFoundException(); }
-
-        var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId);
-        if (group is null) { throw new GroupNotFoundException(); }
-
-        var existingMember = await _groupMemberRepository.GetMemberAsync(request.GroupId, request.UserId);
-
-        if (existingMember is not null)
+        await _unitOfWork.BeginTransactionAsync();
+        try
         {
-            if (existingMember.Status == GroupMemberStatus.Accepted || existingMember.Status == GroupMemberStatus.Pending)
+            var user = await _userRepository.GetUserByIdAsync(request.UserId);
+            if (user is null) { throw new UserNotFoundException(); }
+
+            var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId);
+            if (group is null) { throw new GroupNotFoundException(); }
+
+            var existingMember = await _groupMemberRepository.GetMemberAsync(request.GroupId, request.UserId);
+
+            if (existingMember is not null)
             {
-                throw new FriendInvitationAlreadyExistsException();
+                if (existingMember.Status == GroupMemberStatus.Accepted || existingMember.Status == GroupMemberStatus.Pending)
+                {
+                    throw new FriendInvitationAlreadyExistsException();
+                }
+
+                existingMember.ReInvite(request.Role);
+                await _groupMemberRepository.UpdateAsync(existingMember);
+            }
+            else
+            {
+                var invite = GroupMember.Invite(
+                    user,
+                    group!,
+                    request.Role
+                );
+                await _groupMemberRepository.AddAsync(invite);
             }
 
-            existingMember.ReInvite(request.Role);
-            await _groupMemberRepository.UpdateAsync(existingMember);
+            group!.UpdateTimestamp();
+            await _groupRepository.UpdateAsync(group);
+            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.CommitAsync();
         }
-        else
+        catch
         {
-            var invite = GroupMember.Invite(
-                user,
-                group!,
-                request.Role
-            );
-            await _groupMemberRepository.AddAsync(invite);
+            await _unitOfWork.RollbackAsync();
+            throw;
         }
-
-        group!.UpdateTimestamp();
-        await _groupRepository.UpdateAsync(group);
-        await _unitOfWork.SaveChangesAsync();
-
     }
 
     public async Task AcceptInviteAsync(int userId, int invitationId)
@@ -195,7 +204,7 @@ public class GroupMemberService : IGroupMemberService
         {
             UserId = x.UserId,
             GroupMemberId = x.Id,
-            AvatarUrl = $"{baseUrl}/avatars/{x.User!.AvatarUrl ?? "default-avatar.png"}",
+            AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, x.User!.AvatarUrl),
             Name = x.User.Name,
             Surname = x.User.Surname,
             Email = x.User.Email,

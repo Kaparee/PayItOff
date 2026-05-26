@@ -35,4 +35,9 @@ public class ExpenseService
     {
         return await _httpClient.GetFromJsonAsync<PayItOff.Shared.Responses.ExpenseDetailsResponse>($"Expense/{expenseId}");
     }
+
+    public async Task<PayItOff.Shared.Responses.ExpenseDetailsResponse?> GetExpenseItemDetailsAsync(int expenseId, int itemId)
+    {
+        return await _httpClient.GetFromJsonAsync<PayItOff.Shared.Responses.ExpenseDetailsResponse>($"Expense/{expenseId}/item/{itemId}");
+    }
 }

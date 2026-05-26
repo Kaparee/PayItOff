@@ -36,7 +36,7 @@ public partial class AddExpensePage : ContentPage
         return list;
     }
 
-    private async void OnCategoryDrop(object sender, DropEventArgs e)
+    private async void OnCategoryDrop(object? sender, DropEventArgs e)
     {
         if (sender is VisualElement target)
         {
@@ -69,7 +69,7 @@ public partial class AddExpensePage : ContentPage
         }
     }
 
-    private async void OnUncategorizedDrop(object sender, DropEventArgs e)
+    private async void OnUncategorizedDrop(object? sender, DropEventArgs e)
     {
         if (sender is VisualElement target)
         {
@@ -101,7 +101,7 @@ public partial class AddExpensePage : ContentPage
         }
     }
 
-    private async void OnMemberDrop(object sender, DropEventArgs e)
+    private async void OnMemberDrop(object? sender, DropEventArgs e)
     {
         if (sender is VisualElement target)
         {
@@ -135,7 +135,7 @@ public partial class AddExpensePage : ContentPage
         }
     }
 
-    private void OnMemberDragStarting(object sender, DragStartingEventArgs e)
+    private void OnMemberDragStarting(object? sender, DragStartingEventArgs e)
     {
         if (sender is Element element && element.BindingContext is DisplayGroupMember member)
         {
@@ -143,7 +143,7 @@ public partial class AddExpensePage : ContentPage
         }
     }
 
-    private void OnItemDragStarting(object sender, DragStartingEventArgs e)
+    private void OnItemDragStarting(object? sender, DragStartingEventArgs e)
     {
         if (sender is Element element && element.BindingContext is ReceiptItem item)
         {
@@ -151,7 +151,7 @@ public partial class AddExpensePage : ContentPage
         }
     }
 
-    private void OnCategoryDragStarting(object sender, DragStartingEventArgs e)
+    private void OnCategoryDragStarting(object? sender, DragStartingEventArgs e)
     {
         if (sender is Element element && element.BindingContext is ReceiptCategory category)
         {
@@ -159,7 +159,7 @@ public partial class AddExpensePage : ContentPage
         }
     }
 
-    private void OnDragOver(object sender, DragEventArgs e)
+    private void OnDragOver(object? sender, DragEventArgs e)
     {
         if (sender is VisualElement target)
         {
@@ -168,7 +168,7 @@ public partial class AddExpensePage : ContentPage
         }
     }
 
-    private async void OnItemDrop(object sender, DropEventArgs e)
+    private async void OnItemDrop(object? sender, DropEventArgs e)
     {
         if (sender is VisualElement target)
         {
@@ -189,7 +189,7 @@ public partial class AddExpensePage : ContentPage
         }
     }
 
-    private void OnDragLeave(object sender, DragEventArgs e)
+    private void OnDragLeave(object? sender, DragEventArgs e)
     {
         if (sender is VisualElement target)
         {
@@ -204,7 +204,7 @@ public partial class AddExpensePage : ContentPage
         }
     }
 
-    private void OnPayerPickerLoaded(object sender, EventArgs e)
+    private void OnPayerPickerLoaded(object? sender, EventArgs e)
     {
         if (sender is Picker picker && picker.BindingContext is ReceiptItem item && item.Payer != null)
         {
@@ -216,7 +216,7 @@ public partial class AddExpensePage : ContentPage
         }
     }
 
-    private void OnPayerSelectedIndexChanged(object sender, EventArgs e)
+    private void OnPayerSelectedIndexChanged(object? sender, EventArgs e)
     {
         if (sender is Picker picker && picker.BindingContext is ReceiptItem item)
         {

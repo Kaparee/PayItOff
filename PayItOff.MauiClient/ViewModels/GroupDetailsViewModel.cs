@@ -21,7 +21,7 @@ public partial class TransactionGroup : ObservableCollection<ExpenseSummaryDto>
     }
 }
 
-public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
+public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributable
 {
     private readonly GroupService _groupService;
     private readonly GroupMemberService _groupMemberService;
@@ -30,6 +30,7 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
 
     private List<GroupMemberBalanceDto> _loadedMembers = new();
     private List<ExpenseSummaryDto> _loadedExpenses = new();
+    private int _currentUserId;
 
     [ObservableProperty]
     private int _groupId;
@@ -89,6 +90,7 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
         _groupMemberService = groupMemberService;
         _friendService = friendService;
         _expenseService = expenseService;
+        IsCustomAlertSupported = true;
     }
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
@@ -125,10 +127,10 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
         await Shell.Current.GoToAsync($"{nameof(Views.AddExpensePage)}?groupId={GroupId}");
 
     [RelayCommand]
-    private Task ManageSettlementAsync() => Shell.Current.DisplayAlertAsync("Info", "Zarządzanie rozliczeniem — wkrótce.", "OK");
+    private Task ManageSettlementAsync() => ShowAlertAsync("Info", "Zarządzanie rozliczeniem — wkrótce.", "OK");
 
     [RelayCommand]
-    private Task ToggleTransactionViewAsync() => Shell.Current.DisplayAlertAsync("Info", "Zmiana widoku — wkrótce.", "OK");
+    private Task ToggleTransactionViewAsync() => ShowAlertAsync("Info", "Zmiana widoku — wkrótce.", "OK");
 
     [RelayCommand]
     private void ShowEditGroupPopup()
@@ -148,13 +150,13 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
         IsBusy = true;
         try
         {
-            var details = await _expenseService.GetExpenseDetailsAsync(expense.ExpenseId);
+            var details = await _expenseService.GetExpenseItemDetailsAsync(expense.ExpenseId, expense.ItemId);
             SelectedExpenseDetails = details;
             IsExpenseDetailsPopupVisible = true;
         }
         catch (Exception)
         {
-            await Shell.Current.DisplayAlertAsync("Błąd", "Nie udało się pobrać szczegółów wydatku.", "OK");
+            await ShowAlertAsync("Błąd", "Nie udało się pobrać szczegółów wydatku.", "OK");
         }
         finally
         {
@@ -187,7 +189,7 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
         }
         else
         {
-            await Shell.Current.DisplayAlertAsync("Błąd", "Nie udało się zmienić nazwy grupy.", "OK");
+            await ShowAlertAsync("Błąd", "Nie udało się zmienić nazwy grupy.", "OK");
         }
         IsBusy = false;
     }
@@ -195,7 +197,7 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
     [RelayCommand]
     private async Task DeleteGroupAsync()
     {
-        bool confirm = await Shell.Current.DisplayAlertAsync("Usuń Grupę", "Czy na pewno chcesz usunąć tę grupę? Tej operacji nie można cofnąć.", "Tak, usuń", "Anuluj");
+        bool confirm = await ShowAlertAsync("Usuń Grupę", "Czy na pewno chcesz usunąć tę grupę? Tej operacji nie można cofnąć.", "Tak, usuń", "Anuluj");
         if (!confirm) return;
 
         IsBusy = true;
@@ -206,7 +208,7 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
         }
         else
         {
-            await Shell.Current.DisplayAlertAsync("Błąd", "Nie udało się usunąć grupy.", "OK");
+            await ShowAlertAsync("Błąd", "Nie udało się usunąć grupy.", "OK");
         }
         IsBusy = false;
     }
@@ -214,7 +216,7 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
     [RelayCommand]
     private async Task LeaveGroupAsync()
     {
-        bool confirm = await Shell.Current.DisplayAlertAsync("Opuść Grupę", "Czy na pewno chcesz opuścić tę grupę?", "Tak, opuść", "Anuluj");
+        bool confirm = await ShowAlertAsync("Opuść Grupę", "Czy na pewno chcesz opuścić tę grupę?", "Tak, opuść", "Anuluj");
         if (!confirm) return;
 
         IsBusy = true;
@@ -225,7 +227,7 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
         }
         else
         {
-            await Shell.Current.DisplayAlertAsync("Błąd", "Nie udało się opuścić grupy.", "OK");
+            await ShowAlertAsync("Błąd", "Nie udało się opuścić grupy.", "OK");
         }
         IsBusy = false;
     }
@@ -283,7 +285,7 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
         if (searchResponse == null)
         {
             IsBusy = false;
-            await Shell.Current.DisplayAlertAsync("Błąd", "Nie znaleziono użytkownika o podanych danych.", "OK");
+            await ShowAlertAsync("Błąd", "Nie znaleziono użytkownika o podanych danych.", "OK");
             return;
         }
 
@@ -311,7 +313,7 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
         if (success)
         {
             InviteSearchText = string.Empty;
-            await Shell.Current.DisplayAlertAsync("Sukces", "Wysłano zaproszenie.", "OK");
+            await ShowAlertAsync("Sukces", "Wysłano zaproszenie.", "OK");
             
             var invitedFriend = FriendsList.FirstOrDefault(f => f.FriendId == targetUserId);
             if (invitedFriend != null)
@@ -321,7 +323,7 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
         }
         else
         {
-            await Shell.Current.DisplayAlertAsync("Błąd", errorMsg, "OK");
+            await ShowAlertAsync("Błąd", errorMsg, "OK");
         }
         IsBusy = false;
     }
@@ -330,11 +332,11 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
     private async Task ChangeMemberRoleAsync(GroupMemberResponse member)
     {
         if (UserRole != "Owner") return;
-        if (member.UserId == int.Parse(SecureStorage.Default.GetAsync("user_id").Result ?? "0")) return;
+        if (member.UserId == _currentUserId) return;
         
         var newRole = member.Role == GroupMemberRole.Admin ? GroupMemberRole.Member : GroupMemberRole.Admin;
         
-        bool confirm = await Shell.Current.DisplayAlertAsync("Zmień rolę", $"Czy chcesz zmienić rolę {member.FullName} na {newRole}?", "Tak", "Anuluj");
+        bool confirm = await ShowAlertAsync("Zmień rolę", $"Czy chcesz zmienić rolę {member.FullName} na {newRole}?", "Tak", "Anuluj");
         if (!confirm) return;
         
         IsBusy = true;
@@ -357,9 +359,9 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
     private async Task KickMemberAsync(GroupMemberResponse member)
     {
         if (!IsAdminOrFounder) return;
-        if (member.UserId == int.Parse(SecureStorage.Default.GetAsync("user_id").Result ?? "0")) return;
+        if (member.UserId == _currentUserId) return;
         
-        bool confirm = await Shell.Current.DisplayAlertAsync("Wyrzuć członka", $"Czy na pewno chcesz wyrzucić {member.FullName} z grupy?", "Tak", "Anuluj");
+        bool confirm = await ShowAlertAsync("Wyrzuć członka", $"Czy na pewno chcesz wyrzucić {member.FullName} z grupy?", "Tak", "Anuluj");
         if (!confirm) return;
         
         IsBusy = true;
@@ -376,13 +378,19 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
     {
         if (GroupId <= 0) return;
 
+        if (_currentUserId == 0)
+        {
+            var idStr = await SecureStorage.Default.GetAsync("user_id");
+            _currentUserId = int.TryParse(idStr, out var parsed) ? parsed : 0;
+        }
+
         IsBusy = true;
         try
         {
             var response = await _groupService.GetGroupDetails(GroupId);
             if (response == null)
             {
-                await Shell.Current.DisplayAlertAsync("Błąd", "Nie udało się wczytać grupy.", "OK");
+                await ShowAlertAsync("Błąd", "Nie udało się wczytać grupy.", "OK");
                 return;
             }
 
@@ -445,5 +453,14 @@ public partial class GroupDetailsViewModel : BaseViewModel, IQueryAttributable
         if (date.Date == DateTime.Today) return "Dzisiaj";
         if (date.Date == DateTime.Today.AddDays(-1)) return "Wczoraj";
         return date.ToString("dd.MM.yyyy", CultureInfo.GetCultureInfo("pl-PL"));
+    }
+
+    [RelayCommand]
+    private async Task CopyToClipboardAsync(string text)
+    {
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            await Clipboard.Default.SetTextAsync(text);
+        }
     }
 }

@@ -10,6 +10,8 @@ public class ExpenseDetailsResponse
     
     public string PayerName { get; set; } = string.Empty;
     public string PayerAvatarUrl { get; set; } = string.Empty;
+    public string? PayerPhoneNumber { get; set; }
+    public string? PayerIBAN { get; set; }
     
     public List<ExpenseParticipantDto> Participants { get; set; } = new();
 }

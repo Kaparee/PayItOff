@@ -136,10 +136,18 @@ namespace PayItOff.Application.Services
             else dict[key] = amount;
         }
 
-        public async Task<PayItOff.Shared.Responses.ExpenseDetailsResponse> GetExpenseDetailsAsync(int expenseId)
+        public async Task<PayItOff.Shared.Responses.ExpenseDetailsResponse> GetExpenseDetailsAsync(int userId, int expenseId)
         {
             var expense = await _expenseRepository.GetExpenseWithSplitsAsync(expenseId);
             if (expense == null) throw new ExpenseNotFoundException();
+
+            // Autoryzacja: użytkownik musi być płatnikiem, twórcą lub uczestnikiem wydatku
+            var isAuthorized = expense.PayerId == userId
+                || expense.CreatorId == userId
+                || expense.Items.Any(i => i.Splits.Any(s => s.UserId == userId))
+                || expense.Groups.Any(g => g.Items.Any(i => i.Splits.Any(s => s.UserId == userId)));
+
+            if (!isAuthorized) throw new InvalidUserRoleException();
 
             var response = new PayItOff.Shared.Responses.ExpenseDetailsResponse
             {
@@ -148,7 +156,9 @@ namespace PayItOff.Application.Services
                 TotalAmount = expense.TotalAmount,
                 Date = expense.PurchasedAt,
                 PayerName = $"{expense.Payer.Name} {expense.Payer.Surname}",
-                PayerAvatarUrl = $"{_configuration["AppUrls:BackendUrl"]}/avatars/{expense.Payer.AvatarUrl ?? "default-user-avatar.png"}"
+                PayerAvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(_configuration["AppUrls:BackendUrl"], expense.Payer.AvatarUrl),
+                PayerPhoneNumber = expense.Payer.PhoneNumber,
+                PayerIBAN = expense.Payer.IBAN
             };
 
             var categories = new HashSet<string>();
@@ -162,7 +172,7 @@ namespace PayItOff.Application.Services
                     {
                         UserId = split.UserId,
                         FullName = $"{split.User.Name} {split.User.Surname}",
-                        AvatarUrl = $"{_configuration["AppUrls:BackendUrl"]}/avatars/{split.User.AvatarUrl ?? "default-user-avatar.png"}",
+                        AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(_configuration["AppUrls:BackendUrl"], split.User.AvatarUrl),
                         OwedAmount = 0
                     };
                 }
@@ -191,6 +201,56 @@ namespace PayItOff.Application.Services
             }
 
             response.Category = string.Join(", ", categories);
+            response.Participants = userSplits.Values.ToList();
+
+            return response;
+        }
+
+        public async Task<PayItOff.Shared.Responses.ExpenseDetailsResponse> GetExpenseItemDetailsAsync(int userId, int expenseId, int itemId)
+        {
+            var expense = await _expenseRepository.GetExpenseWithSplitsAsync(expenseId);
+            if (expense == null) throw new ExpenseNotFoundException();
+
+            var item = expense.Items.FirstOrDefault(i => i.Id == itemId) 
+                       ?? expense.Groups.SelectMany(g => g.Items).FirstOrDefault(i => i.Id == itemId);
+            if (item == null) throw new ExpenseNotFoundException();
+
+            var isAuthorized = expense.PayerId == userId
+                || expense.CreatorId == userId
+                || item.Splits.Any(s => s.UserId == userId);
+
+            if (!isAuthorized) throw new InvalidUserRoleException();
+
+            var response = new PayItOff.Shared.Responses.ExpenseDetailsResponse
+            {
+                ExpenseId = expense.Id,
+                Title = item.Name,
+                TotalAmount = item.TotalPrice,
+                Date = expense.PurchasedAt,
+                PayerName = $"{expense.Payer.Name} {expense.Payer.Surname}",
+                PayerAvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(_configuration["AppUrls:BackendUrl"], expense.Payer.AvatarUrl),
+                PayerPhoneNumber = expense.Payer.PhoneNumber,
+                PayerIBAN = expense.Payer.IBAN,
+                Category = item.Category
+            };
+
+            var userSplits = new Dictionary<int, PayItOff.Shared.Responses.ExpenseParticipantDto>();
+
+            foreach (var split in item.Splits)
+            {
+                if (!userSplits.ContainsKey(split.UserId))
+                {
+                    userSplits[split.UserId] = new PayItOff.Shared.Responses.ExpenseParticipantDto
+                    {
+                        UserId = split.UserId,
+                        FullName = $"{split.User.Name} {split.User.Surname}",
+                        AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(_configuration["AppUrls:BackendUrl"], split.User.AvatarUrl),
+                        OwedAmount = 0
+                    };
+                }
+                userSplits[split.UserId].OwedAmount += split.OwedAmount;
+            }
+
             response.Participants = userSplits.Values.ToList();
 
             return response;

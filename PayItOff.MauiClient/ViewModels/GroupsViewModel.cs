@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PayItOff.MauiClient.Services;
 using PayItOff.Shared.Responses;
@@ -7,7 +7,7 @@ using System.Windows.Input;
 
 namespace PayItOff.MauiClient.ViewModels;
 
-public partial class GroupsViewModel : BaseViewModel
+public partial class GroupsViewModel : PopupViewModelBase
 {
     private readonly GroupService _groupService;
     private List<GroupInfoResponse> _allGroups = new();
@@ -149,7 +149,7 @@ public partial class GroupsViewModel : BaseViewModel
         }
         else
         {
-            await Shell.Current.DisplayAlertAsync("Błąd", "Nie udało się utworzyć grupy. Sprawdź połączenie lub nazwę.", "OK");
+            await ShowAlertAsync("Błąd", "Nie udało się utworzyć grupy. Sprawdź połączenie lub nazwę.", "OK");
         }
     }
 
@@ -167,7 +167,7 @@ public partial class GroupsViewModel : BaseViewModel
         }
         else
         {
-            await Shell.Current.DisplayAlertAsync("Błąd", "Nie udało się zmienić statusu ulubionych.", "OK");
+            await ShowAlertAsync("Błąd", "Nie udało się zmienić statusu ulubionych.", "OK");
         }
     }
 

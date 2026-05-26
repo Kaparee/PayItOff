@@ -88,7 +88,7 @@ public class GroupService : IGroupService
             {
                 Id = groupId,
                 Name = member.Group.Name,
-                AvatarUrl = $"{baseUrl}/avatars/{member.Group.AvatarUrl ?? "default-group-avatar.png"}",
+                AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildGroupAvatarUrl(baseUrl, member.Group.AvatarUrl),
                 UpdatedAt = member.Group.UpdatedAt,
                 IsFavorite = member.IsFavorite,
                 Income = income,
@@ -123,9 +123,9 @@ public class GroupService : IGroupService
 
             return new ActiveGroupsDisplayResponse
             {
-                Id = group.Id,
+                Id = group.GroupId,
                 Name = group.Group!.Name,
-                AvatarUrl = $"{baseUrl}/avatars/{group.Group.AvatarUrl ?? "default-group-avatar.png"}",
+                AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildGroupAvatarUrl(baseUrl, group.Group.AvatarUrl),
                 LastUpdate = lastUpdateText
             };
         }).ToList();
@@ -191,7 +191,7 @@ public class GroupService : IGroupService
         var memberDtos = new List<GroupMemberBalanceDto>();
         foreach (var member in members)
         {
-            var user = await _userRepository.GetUserByIdAsync(member.UserId);
+            var user = member.User;
             if (user == null) continue;
 
             var owedToUser = debts.Where(d => d.CreditorId == member.UserId).Sum(d => d.Amount);
@@ -201,19 +201,16 @@ public class GroupService : IGroupService
             var isCreditorToCurrent = debts.Any(d =>
                 d.CreditorId == member.UserId && d.DebtorId == userId && d.Amount > 0);
 
-
             var lines = expenses
                 .Where(e => e.PayerId != member.UserId)
-                .SelectMany(e => e.Items.SelectMany(i => i.Splits
+                .SelectMany(e => e.Items.Concat(e.Groups.SelectMany(g => g.Items)).SelectMany(i => i.Splits
                     .Where(s => s.UserId == member.UserId && e.Payer != null)
                     .Select(s => new { PayerId = e.PayerId, Payer = e.Payer!, Amount = s.OwedAmount })))
                 .GroupBy(x => x.PayerId)
                 .Select(g => new GroupMemberDebtLineDto
                 {
                     CounterpartyName = ShortPersonLabel(g.First().Payer),
-                    AvatarUrl = g.First().Payer.AvatarUrl != null
-                        ? $"{baseUrl}/avatars/{g.First().Payer.AvatarUrl}"
-                        : $"{baseUrl}/avatars/default-user-avatar.png",
+                    AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, g.First().Payer.AvatarUrl),
                     Amount = g.Sum(x => x.Amount),
                     MemberOwes = true
                 })
@@ -224,9 +221,7 @@ public class GroupService : IGroupService
             {
                 UserId = member.UserId,
                 FullName = $"{user.Name} {user.Surname}",
-                AvatarUrl = user.AvatarUrl != null
-                    ? $"{baseUrl}/avatars/{user.AvatarUrl}"
-                    : $"{baseUrl}/avatars/default-user-avatar.png",
+                AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, user.AvatarUrl),
                 OverallBalance = overallBalance,
                 IsCurrentUser = member.UserId == userId,
                 IsCreditorToCurrentUser = isCreditorToCurrent,
@@ -238,9 +233,10 @@ public class GroupService : IGroupService
         }
 
         var expenseDtos = expenses
-            .SelectMany(e => e.Items.Select(i => new ExpenseSummaryDto
+            .SelectMany(e => e.Items.Concat(e.Groups.SelectMany(g => g.Items)).Select(i => new ExpenseSummaryDto
             {
                 ExpenseId = e.Id,
+                ItemId = i.Id,
                 Title = i.Name,
                 PayerName = e.Payer != null ? $"{e.Payer.Name} {e.Payer.Surname}" : "Nieznany",
                 TotalAmount = i.TotalPrice,

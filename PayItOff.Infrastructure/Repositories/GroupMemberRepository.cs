@@ -15,14 +15,16 @@ public class GroupMemberRepository : IGroupMemberRepository
         _context = context;
     }
 
-    public async Task AddAsync(GroupMember groupMember)
+    public Task AddAsync(GroupMember groupMember)
     {
         _context.GroupMembers.Add(groupMember);
+        return Task.CompletedTask;
     }
 
-    public async Task UpdateAsync(GroupMember groupMember)
+    public Task UpdateAsync(GroupMember groupMember)
     {
         _context.GroupMembers.Update(groupMember);
+        return Task.CompletedTask;
     }
 
     public async Task<bool> IsUserOwnerOrAdmin(int userId, int groupId)

@@ -5,7 +5,7 @@ using PayItOff.Shared.Requests;
 
 namespace PayItOff.MauiClient.ViewModels;
 
-public partial class AccountsViewModel : BaseViewModel
+public partial class AccountsViewModel : PopupViewModelBase
 {
     private readonly UserService _userService;
 
@@ -209,11 +209,11 @@ public partial class AccountsViewModel : BaseViewModel
             });
             IsEditDataPopupVisible = false;
             await LoadProfileAsync();
-            await App.Current!.MainPage!.DisplayAlert("Sukces", "Dane zostały zaktualizowane", "OK");
+            await ShowAlertAsync("Sukces", "Dane zostały zaktualizowane", "OK");
         }
         catch (Exception ex)
         {
-            await App.Current!.MainPage!.DisplayAlert("Błąd", ex.Message, "OK");
+            await ShowAlertAsync("Błąd", ex.Message, "OK");
         }
     }
 
@@ -234,11 +234,11 @@ public partial class AccountsViewModel : BaseViewModel
         {
             await _userService.RequestEmailChangeAsync(NewEmail);
             IsEditEmailPopupVisible = false;
-            await App.Current!.MainPage!.DisplayAlert("Sukces", "Link weryfikacyjny został wysłany na podany e-mail", "OK");
+            await ShowAlertAsync("Sukces", "Link weryfikacyjny został wysłany na podany e-mail", "OK");
         }
         catch (Exception ex)
         {
-            await App.Current!.MainPage!.DisplayAlert("Błąd", ex.Message, "OK");
+            await ShowAlertAsync("Błąd", ex.Message, "OK");
         }
     }
 
@@ -264,11 +264,11 @@ public partial class AccountsViewModel : BaseViewModel
                 NewPassword = NewPassword
             });
             IsEditPasswordPopupVisible = false;
-            await App.Current!.MainPage!.DisplayAlert("Sukces", "Twoje hasło zostało zmienione", "OK");
+            await ShowAlertAsync("Sukces", "Twoje hasło zostało zmienione", "OK");
         }
         catch (Exception ex)
         {
-            await App.Current!.MainPage!.DisplayAlert("Błąd", ex.Message, "OK");
+            await ShowAlertAsync("Błąd", ex.Message, "OK");
         }
     }
 
@@ -289,13 +289,13 @@ public partial class AccountsViewModel : BaseViewModel
                 if (success)
                 {
                     await LoadProfileAsync();
-                    await App.Current!.MainPage!.DisplayAlert("Sukces", "Zdjęcie profilowe zostało zaktualizowane", "OK");
+                    await ShowAlertAsync("Sukces", "Zdjęcie profilowe zostało zaktualizowane", "OK");
                 }
             }
         }
         catch (Exception ex)
         {
-            await App.Current!.MainPage!.DisplayAlert("Błąd", $"Wystąpił problem przy wyborze zdjęcia: {ex.Message}", "OK");
+            await ShowAlertAsync("Błąd", $"Wystąpił problem przy wyborze zdjęcia: {ex.Message}", "OK");
         }
         finally
         {

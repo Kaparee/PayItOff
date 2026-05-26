@@ -6,7 +6,7 @@ using PayItOff.Shared.Requests;
 
 namespace PayItOff.MauiClient.ViewModels;
 
-public partial class LoginViewModel : ObservableObject
+public partial class LoginViewModel : PopupViewModelBase
 {
     private readonly AuthService _authService;
 
@@ -16,8 +16,7 @@ public partial class LoginViewModel : ObservableObject
     [ObservableProperty]
     public partial string Password { get; set; } = string.Empty;
 
-    [ObservableProperty]
-    public partial bool IsBusy { get; set; }
+
 
     [ObservableProperty]
     public partial bool HasError { get; set; }
@@ -69,7 +68,7 @@ public partial class LoginViewModel : ObservableObject
             Password = string.Empty;
             HasError = true;
 
-            await Shell.Current.DisplayAlertAsync("Błąd logowania", ex.Message, "OK");
+            await ShowAlertAsync("Błąd logowania", ex.Message, "OK");
         }
         finally
         {
@@ -98,7 +97,7 @@ public partial class LoginViewModel : ObservableObject
             Password = string.Empty;
             HasError = true;
 
-            await Shell.Current.DisplayAlertAsync("Błąd logowania", ex.Message, "OK");
+            await ShowAlertAsync("Błąd logowania", ex.Message, "OK");
         }
         finally
         {

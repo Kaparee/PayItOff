@@ -14,13 +14,15 @@ public class ExpenseRepository : IExpenseRepository
         _context = context;
     }
 
-    public async Task AddAsync(Expense expense)
+    public Task AddAsync(Expense expense)
     {
         _context.Expenses.Add(expense);
+        return Task.CompletedTask;
     }
-    public async Task UpdateAsync(Expense expense)
+    public Task UpdateAsync(Expense expense)
     {
         _context.Expenses.Update(expense);
+        return Task.CompletedTask;
     }
     public async Task<Expense?> GetExpenseWithSplitsAsync(int expenseId)
     {
@@ -43,6 +45,10 @@ public class ExpenseRepository : IExpenseRepository
             .Include(e => e.Items)
                 .ThenInclude(i => i.Splits)
                     .ThenInclude(s => s.User)
+            .Include(e => e.Groups)
+                .ThenInclude(g => g.Items)
+                    .ThenInclude(i => i.Splits)
+                        .ThenInclude(s => s.User)
             .Where(e => e.GroupId == groupId && e.DeletedAt == null)
             .OrderByDescending(e => e.PurchasedAt)
             .ToListAsync();

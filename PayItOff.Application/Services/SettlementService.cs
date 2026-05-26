@@ -56,7 +56,7 @@ public class SettlementService : ISettlementService
             UserId = data.UserId,
             Name = data.Name,
             Surname = data.Surname,
-            AvatarUrl = $"{baseUrl}/avatars/{data.AvatarUrl ?? "default-user-avatar.png"}",
+            AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, data.AvatarUrl),
             Categories = data.Categories,
             Date = data.Date,
             Amount = data.Amount
@@ -75,7 +75,7 @@ public class SettlementService : ISettlementService
             UserId = data.UserId,
             Name = data.Name,
             Surname = data.Surname,
-            AvatarUrl = $"{baseUrl}/avatars/{data.AvatarUrl ?? "default-user-avatar.png"}",
+            AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, data.AvatarUrl),
             Categories = data.Categories,
             Date = data.Date,
             Amount = data.Amount
@@ -136,7 +136,7 @@ public class SettlementService : ISettlementService
                     OtherUserId = otherUser.Id,
                     OtherName = otherUser.Name,
                     OtherSurname = otherUser.Surname,
-                    OtherAvatarUrl = $"{baseUrl}/avatars/{otherUser.AvatarUrl ?? "default-user-avatar.png"}",
+                    OtherAvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, otherUser.AvatarUrl),
                     IsSettlement = false,
                     Status = "Confirmed",
                     CanSendDebtReminder = false
@@ -183,7 +183,7 @@ public class SettlementService : ISettlementService
                 OtherUserId = otherUser.Id,
                 OtherName = otherUser.Name,
                 OtherSurname = otherUser.Surname,
-                OtherAvatarUrl = $"{baseUrl}/avatars/{otherUser.AvatarUrl ?? "default-user-avatar.png"}",
+                OtherAvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, otherUser.AvatarUrl),
                 IsSettlement = true,
                 Status = s.Status.ToString(),
                 TransferReference = s.TransferReference,
@@ -240,43 +240,50 @@ public class SettlementService : ISettlementService
 
     public async Task<int> CreateSettlementAsync(int userId, CreateSettlementRequest request)
     {
-        if (request.Amount <= 0) throw new SettlementOperationException("Kwota musi być większa od zera.");
-
-        var groupInfo = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId) ?? throw new SettlementOperationException("Nie znaleziono grupy.");
-
-        var groupMember = await _groupMemberRepository.GetMemberAsync(request.GroupId, userId);
-        if (groupMember == null)
-            throw new SettlementOperationException("Nie jesteś członkiem wskazanej grupy.");
-
-        var creditorMember = await _groupMemberRepository.GetMemberAsync(request.GroupId, request.ReceiverId);
-        if (creditorMember == null)
-            throw new SettlementOperationException("Wierzyciel nie należy do wskazanej grupy.");
-
-        var debtRecord = await _groupDebtRepository.GetDebtAsync(request.GroupId, userId, request.ReceiverId);
-        decimal currentDebtAmount = debtRecord?.Amount ?? 0m;
-
-        if (currentDebtAmount < request.Amount)
+        await _unitOfWork.BeginTransactionAsync();
+        try
         {
-            throw new SettlementOperationException($"Nie możesz spłacić więcej niż wynosi Twój dług wobec tego użytkownika w tej grupie. Aktualny dług: {currentDebtAmount}");
+            if (request.Amount <= 0) throw new SettlementOperationException("Kwota musi być większa od zera.");
+
+            var groupInfo = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId) ?? throw new SettlementOperationException("Nie znaleziono grupy.");
+
+            var groupMember = await _groupMemberRepository.GetMemberAsync(request.GroupId, userId);
+            if (groupMember == null)
+                throw new SettlementOperationException("Nie jesteś członkiem wskazanej grupy.");
+
+            var creditorMember = await _groupMemberRepository.GetMemberAsync(request.GroupId, request.ReceiverId);
+            if (creditorMember == null)
+                throw new SettlementOperationException("Wierzyciel nie należy do wskazanej grupy.");
+
+            var debtRecord = await _groupDebtRepository.GetDebtAsync(request.GroupId, userId, request.ReceiverId);
+            decimal currentDebtAmount = debtRecord?.Amount ?? 0m;
+
+            if (currentDebtAmount < request.Amount)
+            {
+                throw new SettlementOperationException($"Nie możesz spłacić więcej niż wynosi Twój dług wobec tego użytkownika w tej grupie. Aktualny dług: {currentDebtAmount}");
+            }
+
+            var sender = await _userRepository.GetUserByIdAsync(userId)
+                ?? throw new SettlementOperationException("Nie znaleziono nadawcy w bazie.");
+
+            var receiver = await _userRepository.GetUserByIdAsync(request.ReceiverId)
+                ?? throw new SettlementOperationException("Nie znaleziono odbiorcy w bazie.");
+
+            string description = $"Spłata w grupie {groupInfo.Name}";
+
+            var settlement = Settlement.Create(sender, receiver, groupInfo, request.Amount, description);
+
+            await _settlementRepository.AddAsync(settlement);
+            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.CommitAsync();
+
+            return settlement.Id;
         }
-
-        var sender = await _userRepository.GetUserByIdAsync(userId)
-            ?? throw new SettlementOperationException("Nie znaleziono nadawcy w bazie.");
-
-        var receiver = await _userRepository.GetUserByIdAsync(request.ReceiverId)
-            ?? throw new SettlementOperationException("Nie znaleziono odbiorcy w bazie.");
-
-        var groupEntity = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId)
-            ?? throw new SettlementOperationException("Nie znaleziono encji grupy w bazie.");
-
-        string description = $"Spłata w grupie {groupInfo.Name}";
-
-        var settlement = Settlement.Create(sender, receiver, groupEntity, request.Amount, description);
-
-        await _settlementRepository.AddAsync(settlement);
-        await _unitOfWork.SaveChangesAsync();
-
-        return settlement.Id;
+        catch
+        {
+            await _unitOfWork.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<bool> AcceptSettlementAsync(int userId, int settlementId)

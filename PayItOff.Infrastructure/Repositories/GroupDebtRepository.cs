@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Infrastructure.Persistence;
@@ -14,14 +14,16 @@ public class GroupDebtRepository : IGroupDebtRepository
         _context = context;
     }
 
-    public async Task AddAsync(GroupDebt groupDebt)
+    public Task AddAsync(GroupDebt groupDebt)
     {
         _context.GroupDebts.Add(groupDebt);
+        return Task.CompletedTask;
     }
 
-    public async Task UpdateAsync(GroupDebt groupDebt)
+    public Task UpdateAsync(GroupDebt groupDebt)
     {
         _context.GroupDebts.Update(groupDebt);
+        return Task.CompletedTask;
     }
 
     public async Task<bool> HasActiveGroupDebt(int groupId)

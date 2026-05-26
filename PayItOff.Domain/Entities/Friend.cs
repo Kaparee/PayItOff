@@ -33,7 +33,7 @@ namespace PayItOff.Domain.Entities
             return new Friend(inviter, receiver);
         }
 
-        public void ReInvite(User inviter, User receiver)
+        public void ReInvite()
         {
             SentAt = DateTime.UtcNow;
             AcceptedAt = null;

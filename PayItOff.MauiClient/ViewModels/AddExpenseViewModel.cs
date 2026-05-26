@@ -8,7 +8,7 @@ using System.Text.Json;
 
 namespace PayItOff.MauiClient.ViewModels;
 
-public partial class AddExpenseViewModel : BaseViewModel, IQueryAttributable
+public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributable
 {
     private readonly GroupService _groupService;
     private readonly ExpenseService _expenseService;
@@ -56,6 +56,7 @@ public partial class AddExpenseViewModel : BaseViewModel, IQueryAttributable
     {
         _groupService = groupService;
         _expenseService = expenseService;
+        IsCustomAlertSupported = true;
     }
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
@@ -137,7 +138,7 @@ public partial class AddExpenseViewModel : BaseViewModel, IQueryAttributable
         }
         catch (Exception ex)
         {
-            await Shell.Current.DisplayAlertAsync("Błąd", "Nie udało się załadować danych grupy: " + ex.Message, "OK");
+            await ShowAlertAsync("Błąd", "Nie udało się załadować danych grupy: " + ex.Message, "OK");
         }
         finally
         {
@@ -426,13 +427,13 @@ public partial class AddExpenseViewModel : BaseViewModel, IQueryAttributable
                         item.Payer = _defaultPayer;
                         BufferItems.Add(item);
                     }
-                    await Shell.Current.DisplayAlertAsync("Sukces", $"Wczytano {items.Count} produktów z pliku JSON.", "OK");
+                    await ShowAlertAsync("Sukces", $"Wczytano {items.Count} produktów z pliku JSON.", "OK");
                 }
             }
         }
         catch (Exception ex)
         {
-            await Shell.Current.DisplayAlertAsync("Błąd", "Błąd podczas wyboru pliku: " + ex.Message, "OK");
+            await ShowAlertAsync("Błąd", "Błąd podczas wyboru pliku: " + ex.Message, "OK");
         }
     }
 
@@ -455,7 +456,7 @@ public partial class AddExpenseViewModel : BaseViewModel, IQueryAttributable
             catch (Exception ex)
             {
                 IsBusy = false;
-                await Shell.Current.DisplayAlertAsync("Błąd", "Aparat niedostępny: " + ex.Message, "OK");
+                await ShowAlertAsync("Błąd", "Aparat niedostępny: " + ex.Message, "OK");
             }
         }
     }
@@ -477,7 +478,7 @@ public partial class AddExpenseViewModel : BaseViewModel, IQueryAttributable
         catch (Exception ex)
         {
             IsBusy = false;
-            await Shell.Current.DisplayAlertAsync("Błąd", "Galeria niedostępna: " + ex.Message, "OK");
+            await ShowAlertAsync("Błąd", "Galeria niedostępna: " + ex.Message, "OK");
         }
     }
 
@@ -492,19 +493,19 @@ public partial class AddExpenseViewModel : BaseViewModel, IQueryAttributable
 
         if (allItems.Count == 0)
         {
-            await Shell.Current.DisplayAlertAsync("Błąd", "Brak produktów do rozliczenia.", "OK");
+            await ShowAlertAsync("Błąd", "Brak produktów do rozliczenia.", "OK");
             return;
         }
 
         if (allItems.Any(i => i.Payer == null))
         {
-            await Shell.Current.DisplayAlertAsync("Błąd", "Wszystkie przedmioty muszą mieć przypisanego płatnika ('Kto zapłacił').", "OK");
+            await ShowAlertAsync("Błąd", "Wszystkie przedmioty muszą mieć przypisanego płatnika ('Kto zapłacił').", "OK");
             return;
         }
 
         if (allItems.Any(i => i.AssignedMembers.Count == 0))
         {
-            await Shell.Current.DisplayAlertAsync("Błąd", "Wszystkie przedmioty muszą mieć przypisaną przynajmniej jedną osobę (przeciągnij produkty na osoby).", "OK");
+            await ShowAlertAsync("Błąd", "Wszystkie przedmioty muszą mieć przypisaną przynajmniej jedną osobę (przeciągnij produkty na osoby).", "OK");
             return;
         }
 
@@ -587,12 +588,12 @@ public partial class AddExpenseViewModel : BaseViewModel, IQueryAttributable
             };
 
             await _expenseService.CreateExpenseBatch(request);
-            await Shell.Current.DisplayAlertAsync("Sukces", "Wydatek został zapisany!", "OK");
+            await ShowAlertAsync("Sukces", "Wydatek został zapisany!", "OK");
             await Shell.Current.GoToAsync("..");
         }
         catch (Exception ex)
         {
-            await Shell.Current.DisplayAlertAsync("Błąd", "Wystąpił problem podczas zapisu: " + ex.Message, "OK");
+            await ShowAlertAsync("Błąd", "Wystąpił problem podczas zapisu: " + ex.Message, "OK");
         }
         finally
         {
