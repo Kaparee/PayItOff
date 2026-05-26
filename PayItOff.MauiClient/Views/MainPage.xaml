@@ -19,7 +19,7 @@
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
                         </HorizontalStackLayout.GestureRecognizers>
-                        <Label Text="☰" TextColor="{StaticResource TextMain}" FontSize="28" VerticalOptions="Center"/>
+                        <Image Source="phone_menu_icon.png" WidthRequest="28" HeightRequest="28" VerticalOptions="Center"/>
                         <Label Text="Menu" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" Margin="5,0,0,0" FontSize="18"/>
                     </HorizontalStackLayout>
 

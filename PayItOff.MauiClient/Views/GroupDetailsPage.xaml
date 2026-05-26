@@ -20,7 +20,7 @@
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
                         </HorizontalStackLayout.GestureRecognizers>
-                        <Label Text="☰" TextColor="{StaticResource TextMain}" FontSize="28" VerticalOptions="Center"/>
+                        <Image Source="phone_menu_icon.png" WidthRequest="28" HeightRequest="28" VerticalOptions="Center"/>
                         <Label Text="Menu" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" Margin="5,0,0,0" FontSize="18"/>
                     </HorizontalStackLayout>
 
@@ -32,33 +32,55 @@
                             <HorizontalStackLayout.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding GoBackCommand}" />
                             </HorizontalStackLayout.GestureRecognizers>
-                            <Label Text="← Powrót" TextColor="{StaticResource TextSubtle}" FontSize="16" VerticalOptions="Center" FontAttributes="Bold"/>
+                            <Image Source="arrow_left_icon.png" WidthRequest="20" HeightRequest="20" VerticalOptions="Center"/>
+                            <Label Text="Powrót" TextColor="{StaticResource TextSubtle}" FontSize="16" VerticalOptions="Center" FontAttributes="Bold"/>
                             <BoxView WidthRequest="1" HeightRequest="20" Color="{StaticResource Border}" VerticalOptions="Center" Margin="10,0"/>
                             <Label Text="{Binding RoleSubtitle}" TextColor="{StaticResource TextMain}" FontSize="{OnIdiom Phone=20, Default=24}" FontAttributes="Bold" VerticalOptions="Center"/>
                         </HorizontalStackLayout>
 
                         
-                        <HorizontalStackLayout Grid.Column="2" Spacing="20" VerticalOptions="Center"
-                                               IsVisible="{Binding IsAdminOrFounder}">
-                            <HorizontalStackLayout Spacing="6">
+                        <HorizontalStackLayout Grid.Column="2" Spacing="20" VerticalOptions="Center">
+                            <HorizontalStackLayout Spacing="6" IsVisible="{Binding IsAdminOrFounder}">
                                 <HorizontalStackLayout.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding ManageSettlementCommand}" />
+                                    <TapGestureRecognizer Command="{Binding ShowEditGroupPopupCommand}" />
                                 </HorizontalStackLayout.GestureRecognizers>
-                                <Label Text="✎" TextColor="{StaticResource TextMain}" FontSize="18" VerticalOptions="Center"/>
+                                <Image Source="edit_icon.png" WidthRequest="24" HeightRequest="24" VerticalOptions="Center"/>
+                                <VerticalStackLayout VerticalOptions="Center">
+                                    <Label Text="Edytuj" TextColor="{StaticResource TextMain}" FontSize="10" FontAttributes="Bold"/>
+                                    <Label Text="grupę" TextColor="{StaticResource TextMain}" FontSize="10" FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+
+                            <HorizontalStackLayout Spacing="6" IsVisible="{Binding IsAdminOrFounder}">
+                                <HorizontalStackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ShowManageMembersPopupCommand}" />
+                                </HorizontalStackLayout.GestureRecognizers>
+                                <Image Source="add_friend_to_group_icon.png" WidthRequest="24" HeightRequest="24" VerticalOptions="Center"/>
                                 <VerticalStackLayout VerticalOptions="Center">
                                     <Label Text="Zarządzaj" TextColor="{StaticResource TextMain}" FontSize="10" FontAttributes="Bold"/>
-                                    <Label Text="rozliczeniem" TextColor="{StaticResource TextMain}" FontSize="10" FontAttributes="Bold"/>
+                                    <Label Text="członkami" TextColor="{StaticResource TextMain}" FontSize="10" FontAttributes="Bold"/>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
 
                             <HorizontalStackLayout Spacing="6">
                                 <HorizontalStackLayout.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding ManageMembersCommand}" />
+                                    <TapGestureRecognizer Command="{Binding LeaveGroupCommand}" />
                                 </HorizontalStackLayout.GestureRecognizers>
-                                <Label Text="👥" TextColor="{StaticResource TextMain}" FontSize="18" VerticalOptions="Center"/>
+                                <Image Source="leave_icon.png" WidthRequest="24" HeightRequest="24" VerticalOptions="Center"/>
                                 <VerticalStackLayout VerticalOptions="Center">
-                                    <Label Text="Zarządzaj" TextColor="{StaticResource TextMain}" FontSize="10" FontAttributes="Bold"/>
-                                    <Label Text="członkami" TextColor="{StaticResource TextMain}" FontSize="10" FontAttributes="Bold"/>
+                                    <Label Text="Opuść" TextColor="{StaticResource StatusRed}" FontSize="10" FontAttributes="Bold"/>
+                                    <Label Text="grupę" TextColor="{StaticResource StatusRed}" FontSize="10" FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+
+                            <HorizontalStackLayout Spacing="6" IsVisible="{Binding IsAdminOrFounder}">
+                                <HorizontalStackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding DeleteGroupCommand}" />
+                                </HorizontalStackLayout.GestureRecognizers>
+                                <Image Source="delete_icon.png" WidthRequest="24" HeightRequest="24" VerticalOptions="Center"/>
+                                <VerticalStackLayout VerticalOptions="Center">
+                                    <Label Text="Usuń" TextColor="{StaticResource StatusRed}" FontSize="10" FontAttributes="Bold"/>
+                                    <Label Text="grupę" TextColor="{StaticResource StatusRed}" FontSize="10" FontAttributes="Bold"/>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
                         </HorizontalStackLayout>
@@ -84,17 +106,13 @@
                                         StrokeThickness="1" Stroke="#33ffffff"
                                         WidthRequest="280" HeightRequest="44"
                                         Padding="15,0" VerticalOptions="Center">
-                                    <Grid ColumnDefinitions="30, *">
-                                        <Label Text="🔍" VerticalOptions="Center" HorizontalOptions="Start" FontSize="14" Opacity="0.5"/>
-                                        <SearchBar Grid.Column="1"
-                                                   Placeholder="Wpisz szukaną osobę..."
-                                                   Text="{Binding MemberSearchText}"
-                                                   TextColor="White"
-                                                   PlaceholderColor="#888"
-                                                   BackgroundColor="Transparent"
-                                                   CancelButtonColor="{StaticResource TextSubtle}"
-                                                   Margin="-10,0,0,0"/>
-                                    </Grid>
+                                    <SearchBar Placeholder="Wpisz szukaną osobę..."
+                                               Text="{Binding MemberSearchText}"
+                                               TextColor="White"
+                                               PlaceholderColor="#888"
+                                               BackgroundColor="Transparent"
+                                               CancelButtonColor="{StaticResource TextSubtle}"
+                                               Margin="-10,0,0,0"/>
                                 </Border>
                             </Grid>
 
@@ -110,8 +128,7 @@
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Tapped="OnPrevMemberClicked" />
                                     </Border.GestureRecognizers>
-                                    <Label Text="←" TextColor="{StaticResource TextSubtle}" FontSize="22"
-                                           HorizontalOptions="Center" VerticalOptions="Center" Margin="0,-2,0,0"/>
+                                    <Image Source="arrow_left_icon.png" WidthRequest="20" HeightRequest="20" HorizontalOptions="Center" VerticalOptions="Center"/>
                                 </Border>
 
                                 
@@ -135,7 +152,7 @@
                                                 <VerticalStackLayout Spacing="0">
 
                                                     <!-- Nagłówek: awatar + imię -->
-                                                    <Grid Padding="16,14" ColumnDefinitions="Auto, *">
+                                                    <Grid Padding="16,14" ColumnDefinitions="Auto, *, Auto">
                                                         <Border Grid.Column="0" HeightRequest="40" WidthRequest="40"
                                                                 StrokeShape="RoundRectangle 20" StrokeThickness="0"
                                                                 BackgroundColor="#1E232D" Margin="0,0,12,0">
@@ -149,7 +166,7 @@
                                                         <Label Grid.Column="1" Text="{Binding FullName}"
                                                                FontSize="18" FontAttributes="Bold"
                                                                TextColor="White"
-                                                               VerticalOptions="Center"/>
+                                                               VerticalOptions="Center" HorizontalOptions="Start"/>
                                                     </Grid>
 
                                                     <!-- Separator -->
@@ -226,8 +243,7 @@
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Tapped="OnNextMemberClicked" />
                                     </Border.GestureRecognizers>
-                                    <Label Text="→" TextColor="{StaticResource TextSubtle}" FontSize="22"
-                                           HorizontalOptions="Center" VerticalOptions="Center" Margin="0,-2,0,0"/>
+                                    <Image Source="arrow_right_icon.png" WidthRequest="24" HeightRequest="24" VerticalOptions="Center" HorizontalOptions="Center" Opacity="0.5"/>
                                 </Border>
                             </Grid>
                         </VerticalStackLayout>
@@ -240,7 +256,7 @@
                             <TapGestureRecognizer Command="{Binding AddExpenseCommand}"/>
                         </Border.GestureRecognizers>
                         <HorizontalStackLayout HorizontalOptions="Center" Spacing="10" VerticalOptions="Center">
-                            <Label Text="+" TextColor="White" FontSize="26" VerticalOptions="Center" Margin="0,-4,0,0" FontAttributes="Bold"/>
+                            <Image Source="plus_icon.png" WidthRequest="18" HeightRequest="18" VerticalOptions="Center" />
                             <Label Text="Dodaj nowe wydatki" TextColor="White" FontAttributes="Bold" FontSize="18" VerticalOptions="Center"/>
                         </HorizontalStackLayout>
                     </Border>
@@ -271,17 +287,13 @@
                                             BackgroundColor="#0A000000"
                                             StrokeThickness="1" Stroke="#33ffffff"
                                             HeightRequest="44" Padding="15,0">
-                                        <Grid ColumnDefinitions="30, *">
-                                            <Label Text="🔍" VerticalOptions="Center" HorizontalOptions="Start" FontSize="14" Opacity="0.5"/>
-                                            <SearchBar Grid.Column="1"
-                                                       Placeholder="Wpisz szukaną transakcję..."
-                                                       Text="{Binding TransactionSearchText}"
-                                                       TextColor="White"
-                                                       PlaceholderColor="#888"
-                                                       BackgroundColor="Transparent"
-                                                       CancelButtonColor="{StaticResource TextSubtle}"
-                                                       Margin="-10,0,0,0"/>
-                                        </Grid>
+                                        <SearchBar Placeholder="Wpisz szukaną transakcję..."
+                                                   Text="{Binding TransactionSearchText}"
+                                                   TextColor="White"
+                                                   PlaceholderColor="#888"
+                                                   BackgroundColor="Transparent"
+                                                   CancelButtonColor="{StaticResource TextSubtle}"
+                                                   Margin="-10,0,0,0"/>
                                     </Border>
                                 </Grid>
                             </VerticalStackLayout>
@@ -314,6 +326,9 @@
                                                                 BackgroundColor="#15FFFFFF"
                                                                 StrokeThickness="1" Stroke="#11FFFFFF"
                                                                 Padding="16,12">
+                                                            <Border.GestureRecognizers>
+                                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GroupDetailsViewModel}}, Path=ShowExpenseDetailsCommand}" CommandParameter="{Binding .}"/>
+                                                            </Border.GestureRecognizers>
                                                             <Grid ColumnDefinitions="Auto, *, *"
                                                                   ColumnSpacing="10">
                                                                 <Label Grid.Column="0"
@@ -370,6 +385,176 @@
                 <Label Text="Wczytywanie grupy…" TextColor="White"
                        FontAttributes="Bold" FontSize="15" HorizontalOptions="Center" />
             </VerticalStackLayout>
+        </Grid>
+
+        <!-- EDIT GROUP POPUP -->
+        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsEditGroupPopupVisible}" Style="{StaticResource PopupOverlayStyle}">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CancelEditGroupPopupCommand}" />
+            </Grid.GestureRecognizers>
+            <Border Style="{StaticResource PopupContainerStyle}" WidthRequest="350">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="20">
+                    <Label Text="Edytuj grupę" FontSize="22" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
+                    <Entry Placeholder="Nazwa grupy" Text="{Binding NewGroupName}" PlaceholderColor="#888" TextColor="White" BackgroundColor="#2A303C" />
+
+                    <Grid ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,10,0,0">
+                        <Button Grid.Column="0" Text="Anuluj" Command="{Binding CancelEditGroupPopupCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+                        <Button Grid.Column="1" Text="Zapisz" Command="{Binding ConfirmEditGroupCommand}" Style="{StaticResource SuccessButtonStyle}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- MANAGE MEMBERS POPUP -->
+        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsManageMembersPopupVisible}" Style="{StaticResource PopupOverlayStyle}">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CancelManageMembersPopupCommand}" />
+            </Grid.GestureRecognizers>
+            <Border Style="{StaticResource PopupContainerStyle}" WidthRequest="400" MaximumHeightRequest="600">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer />
+                </Border.GestureRecognizers>
+                
+                <ScrollView>
+                    <VerticalStackLayout Spacing="25">
+                        <Label Text="Zarządzaj członkami" FontSize="22" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
+
+                        <!-- SEKCJA: Szybkie zapraszanie znajomych -->
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="Szybko zaproś znajomych" FontSize="14" TextColor="{StaticResource TextSubtle}" FontAttributes="Bold"/>
+                            
+                            <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                                <HorizontalStackLayout BindableLayout.ItemsSource="{Binding FriendsList}" Spacing="15">
+                                    <BindableLayout.EmptyView>
+                                        <Label Text="Brak znajomych do zaproszenia" TextColor="#666" FontSize="12" FontAttributes="Italic" Padding="10,0"/>
+                                    </BindableLayout.EmptyView>
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate>
+                                            <VerticalStackLayout Spacing="5" WidthRequest="70" HorizontalOptions="Center">
+                                                <VerticalStackLayout.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding BindingContext.InviteFriendCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}"/>
+                                                </VerticalStackLayout.GestureRecognizers>
+                                                
+                                                <Grid WidthRequest="60" HeightRequest="60">
+                                                    <Border WidthRequest="60" HeightRequest="60" StrokeShape="RoundRectangle 30" StrokeThickness="2" Stroke="#333" BackgroundColor="#2A303C">
+                                                        <Image Source="{Binding AvatarUrl}" Aspect="AspectFill"/>
+                                                    </Border>
+                                                    <!-- Ikonka plusa -->
+                                                    <Border WidthRequest="20" HeightRequest="20" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource StatusGreen}" StrokeThickness="0" 
+                                                            HorizontalOptions="End" VerticalOptions="End" TranslationX="2" TranslationY="2">
+                                                        <Image Source="plus_icon.png" WidthRequest="12" HeightRequest="12" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                                    </Border>
+                                                </Grid>
+                                                <Label Text="{Binding FullName}" FontSize="10" TextColor="#AAA" HorizontalOptions="Center" HorizontalTextAlignment="Center" MaxLines="2" LineBreakMode="TailTruncation"/>
+                                            </VerticalStackLayout>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </HorizontalStackLayout>
+                            </ScrollView>
+
+                            <Label Text="LUB" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" FontSize="12" FontAttributes="Bold" Margin="0,5"/>
+
+                            <Grid ColumnDefinitions="*, Auto" ColumnSpacing="10">
+                                <Entry Grid.Column="0" Placeholder="Wpisz email lub nick..." Text="{Binding InviteSearchText}" PlaceholderColor="#888" TextColor="White" BackgroundColor="#2A303C" HeightRequest="40" VerticalOptions="Center"/>
+                                <Button Grid.Column="1" Text="Zaproś" Command="{Binding InviteUserBySearchCommand}" Style="{StaticResource SuccessButtonStyle}" HeightRequest="40" Padding="15,0" VerticalOptions="Center"/>
+                            </Grid>
+                        </VerticalStackLayout>
+
+                        <BoxView HeightRequest="1" Color="#333" Margin="0,5"/>
+
+                        <!-- SEKCJA: Lista obecnych członków -->
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="Obecni członkowie grupy" FontSize="14" TextColor="{StaticResource TextSubtle}" FontAttributes="Bold"/>
+                            
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding ActiveMembersList}" Spacing="10">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border StrokeShape="RoundRectangle 12" BackgroundColor="#2A303C" StrokeThickness="0" Padding="10">
+                                            <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="10">
+                                                <Border Grid.Column="0" WidthRequest="40" HeightRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0" VerticalOptions="Center">
+                                                    <Image Source="{Binding AvatarUrl}" Aspect="AspectFill"/>
+                                                </Border>
+                                                
+                                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                                    <Label Text="{Binding FullName}" FontSize="14" FontAttributes="Bold" TextColor="White" LineBreakMode="TailTruncation"/>
+                                                    <Label Text="{Binding Role}" FontSize="10" TextColor="{StaticResource StatusGreen}" FontAttributes="Bold"/>
+                                                </VerticalStackLayout>
+
+                                                <!-- Zmiana Roli -->
+                                                <ImageButton Grid.Column="2" Source="star_icon_fav.png" BackgroundColor="Transparent" Padding="5,5" WidthRequest="35" HeightRequest="35"
+                                                        Command="{Binding BindingContext.ChangeMemberRoleCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                        CommandParameter="{Binding .}"
+                                                        ToolTipProperties.Text="Zmień rolę"
+                                                        IsVisible="{Binding BindingContext.IsOwner, Source={RelativeSource AncestorType={x:Type ContentPage}}}"/>
+
+                                                <!-- Usunięcie -->
+                                                <ImageButton Grid.Column="3" Source="delete_icon.png" BackgroundColor="Transparent" Padding="5,5" WidthRequest="35" HeightRequest="35"
+                                                        Command="{Binding BindingContext.KickMemberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                        CommandParameter="{Binding .}"
+                                                        ToolTipProperties.Text="Usuń z grupy"
+                                                        IsVisible="{Binding BindingContext.IsAdminOrFounder, Source={RelativeSource AncestorType={x:Type ContentPage}}}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+
+                        <Button Text="Zamknij" Command="{Binding CancelManageMembersPopupCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,10,0,0"/>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Border>
+        </Grid>
+
+        <!-- EXPENSE DETAILS POPUP -->
+        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsExpenseDetailsPopupVisible}" Style="{StaticResource PopupOverlayStyle}" ZIndex="300">
+            <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400" HorizontalOptions="Center">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Szczegóły transakcji" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
+                    
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="{Binding SelectedExpenseDetails.Title}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
+                        <Label Text="{Binding SelectedExpenseDetails.Category}" FontSize="14" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center"/>
+                        <Label Text="{Binding SelectedExpenseDetails.TotalAmount, StringFormat='Całkowita kwota: {0:N2} zł'}" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
+                        
+                        <Label Text="Kto zapłacił:" FontSize="14" TextColor="{StaticResource TextSubtle}" Margin="0,10,0,0"/>
+                        <Grid ColumnDefinitions="Auto, *">
+                            <Border Grid.Column="0" WidthRequest="30" HeightRequest="30" StrokeShape="RoundRectangle 15" BackgroundColor="#1E232D" StrokeThickness="0" Margin="0,0,10,0" VerticalOptions="Center">
+                                <Grid>
+                                    <Path Aspect="Uniform" WidthRequest="20" HeightRequest="20" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444" Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                    <Image Source="{Binding SelectedExpenseDetails.PayerAvatarUrl}" Aspect="AspectFill" />
+                                </Grid>
+                            </Border>
+                            <Label Grid.Column="1" Text="{Binding SelectedExpenseDetails.PayerName}" FontSize="14" TextColor="{StaticResource TextMain}" VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Label Text="W czym brał udział:" FontSize="14" TextColor="{StaticResource TextSubtle}" Margin="0,10,0,0"/>
+                        <ScrollView MaximumHeightRequest="200" Margin="0,0,0,10">
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding SelectedExpenseDetails.Participants}" Spacing="10">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10" Padding="0,0,10,0">
+                                            <Border Grid.Column="0" WidthRequest="30" HeightRequest="30" StrokeShape="RoundRectangle 15" BackgroundColor="#1E232D" StrokeThickness="0" VerticalOptions="Center">
+                                                <Grid>
+                                                    <Path Aspect="Uniform" WidthRequest="20" HeightRequest="20" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444" Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                                    <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
+                                                </Grid>
+                                            </Border>
+                                            <Label Grid.Column="1" Text="{Binding FullName}" FontSize="14" TextColor="{StaticResource TextMain}" VerticalOptions="Center" LineBreakMode="TailTruncation"/>
+                                            <Label Grid.Column="2" Text="{Binding OwedAmount, StringFormat='{0:N2} zł'}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource TextMain}" VerticalOptions="Center" HorizontalOptions="End"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </ScrollView>
+                    </VerticalStackLayout>
+
+                    <Button Text="Zamknij" Command="{Binding CloseExpenseDetailsPopupCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,15,0,0"/>
+                </VerticalStackLayout>
+            </Border>
         </Grid>
     </Grid>
 

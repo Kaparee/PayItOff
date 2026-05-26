@@ -1,4 +1,4 @@
-﻿using PayItOff.Domain.Enums;
+using PayItOff.Domain.Enums;
 
 namespace PayItOff.Shared.Responses
 {
@@ -12,5 +12,7 @@ namespace PayItOff.Shared.Responses
         public required string Email { get; set; }
         public required string Nickname { get; set; }
         public required GroupMemberRole Role { get; set; }
+
+        public string FullName => $"{Name} {Surname}";
     }
 }

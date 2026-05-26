@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using PayItOff.Application.Interfaces;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Enums;
@@ -57,6 +57,8 @@ public class GroupMemberService : IGroupMemberService
             await _groupMemberRepository.AddAsync(invite);
         }
 
+        group!.UpdateTimestamp();
+        await _groupRepository.UpdateAsync(group);
         await _unitOfWork.SaveChangesAsync();
 
     }
@@ -69,6 +71,12 @@ public class GroupMemberService : IGroupMemberService
         if (userId != invitation.UserId) { throw new InvalidUserInvitationException(); }
 
         invitation.Accept();
+        invitation.Group?.UpdateTimestamp();
+
+        if (invitation.Group != null)
+        {
+            await _groupRepository.UpdateAsync(invitation.Group);
+        }
 
         await _groupMemberRepository.UpdateAsync(invitation);
         await _unitOfWork.SaveChangesAsync();
@@ -101,6 +109,12 @@ public class GroupMemberService : IGroupMemberService
         if (actor.Role == GroupMemberRole.Admin && request.NewRole == GroupMemberRole.Owner) { throw new InvalidUserRoleException(); }
 
         targetUser!.UpdateRole(request.NewRole);
+        targetUser.Group?.UpdateTimestamp();
+
+        if (targetUser.Group != null)
+        {
+            await _groupRepository.UpdateAsync(targetUser.Group);
+        }
 
         await _groupMemberRepository.UpdateAsync(targetUser);
         await _unitOfWork.SaveChangesAsync();
@@ -122,6 +136,12 @@ public class GroupMemberService : IGroupMemberService
         if (user.Role == GroupMemberRole.Owner) { throw new InvalidUserRoleException(); }
 
         user.Leave();
+        user.Group?.UpdateTimestamp();
+
+        if (user.Group != null)
+        {
+            await _groupRepository.UpdateAsync(user.Group);
+        }
 
         await _groupMemberRepository.UpdateAsync(user);
         await _unitOfWork.SaveChangesAsync();
@@ -139,6 +159,13 @@ public class GroupMemberService : IGroupMemberService
         if (userId == targetUserId) { throw new InvalidUserRoleException(); }
 
         targetUser.Kick();
+        targetUser.Group?.UpdateTimestamp();
+        
+        if (targetUser.Group != null)
+        {
+            await _groupRepository.UpdateAsync(targetUser.Group);
+        }
+
         await _groupMemberRepository.UpdateAsync(targetUser);
         await _unitOfWork.SaveChangesAsync();
     }

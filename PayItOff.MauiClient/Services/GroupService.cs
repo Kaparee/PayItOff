@@ -1,4 +1,5 @@
-﻿using PayItOff.Shared.Responses;
+using PayItOff.Shared.Responses;
+using PayItOff.Shared.Requests;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -65,5 +66,35 @@ public class GroupService
         return response.IsSuccessStatusCode
             ? await response.Content.ReadFromJsonAsync<List<ActiveGroupsDisplayResponse>>(_options) ?? []
             : [];
+    }
+
+    public async Task<bool> EditGroupInfoAsync(EditGroupInfoRequest request, Stream? avatarStream = null, string? fileName = null)
+    {
+        using var content = new MultipartFormDataContent();
+        content.Add(new StringContent(request.GroupId.ToString()), "GroupId");
+        if (!string.IsNullOrEmpty(request.NewName))
+        {
+            content.Add(new StringContent(request.NewName), "NewName");
+        }
+
+        if (avatarStream != null && !string.IsNullOrEmpty(fileName))
+        {
+            var imageContent = new StreamContent(avatarStream);
+            imageContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+            content.Add(imageContent, "avatar", fileName);
+        }
+
+        var response = await _httpClient.PatchAsync("Group/group-edit", content);
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> DeleteGroupAsync(int groupId)
+    {
+        var requestMsg = new HttpRequestMessage(HttpMethod.Delete, "Group/group-delete")
+        {
+            Content = JsonContent.Create(new DeleteGroupRequest { GroupId = groupId })
+        };
+        var response = await _httpClient.SendAsync(requestMsg);
+        return response.IsSuccessStatusCode;
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Enums;
 using PayItOff.Domain.Interfaces;
@@ -49,7 +49,7 @@ public class GroupRepository : IGroupRepository
             .Include(x => x.Group)
             .Where(x => x.UserId == userId && x.Status == GroupMemberStatus.Accepted)
             .Where(x => x.Group!.DeletedAt == null)
-            .OrderByDescending(x => x.UpdatedAt)
+            .OrderByDescending(x => x.Group!.UpdatedAt)
             .Take(4)
             .ToListAsync();
     }

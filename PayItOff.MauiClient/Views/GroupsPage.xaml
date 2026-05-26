@@ -25,13 +25,11 @@
                 <Border Grid.Row="0" HorizontalOptions="End" VerticalOptions="Center"
                         StrokeShape="RoundRectangle 20" BackgroundColor="Transparent"
                         Stroke="#444" StrokeThickness="1" WidthRequest="320" HeightRequest="40" Padding="15,0">
-                    <Grid ColumnDefinitions="30, *">
-                        <Label Text="🔍" VerticalOptions="Center" HorizontalOptions="Start" FontSize="14" Opacity="0.5"/>
-                        <Entry Grid.Column="1" Placeholder="Wpisz szukaną grupę..."
+                    <SearchBar Placeholder="Wpisz szukaną grupę..."
                                PlaceholderColor="#666" TextColor="White" FontSize="14"
                                VerticalOptions="Center" BackgroundColor="Transparent"
-                               Text="{Binding SearchQuery}"/>
-                    </Grid>
+                               Text="{Binding SearchQuery}" CancelButtonColor="{StaticResource TextSubtle}"
+                               Margin="-10,0,0,0"/>
                 </Border>
 
                 
@@ -101,16 +99,13 @@
                                                                       CommandParameter="{Binding .}" />
                                             </Border.GestureRecognizers>
                                             
-                                            <Path Aspect="Uniform" WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center"
-                                                  Fill="Transparent" Stroke="#666" StrokeThickness="1.5"
-                                                  Data="M 12 0 L 15.7 8.6 L 24 9.8 L 18 15.6 L 19.4 24 L 12 20.1 L 4.6 24 L 6 15.6 L 0 9.8 L 8.3 8.6 Z">
-                                                <Path.Triggers>
-                                                    <DataTrigger TargetType="Path" Binding="{Binding IsFavorite}" Value="True">
-                                                        <Setter Property="Fill" Value="#FFA500" />
-                                                        <Setter Property="Stroke" Value="#FFA500" />
+                                            <Image WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center" Source="star_icon_default.png">
+                                                <Image.Triggers>
+                                                    <DataTrigger TargetType="Image" Binding="{Binding IsFavorite}" Value="True">
+                                                        <Setter Property="Source" Value="star_icon_fav.png" />
                                                     </DataTrigger>
-                                                </Path.Triggers>
-                                            </Path>
+                                                </Image.Triggers>
+                                            </Image>
                                         </Border>
                                     </Grid>
                                 </DataTemplate>
@@ -124,7 +119,7 @@
                                 <TapGestureRecognizer Command="{Binding ShowCreatePopupCommand}"/>
                             </Border.GestureRecognizers>
                             <HorizontalStackLayout HorizontalOptions="Center" Spacing="15" VerticalOptions="Center">
-                                <Label Text="+" TextColor="White" FontSize="32" VerticalOptions="Center" Margin="0,-4,0,0"/>
+                                <Image Source="plus_icon.png" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" Margin="0,-4,0,0"/>
                                 <Label Text="Utwórz nową grupę" TextColor="White" FontAttributes="Bold" FontSize="18" VerticalOptions="Center"/>
                             </HorizontalStackLayout>
                         </Border>
@@ -135,9 +130,8 @@
         </Grid>
 
         
-        <Grid IsVisible="{Binding IsCreatePopupVisible}" BackgroundColor="#D9121212" ZIndex="200">
-            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="420"
-                    BackgroundColor="{StaticResource SurfaceDark}" StrokeShape="RoundRectangle 20" Padding="35" StrokeThickness="0">
+        <Grid IsVisible="{Binding IsCreatePopupVisible}" Style="{StaticResource PopupOverlayStyle}">
+            <Border Style="{StaticResource PopupContainerStyle}" WidthRequest="420">
                 <VerticalStackLayout Spacing="30">
                     <Label Text="Nowa Grupa" FontSize="26" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
 
@@ -152,7 +146,7 @@
                             </Border.StrokeShape>
                             <Grid>
                                 <BoxView Color="#2B2B3D" CornerRadius="60" />
-                                <Label Text="+" TextColor="#7F00FF" FontSize="40" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                <Image Source="camera_icon.png" WidthRequest="40" HeightRequest="40" HorizontalOptions="Center" VerticalOptions="Center" />
                                 <Image Source="{Binding SelectedAvatarSource}" Aspect="AspectFill" />
                             </Grid>
                         </Border>
@@ -168,10 +162,8 @@
 
                     
                     <Grid ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,10,0,0">
-                        <Button Grid.Column="0" Text="Anuluj" Command="{Binding ClosePopupCommand}"
-                                BackgroundColor="#1E232D" TextColor="White" BorderColor="#444" BorderWidth="1" HeightRequest="45" CornerRadius="10"/>
-                        <Button Grid.Column="1" Text="Utwórz" Command="{Binding ConfirmCreateGroupCommand}"
-                                BackgroundColor="{StaticResource StatusGreen}" TextColor="#121212" FontAttributes="Bold" HeightRequest="45" CornerRadius="10"/>
+                        <Button Grid.Column="0" Text="Anuluj" Command="{Binding ClosePopupCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+                        <Button Grid.Column="1" Text="Utwórz" Command="{Binding ConfirmCreateGroupCommand}" Style="{StaticResource SuccessButtonStyle}" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>

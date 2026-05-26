@@ -7,14 +7,6 @@
              BackgroundColor="{StaticResource MainBackground}">
 
     <ContentPage.Resources>
-        <Style x:Key="BaseEntryBorderStyle" TargetType="Border">
-            <Setter Property="Stroke" Value="{StaticResource Border}" />
-            <Setter Property="StrokeThickness" Value="1" />
-            <Setter Property="StrokeShape" Value="RoundRectangle 12" />
-            <Setter Property="BackgroundColor" Value="{StaticResource SurfaceDark}" />
-            <Setter Property="Padding" Value="15,0" />
-        </Style>
-
         <Style x:Key="PasswordEntryBorderStyle" TargetType="Border" BasedOn="{StaticResource BaseEntryBorderStyle}">
             <Style.Triggers>
                 <DataTrigger TargetType="Border" Binding="{Binding HasError}" Value="True">
@@ -61,16 +53,14 @@
                                ReturnType="Done"
                                Margin="0" />
 
-                        <Button Grid.Column="1"
-                                Text="{Binding PasswordIcon}"
-                                Command="{Binding TogglePasswordVisibilityCommand}"
-                                BackgroundColor="Transparent"
-                                TextColor="{StaticResource TextMain}"
-                                FontSize="18"
-                                Padding="0"
-                                HeightRequest="45"
-                                WidthRequest="45"
-                                VerticalOptions="Center" />
+                        <ImageButton Grid.Column="1"
+                                     Source="{Binding PasswordIcon}"
+                                     Command="{Binding TogglePasswordVisibilityCommand}"
+                                     BackgroundColor="Transparent"
+                                     Padding="12"
+                                     HeightRequest="45"
+                                     WidthRequest="45"
+                                     VerticalOptions="Center" />
                     </Grid>
                 </Border>
             </VerticalStackLayout>
@@ -85,7 +75,7 @@
                     Margin="0,10,0,0" />
 
             <Button Text="Nie masz konta? Zarejestruj się"
-                    BackgroundColor="Transparent"
+                    Style="{StaticResource GhostButtonStyle}"
                     Command="{Binding GoToRegisterCommand}"
                     TextColor="{StaticResource BrandViolet}" />
 

@@ -15,10 +15,14 @@ public class NotificationRepository : INotificationRepository
         _context = context;
     }
 
-    public Task AddAsync(Notification notification)
+    public async Task AddAsync(Notification notification)
     {
         _context.Notifications.Add(notification);
-        return Task.CompletedTask;
+    }
+
+    public async Task UpdateAsync(Notification notification)
+    {
+        _context.Notifications.Update(notification);
     }
 
     public Task<bool> HasDebtReminderSinceAsync(int creditorId, int debtorId, int groupDebtId, DateTime sinceUtc)
@@ -30,4 +34,6 @@ public class NotificationRepository : INotificationRepository
             && n.EntityId == groupDebtId
             && n.CreatedAt >= sinceUtc);
     }
+
+
 }

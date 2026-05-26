@@ -26,7 +26,7 @@ public partial class LoginViewModel : ObservableObject
     public partial bool IsPasswordHidden { get; set; } = true;
 
     [ObservableProperty]
-    public partial string PasswordIcon { get; set; } = "👁️";
+    public partial string PasswordIcon { get; set; } = "eye_closed.png";
 
     public LoginViewModel(AuthService authService)
     {
@@ -110,7 +110,7 @@ public partial class LoginViewModel : ObservableObject
     private void TogglePasswordVisibility()
     {
         IsPasswordHidden = !IsPasswordHidden;
-        PasswordIcon = IsPasswordHidden ? "👁️" : "🙈";
+        PasswordIcon = IsPasswordHidden ? "eye_closed.png" : "eye_open.png";
     }
 
     [RelayCommand]

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
@@ -38,14 +38,15 @@
         <Setter Property="FontSize" Value="12" />
     </Style>
 
-    <Style TargetType="Button">
+    <Style x:Key="BaseButtonStyle" TargetType="Button">
         <Setter Property="TextColor" Value="{StaticResource TextMain}" />
         <Setter Property="BackgroundColor" Value="{StaticResource PrimaryViolet}" />
         <Setter Property="FontFamily" Value="OpenSansRegular"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="CornerRadius" Value="12"/>
         <Setter Property="Padding" Value="14,10"/>
-        <Setter Property="HeightRequest" Value="50"/>
+        <Setter Property="HeightRequest" Value="48"/>
+        <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="CommonStates">
@@ -66,6 +67,8 @@
             </VisualStateGroupList>
         </Setter>
     </Style>
+
+    <Style TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}" />
 
     <Style TargetType="Entry">
         <Setter Property="TextColor" Value="{StaticResource TextMain}" />
@@ -144,6 +147,55 @@
         <Setter Property="WidthRequest" Value="120" />
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="BackgroundColor" Value="{StaticResource SurfaceDark}" />
+    </Style>
+
+    <Style x:Key="BaseEntryBorderStyle" TargetType="Border">
+        <Setter Property="Stroke" Value="{StaticResource Border}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 12" />
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceDark}" />
+        <Setter Property="Padding" Value="15,0" />
+    </Style>
+
+    <!-- Specific Button Styles -->
+    <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryViolet}" />
+    </Style>
+
+    <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceDark}" />
+        <Setter Property="TextColor" Value="{StaticResource TextMain}" />
+    </Style>
+
+    <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+        <Setter Property="BackgroundColor" Value="{StaticResource StatusRed}" />
+        <Setter Property="TextColor" Value="{StaticResource TextMain}" />
+    </Style>
+
+    <Style x:Key="SuccessButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+        <Setter Property="BackgroundColor" Value="{StaticResource StatusGreen}" />
+        <Setter Property="TextColor" Value="{StaticResource TextMain}" />
+    </Style>
+
+    <Style x:Key="GhostButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{StaticResource TextMain}" />
+    </Style>
+
+    <!-- Popup Styles -->
+    <Style x:Key="PopupOverlayStyle" TargetType="Grid">
+        <Setter Property="BackgroundColor" Value="{StaticResource PopupOverlay}" />
+        <Setter Property="ZIndex" Value="200" />
+    </Style>
+
+    <Style x:Key="PopupContainerStyle" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource BgDark}" />
+        <Setter Property="Stroke" Value="{StaticResource Border}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 20" />
+        <Setter Property="Padding" Value="24" />
+        <Setter Property="Margin" Value="24" />
+        <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
 </ResourceDictionary>

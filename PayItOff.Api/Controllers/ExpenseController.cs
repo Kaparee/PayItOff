@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PayItOff.Application.Interfaces;
 using PayItOff.Shared.Requests;
@@ -40,4 +40,12 @@ public class ExpenseController : ControllerBase
         return Ok();
     }
 
+    [HttpGet("{id}")]
+    [EndpointSummary("Szczegóły wydatku")]
+    [EndpointDescription("Endpoint zwracający detale konkretnego wydatku po ID, wraz z informacją kto za niego zapłacił i jacy użytkownicy biorą w nim udział.")]
+    public async Task<IActionResult> GetExpenseDetails(int id)
+    {
+        var response = await _expenseService.GetExpenseDetailsAsync(id);
+        return Ok(response);
+    }
 }

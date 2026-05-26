@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Enums;
 using PayItOff.Domain.Interfaces;
@@ -42,6 +42,7 @@ public class GroupMemberRepository : IGroupMemberRepository
     public async Task<GroupMember?> GetActiveInvitationById(int invitationId)
     {
         return await _context.GroupMembers
+            .Include(x => x.Group)
             .Where(x => x.Id == invitationId && x.Status == GroupMemberStatus.Pending)
             .FirstOrDefaultAsync();
     }
@@ -49,6 +50,7 @@ public class GroupMemberRepository : IGroupMemberRepository
     public async Task<GroupMember?> GetMemberAsync(int groupId, int userId)
     {
         return await _context.GroupMembers
+            .Include(x => x.Group)
             .Where(x => x.GroupId == groupId && x.UserId == userId)
             .FirstOrDefaultAsync();
     }

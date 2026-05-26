@@ -30,4 +30,9 @@ public class ExpenseService
         var result = await response.Content.ReadFromJsonAsync<System.Text.Json.Nodes.JsonObject>();
         return result?["fileName"]?.ToString() ?? string.Empty;
     }
+
+    public async Task<PayItOff.Shared.Responses.ExpenseDetailsResponse?> GetExpenseDetailsAsync(int expenseId)
+    {
+        return await _httpClient.GetFromJsonAsync<PayItOff.Shared.Responses.ExpenseDetailsResponse>($"Expense/{expenseId}");
+    }
 }

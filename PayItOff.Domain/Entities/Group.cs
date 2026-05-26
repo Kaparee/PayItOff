@@ -43,13 +43,18 @@ namespace PayItOff.Domain.Entities
 
             if (isUpdated)
             {
-                UpdatedAt = DateTime.UtcNow;
+                UpdateTimestamp();
             }
+        }
+
+        public void UpdateTimestamp()
+        {
+            UpdatedAt = DateTime.UtcNow;
         }
 
         public void Delete()
         {
-            UpdatedAt = DateTime.UtcNow;
+            UpdateTimestamp();
             DeletedAt = DateTime.UtcNow;
         }
     }

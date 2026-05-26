@@ -37,7 +37,7 @@
                     <HorizontalStackLayout.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
                     </HorizontalStackLayout.GestureRecognizers>
-                    <Label Text="☰" TextColor="{StaticResource TextMain}" FontSize="28" VerticalOptions="Center"/>
+                    <Image Source="phone_menu_icon.png" WidthRequest="28" HeightRequest="28" VerticalOptions="Center"/>
                     <Label Text="Menu" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" Margin="5,0,0,0" FontSize="18"/>
                 </HorizontalStackLayout>
 
@@ -133,13 +133,11 @@
                     <Border Grid.Column="0" HorizontalOptions="Start" VerticalOptions="Center"
                             StrokeShape="RoundRectangle 20" BackgroundColor="Transparent"
                             Stroke="#444" StrokeThickness="1" WidthRequest="320" HeightRequest="40" Padding="15,0">
-                        <Grid ColumnDefinitions="30, *">
-                            <Label Text="🔍" VerticalOptions="Center" HorizontalOptions="Start" FontSize="14" Opacity="0.5"/>
-                            <Entry Grid.Column="1" Placeholder="Wpisz dane znajomego..."
+                        <SearchBar Placeholder="Wpisz dane znajomego..."
                                    PlaceholderColor="#666" TextColor="White" FontSize="14"
                                    VerticalOptions="Center" BackgroundColor="Transparent"
-                                   Text="{Binding SearchQuery}"/>
-                        </Grid>
+                                   Text="{Binding SearchQuery}" CancelButtonColor="{StaticResource TextSubtle}"
+                                   Margin="-10,0,0,0"/>
                     </Border>
 
                     <!-- Napis Znajomi (na środku) -->
@@ -152,7 +150,7 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ShowInvitePopupCommand}" />
                         </Border.GestureRecognizers>
-                        <Image Source="icon_friends_green.png" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" VerticalOptions="Center" />
+                        <Image Source="friends_icon_green.png" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" VerticalOptions="Center" />
                     </Border>
                 </Grid>
 
@@ -313,26 +311,7 @@
                                                 <Border.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:FriendsViewModel}}, Path=RemoveFriendCommand}" CommandParameter="{Binding .}" />
                                                 </Border.GestureRecognizers>
-                                                <VisualStateManager.VisualStateGroups>
-                                                    <VisualStateGroupList>
-                                                        <VisualStateGroup Name="CommonStates">
-                                                            <VisualState Name="Normal">
-                                                                <VisualState.Setters>
-                                                                    <Setter Property="BackgroundColor" Value="Transparent" />
-                                                                    <Setter TargetName="removeIconPath" Property="Path.Fill" Value="#EF4444" />
-                                                                </VisualState.Setters>
-                                                            </VisualState>
-                                                            <VisualState Name="PointerOver">
-                                                                <VisualState.Setters>
-                                                                    <Setter Property="BackgroundColor" Value="#EF4444" />
-                                                                    <Setter TargetName="removeIconPath" Property="Path.Fill" Value="White" />
-                                                                </VisualState.Setters>
-                                                            </VisualState>
-                                                        </VisualStateGroup>
-                                                    </VisualStateGroupList>
-                                                </VisualStateManager.VisualStateGroups>
-                                                <Path x:Name="removeIconPath" Aspect="Uniform" WidthRequest="18" HeightRequest="18" HorizontalOptions="Center" VerticalOptions="Center" Fill="#EF4444"
-                                                      Data="M9 8c1.66 0 3-1.34 3-3S10.66 2 9 2 6 3.34 6 5s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V16h14v-2.5c0-2.33-4.67-3.5-7-3.5zm11.25 0l-1.41-1.41-2.09 2.08-2.09-2.08-1.41 1.41 2.08 2.09-2.08 2.09 1.41 1.41 2.09-2.08 2.09 2.08 1.41-1.41-2.08-2.09z" />
+                                                <Image Source="friend_remove_icon.png" WidthRequest="18" HeightRequest="18" HorizontalOptions="Center" VerticalOptions="Center"/>
                                             </Border>
 
                                             <!-- WYSŁANE: Wycofaj -->
@@ -340,26 +319,7 @@
                                                 <Border.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:FriendsViewModel}}, Path=RemoveFriendCommand}" CommandParameter="{Binding .}" />
                                                 </Border.GestureRecognizers>
-                                                <VisualStateManager.VisualStateGroups>
-                                                    <VisualStateGroupList>
-                                                        <VisualStateGroup Name="CommonStates">
-                                                            <VisualState Name="Normal">
-                                                                <VisualState.Setters>
-                                                                    <Setter Property="BackgroundColor" Value="Transparent" />
-                                                                    <Setter TargetName="cancelIconPath" Property="Path.Fill" Value="#EF4444" />
-                                                                </VisualState.Setters>
-                                                            </VisualState>
-                                                            <VisualState Name="PointerOver">
-                                                                <VisualState.Setters>
-                                                                    <Setter Property="BackgroundColor" Value="#EF4444" />
-                                                                    <Setter TargetName="cancelIconPath" Property="Path.Fill" Value="White" />
-                                                                </VisualState.Setters>
-                                                            </VisualState>
-                                                        </VisualStateGroup>
-                                                    </VisualStateGroupList>
-                                                </VisualStateManager.VisualStateGroups>
-                                                <Path x:Name="cancelIconPath" Aspect="Uniform" WidthRequest="18" HeightRequest="18" HorizontalOptions="Center" VerticalOptions="Center" Fill="#EF4444"
-                                                      Data="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                                                <Image Source="x_icon.png" WidthRequest="20" HeightRequest="20" HorizontalOptions="Center" VerticalOptions="Center"/>
                                             </Border>
 
                                             <!-- OCZEKUJĄCE: Zaakceptuj -->
@@ -367,26 +327,7 @@
                                                 <Border.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:FriendsViewModel}}, Path=AcceptInviteCommand}" CommandParameter="{Binding .}" />
                                                 </Border.GestureRecognizers>
-                                                <VisualStateManager.VisualStateGroups>
-                                                    <VisualStateGroupList>
-                                                        <VisualStateGroup Name="CommonStates">
-                                                            <VisualState Name="Normal">
-                                                                <VisualState.Setters>
-                                                                    <Setter Property="BackgroundColor" Value="Transparent" />
-                                                                    <Setter TargetName="acceptIconPath" Property="Path.Fill" Value="#10B981" />
-                                                                </VisualState.Setters>
-                                                            </VisualState>
-                                                            <VisualState Name="PointerOver">
-                                                                <VisualState.Setters>
-                                                                    <Setter Property="BackgroundColor" Value="#10B981" />
-                                                                    <Setter TargetName="acceptIconPath" Property="Path.Fill" Value="White" />
-                                                                </VisualState.Setters>
-                                                            </VisualState>
-                                                        </VisualStateGroup>
-                                                    </VisualStateGroupList>
-                                                </VisualStateManager.VisualStateGroups>
-                                                <Path x:Name="acceptIconPath" Aspect="Uniform" WidthRequest="18" HeightRequest="18" HorizontalOptions="Center" VerticalOptions="Center" Fill="#10B981"
-                                                      Data="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                                <Image Source="check_mark_icon.png" WidthRequest="20" HeightRequest="20" HorizontalOptions="Center" VerticalOptions="Center"/>
                                             </Border>
 
                                             <!-- OCZEKUJĄCE: Odrzuć -->
@@ -394,26 +335,7 @@
                                                 <Border.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:FriendsViewModel}}, Path=RemoveFriendCommand}" CommandParameter="{Binding .}" />
                                                 </Border.GestureRecognizers>
-                                                <VisualStateManager.VisualStateGroups>
-                                                    <VisualStateGroupList>
-                                                        <VisualStateGroup Name="CommonStates">
-                                                            <VisualState Name="Normal">
-                                                                <VisualState.Setters>
-                                                                    <Setter Property="BackgroundColor" Value="Transparent" />
-                                                                    <Setter TargetName="declineIconPath" Property="Path.Fill" Value="#EF4444" />
-                                                                </VisualState.Setters>
-                                                            </VisualState>
-                                                            <VisualState Name="PointerOver">
-                                                                <VisualState.Setters>
-                                                                    <Setter Property="BackgroundColor" Value="#EF4444" />
-                                                                    <Setter TargetName="declineIconPath" Property="Path.Fill" Value="White" />
-                                                                </VisualState.Setters>
-                                                            </VisualState>
-                                                        </VisualStateGroup>
-                                                    </VisualStateGroupList>
-                                                </VisualStateManager.VisualStateGroups>
-                                                <Path x:Name="declineIconPath" Aspect="Uniform" WidthRequest="18" HeightRequest="18" HorizontalOptions="Center" VerticalOptions="Center" Fill="#EF4444"
-                                                      Data="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                                                <Image Source="x_icon.png" WidthRequest="20" HeightRequest="20" HorizontalOptions="Center" VerticalOptions="Center"/>
                                             </Border>
 
                                         </HorizontalStackLayout>
@@ -429,9 +351,8 @@
         </Grid>
 
         <!-- WARSTWA 2: popup wyszukiwania znajomego -->
-        <Grid IsVisible="{Binding IsInvitePopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
-            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="450"
-                    BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="#2A3648">
+        <Grid IsVisible="{Binding IsInvitePopupVisible}" Style="{StaticResource PopupOverlayStyle}">
+            <Border Style="{StaticResource PopupContainerStyle}" WidthRequest="450">
                 <VerticalStackLayout Spacing="25">
                     <!-- Nagłówek -->
                     <VerticalStackLayout Spacing="8">
@@ -510,19 +431,16 @@
 
                     <!-- Przyciski akcji -->
                     <Grid ColumnDefinitions="Auto, Auto" HorizontalOptions="Center" ColumnSpacing="20" Margin="0,10,0,0">
-                        <Button Grid.Column="0" Text="Cofnij" Command="{Binding CloseInvitePopupCommand}"
-                                BackgroundColor="#EF4444" TextColor="White" FontAttributes="Bold" HeightRequest="40" WidthRequest="120" CornerRadius="20"/>
-                        <Button Grid.Column="1" Text="Zatwierdź" Command="{Binding ConfirmInviteCommand}"
-                                BackgroundColor="#10B981" TextColor="White" FontAttributes="Bold" HeightRequest="40" WidthRequest="120" CornerRadius="20"/>
+                        <Button Grid.Column="0" Text="Cofnij" Command="{Binding CloseInvitePopupCommand}" Style="{StaticResource DangerButtonStyle}" WidthRequest="120" />
+                        <Button Grid.Column="1" Text="Zatwierdź" Command="{Binding ConfirmInviteCommand}" Style="{StaticResource SuccessButtonStyle}" WidthRequest="120" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
         </Grid>
 
         <!-- WARSTWA 3: popup potwierdzenia usunięcia znajomego -->
-        <Grid IsVisible="{Binding IsDeletePopupVisible}" BackgroundColor="#D90C101A" ZIndex="210">
-            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="450"
-                    BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="#2A3648">
+        <Grid IsVisible="{Binding IsDeletePopupVisible}" Style="{StaticResource PopupOverlayStyle}">
+            <Border Style="{StaticResource PopupContainerStyle}" WidthRequest="450">
                 <VerticalStackLayout Spacing="25">
                     <!-- Nagłówek -->
                     <VerticalStackLayout Spacing="8">
@@ -550,19 +468,16 @@
 
                     <!-- Przyciski akcji -->
                     <Grid ColumnDefinitions="Auto, Auto" HorizontalOptions="Center" ColumnSpacing="20" Margin="0,10,0,0">
-                        <Button Grid.Column="0" Text="Anuluj" Command="{Binding CancelDeleteFriendCommand}"
-                                BackgroundColor="#374151" TextColor="White" FontAttributes="Bold" HeightRequest="40" WidthRequest="120" CornerRadius="20"/>
-                        <Button Grid.Column="1" Text="Potwierdź" Command="{Binding ConfirmDeleteFriendCommand}"
-                                BackgroundColor="#EF4444" TextColor="White" FontAttributes="Bold" HeightRequest="40" WidthRequest="120" CornerRadius="20"/>
+                        <Button Grid.Column="0" Text="Anuluj" Command="{Binding CancelDeleteFriendCommand}" Style="{StaticResource SecondaryButtonStyle}" WidthRequest="120" />
+                        <Button Grid.Column="1" Text="Potwierdź" Command="{Binding ConfirmDeleteFriendCommand}" Style="{StaticResource DangerButtonStyle}" WidthRequest="120" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
         </Grid>
 
         <!-- WARSTWA 4: popup powiadomienia (alert) -->
-        <Grid IsVisible="{Binding IsAlertPopupVisible}" BackgroundColor="#D90C101A" ZIndex="220">
-            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="450"
-                    BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1.5">
+        <Grid IsVisible="{Binding IsAlertPopupVisible}" Style="{StaticResource PopupOverlayStyle}">
+            <Border Style="{StaticResource PopupContainerStyle}" WidthRequest="450" StrokeThickness="1.5">
                 <Border.Triggers>
                     <DataTrigger TargetType="Border" Binding="{Binding IsAlertError}" Value="True">
                         <Setter Property="Stroke" Value="#EF4444" />
@@ -585,13 +500,11 @@
                             </Border.Triggers>
                             <Grid>
                                 <!-- Wykrzyknik dla błędu -->
-                                <Path Aspect="Uniform" WidthRequest="30" HeightRequest="30" Fill="#EF4444" HorizontalOptions="Center" VerticalOptions="Center"
-                                      IsVisible="{Binding IsAlertError}"
-                                      Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                                <Image Source="x_icon.png" WidthRequest="30" HeightRequest="30" HorizontalOptions="Center" VerticalOptions="Center"
+                                       IsVisible="{Binding IsAlertError}" />
                                 <!-- Ptaszek dla sukcesu -->
-                                <Path Aspect="Uniform" WidthRequest="30" HeightRequest="30" Fill="#10B981" HorizontalOptions="Center" VerticalOptions="Center"
-                                      IsVisible="{Binding IsAlertError, Converter={StaticResource InverseBool}}"
-                                      Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                                <Image Source="check_mark_icon.png" WidthRequest="30" HeightRequest="30" HorizontalOptions="Center" VerticalOptions="Center"
+                                       IsVisible="{Binding IsAlertError, Converter={StaticResource InverseBool}}" />
                             </Grid>
                         </Border>
                     </Grid>
@@ -603,14 +516,13 @@
                     </VerticalStackLayout>
 
                     <!-- Przycisk Zamknięcia -->
-                    <Button Text="OK" Command="{Binding CloseAlertPopupCommand}"
-                            TextColor="White" FontAttributes="Bold" HeightRequest="40" WidthRequest="120" CornerRadius="20" HorizontalOptions="Center">
+                    <Button Text="OK" Command="{Binding CloseAlertPopupCommand}" WidthRequest="120" HorizontalOptions="Center">
                         <Button.Triggers>
                             <DataTrigger TargetType="Button" Binding="{Binding IsAlertError}" Value="True">
-                                <Setter Property="BackgroundColor" Value="#EF4444" />
+                                <Setter Property="BackgroundColor" Value="{StaticResource StatusRed}" />
                             </DataTrigger>
                             <DataTrigger TargetType="Button" Binding="{Binding IsAlertError}" Value="False">
-                                <Setter Property="BackgroundColor" Value="#10B981" />
+                                <Setter Property="BackgroundColor" Value="{StaticResource StatusGreen}" />
                             </DataTrigger>
                         </Button.Triggers>
                     </Button>
@@ -619,17 +531,16 @@
         </Grid>
 
         <!-- WARSTWA 5: popup wspólnych grup -->
-        <Grid IsVisible="{Binding IsSharedGroupsPopupVisible}" BackgroundColor="#D90C101A" ZIndex="230">
-            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="400"
-                    BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="#2A3648">
+        <Grid IsVisible="{Binding IsSharedGroupsPopupVisible}" Style="{StaticResource PopupOverlayStyle}">
+            <Border Style="{StaticResource PopupContainerStyle}" WidthRequest="400">
                 <VerticalStackLayout Spacing="20">
                     <Grid>
                         <Label Text="{Binding SelectedFriendFullName, StringFormat='Wspólne grupy z: {0}'}" FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Start" VerticalOptions="Center" MaxLines="1" LineBreakMode="TailTruncation" Margin="0,0,30,0"/>
-                        <Label Text="✕" TextColor="{StaticResource TextSubtle}" FontSize="20" HorizontalOptions="End" VerticalOptions="Center">
-                            <Label.GestureRecognizers>
+                        <Image Source="x_icon.png" WidthRequest="24" HeightRequest="24" HorizontalOptions="End" VerticalOptions="Center">
+                            <Image.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding CloseSharedGroupsPopupCommand}" />
-                            </Label.GestureRecognizers>
-                        </Label>
+                            </Image.GestureRecognizers>
+                        </Image>
                     </Grid>
 
                     <CollectionView ItemsSource="{Binding SelectedFriendSharedGroups}" HeightRequest="250" Margin="0,10,0,0">
@@ -652,8 +563,7 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
-                    <Button Text="Zamknij" Command="{Binding CloseSharedGroupsPopupCommand}"
-                            BackgroundColor="#2D3A54" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44" Margin="0,10,0,0"/>
+                    <Button Text="Zamknij" Command="{Binding CloseSharedGroupsPopupCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,10,0,0"/>
                 </VerticalStackLayout>
             </Border>
         </Grid>

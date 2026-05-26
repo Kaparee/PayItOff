@@ -21,7 +21,7 @@
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
                         </HorizontalStackLayout.GestureRecognizers>
-                        <Label Text="☰" TextColor="{StaticResource TextMain}" FontSize="28" VerticalOptions="Center"/>
+                        <Image Source="phone_menu_icon.png" WidthRequest="28" HeightRequest="28" VerticalOptions="Center"/>
                         <Label Text="Menu" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" Margin="5,0,0,0" FontSize="18"/>
                     </HorizontalStackLayout>
 
@@ -83,12 +83,12 @@
 
                             <!-- Akcje -->
                             <Grid ColumnDefinitions="*, *" ColumnSpacing="10" Margin="0,10,0,0">
-                                <Button Grid.Column="0" Text="Edytuj dane użytkownika" Command="{Binding ShowEditDataPopupCommand}" BackgroundColor="{StaticResource SurfaceDark}" TextColor="White" CornerRadius="10" FontSize="12" HeightRequest="44"/>
-                                <Button Grid.Column="1" Text="Edytuj zdjęcie profilowe" Command="{Binding ChangeAvatarCommand}" BackgroundColor="{StaticResource SurfaceDark}" TextColor="White" CornerRadius="10" FontSize="12" HeightRequest="44"/>
+                                <Button Grid.Column="0" Text="Edytuj dane użytkownika" Command="{Binding ShowEditDataPopupCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+                                <Button Grid.Column="1" Text="Edytuj zdjęcie profilowe" Command="{Binding ChangeAvatarCommand}" Style="{StaticResource SecondaryButtonStyle}" />
                             </Grid>
-                            <Button Text="Edytuj adres E-Mail" Command="{Binding ShowEditEmailPopupCommand}" BackgroundColor="{StaticResource SurfaceDark}" TextColor="White" CornerRadius="10" HeightRequest="44" FontSize="12"/>
-                            <Button Text="Edytuj Hasło" Command="{Binding ShowEditPasswordPopupCommand}" BackgroundColor="{StaticResource SurfaceDark}" TextColor="White" CornerRadius="10" HeightRequest="44" FontSize="12"/>
-                            <Button Text="Usuń trwale konto" Command="{Binding ShowDeleteAccountPopupCommand}" BackgroundColor="Transparent" TextColor="#EF4444" BorderColor="#EF4444" BorderWidth="1" CornerRadius="10" HeightRequest="44" FontSize="12" Margin="0,10,0,0"/>
+                            <Button Text="Edytuj adres E-Mail" Command="{Binding ShowEditEmailPopupCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+                            <Button Text="Edytuj Hasło" Command="{Binding ShowEditPasswordPopupCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+                            <Button Text="Usuń trwale konto" Command="{Binding ShowDeleteAccountPopupCommand}" Style="{StaticResource GhostButtonStyle}" TextColor="{StaticResource StatusRed}" BorderColor="{StaticResource StatusRed}" BorderWidth="1" Margin="0,10,0,0"/>
 
                         </VerticalStackLayout>
 
@@ -159,17 +159,16 @@
         </Grid>
 
         <!-- Popup: edytuj dane -->
-        <Grid IsVisible="{Binding IsEditDataPopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
-            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="400"
-                    BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="{StaticResource Border}">
+        <Grid IsVisible="{Binding IsEditDataPopupVisible}" Style="{StaticResource PopupOverlayStyle}">
+            <Border Style="{StaticResource PopupContainerStyle}" WidthRequest="400">
                 <VerticalStackLayout Spacing="20">
                     <Grid>
                         <Label Text="Edytuj dane" FontSize="20" FontAttributes="Bold" TextColor="White" HorizontalOptions="Start" VerticalOptions="Center" />
-                        <Label Text="✕" TextColor="{StaticResource TextSubtle}" FontSize="20" HorizontalOptions="End" VerticalOptions="Center">
-                            <Label.GestureRecognizers>
+                        <Image Source="x_icon.png" WidthRequest="24" HeightRequest="24" HorizontalOptions="End" VerticalOptions="Center">
+                            <Image.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding CloseEditDataPopupCommand}" />
-                            </Label.GestureRecognizers>
-                        </Label>
+                            </Image.GestureRecognizers>
+                        </Image>
                     </Grid>
 
                     <Entry Placeholder="Imię" Text="{Binding EditFirstName}" TextColor="White" BackgroundColor="#242F41" />
@@ -177,68 +176,65 @@
                     <Entry Placeholder="Numer Telefonu" Text="{Binding EditPhoneNumber}" TextColor="White" BackgroundColor="#242F41" />
                     <Entry Placeholder="Numer Konta (IBAN)" Text="{Binding EditIban}" TextColor="White" BackgroundColor="#242F41" />
 
-                    <Button Text="Zapisz" Command="{Binding SubmitEditDataCommand}" BackgroundColor="#10B981" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44" Margin="0,10,0,0"/>
+                    <Button Text="Zapisz" Command="{Binding SubmitEditDataCommand}" Style="{StaticResource SuccessButtonStyle}" Margin="0,10,0,0"/>
                 </VerticalStackLayout>
             </Border>
         </Grid>
 
         <!-- Popup: edytuj e-mail -->
-        <Grid IsVisible="{Binding IsEditEmailPopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
-            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="400"
-                    BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="{StaticResource Border}">
+        <Grid IsVisible="{Binding IsEditEmailPopupVisible}" Style="{StaticResource PopupOverlayStyle}">
+            <Border Style="{StaticResource PopupContainerStyle}" WidthRequest="400">
                 <VerticalStackLayout Spacing="20">
                     <Grid>
                         <Label Text="Zmień E-Mail" FontSize="20" FontAttributes="Bold" TextColor="White" HorizontalOptions="Start" VerticalOptions="Center" />
-                        <Label Text="✕" TextColor="{StaticResource TextSubtle}" FontSize="20" HorizontalOptions="End" VerticalOptions="Center">
-                            <Label.GestureRecognizers>
+                        <Image Source="x_icon.png" WidthRequest="24" HeightRequest="24" HorizontalOptions="End" VerticalOptions="Center">
+                            <Image.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding CloseEditEmailPopupCommand}" />
-                            </Label.GestureRecognizers>
-                        </Label>
+                            </Image.GestureRecognizers>
+                        </Image>
                     </Grid>
                     <Label Text="Wpisz nowy adres e-mail. Na podany adres zostanie wysłany link weryfikacyjny." TextColor="{StaticResource TextSubtle}" FontSize="13" />
                     <Entry Placeholder="Nowy E-Mail" Text="{Binding NewEmail}" Keyboard="Email" TextColor="White" BackgroundColor="#242F41" />
-                    <Button Text="Wyślij link" Command="{Binding SubmitEditEmailCommand}" BackgroundColor="#10B981" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44" Margin="0,10,0,0"/>
+                    <Button Text="Wyślij link" Command="{Binding SubmitEditEmailCommand}" Style="{StaticResource SuccessButtonStyle}" Margin="0,10,0,0"/>
                 </VerticalStackLayout>
             </Border>
         </Grid>
 
         <!-- Popup: edytuj hasło -->
-        <Grid IsVisible="{Binding IsEditPasswordPopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
-            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="400"
-                    BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="{StaticResource Border}">
+        <Grid IsVisible="{Binding IsEditPasswordPopupVisible}" Style="{StaticResource PopupOverlayStyle}">
+            <Border Style="{StaticResource PopupContainerStyle}" WidthRequest="400">
                 <VerticalStackLayout Spacing="20">
                     <Grid>
                         <Label Text="Zmień Hasło" FontSize="20" FontAttributes="Bold" TextColor="White" HorizontalOptions="Start" VerticalOptions="Center" />
-                        <Label Text="✕" TextColor="{StaticResource TextSubtle}" FontSize="20" HorizontalOptions="End" VerticalOptions="Center">
-                            <Label.GestureRecognizers>
+                        <Image Source="x_icon.png" WidthRequest="24" HeightRequest="24" HorizontalOptions="End" VerticalOptions="Center">
+                            <Image.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding CloseEditPasswordPopupCommand}" />
-                            </Label.GestureRecognizers>
-                        </Label>
+                            </Image.GestureRecognizers>
+                        </Image>
                     </Grid>
                     <Entry Placeholder="Stare Hasło" IsPassword="True" Text="{Binding OldPassword}" TextColor="White" BackgroundColor="#242F41" />
                     <Entry Placeholder="Nowe Hasło" IsPassword="True" Text="{Binding NewPassword}" TextColor="White" BackgroundColor="#242F41" />
-                    <Button Text="Zapisz" Command="{Binding SubmitEditPasswordCommand}" BackgroundColor="#10B981" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44" Margin="0,10,0,0"/>
+                    <Button Text="Zapisz" Command="{Binding SubmitEditPasswordCommand}" Style="{StaticResource SuccessButtonStyle}" Margin="0,10,0,0"/>
                 </VerticalStackLayout>
             </Border>
         </Grid>
 
         <!-- Popup: usuń konto -->
-        <Grid IsVisible="{Binding IsDeleteAccountPopupVisible}" BackgroundColor="#D90C101A" ZIndex="200">
-            <Border VerticalOptions="Center" HorizontalOptions="Center" WidthRequest="400"
-                    BackgroundColor="#1B2230" StrokeShape="RoundRectangle 20" Padding="30" StrokeThickness="1" Stroke="#EF4444">
+        <Grid IsVisible="{Binding IsDeleteAccountPopupVisible}" Style="{StaticResource PopupOverlayStyle}">
+            <Border Style="{StaticResource PopupContainerStyle}" WidthRequest="400" Stroke="{StaticResource StatusRed}">
                 <VerticalStackLayout Spacing="20">
                     <Grid>
-                        <Label Text="Usuń Konto" FontSize="20" FontAttributes="Bold" TextColor="#EF4444" HorizontalOptions="Start" VerticalOptions="Center" />
-                        <Label Text="✕" TextColor="{StaticResource TextSubtle}" FontSize="20" HorizontalOptions="End" VerticalOptions="Center">
-                            <Label.GestureRecognizers>
+                        <Label Text="Usuń Konto" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource StatusRed}" HorizontalOptions="Start" VerticalOptions="Center" />
+                        <Image Source="x_icon.png" WidthRequest="24" HeightRequest="24" HorizontalOptions="End" VerticalOptions="Center">
+                            <Image.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding CloseDeleteAccountPopupCommand}" />
-                            </Label.GestureRecognizers>
-                        </Label>
+                            </Image.GestureRecognizers>
+                        </Image>
                     </Grid>
                     <Label Text="Czy na pewno chcesz usunąć to konto? Tej operacji nie można cofnąć, stracisz wszystkie dane!" TextColor="White" FontSize="14" />
                     <Grid ColumnDefinitions="*, *" ColumnSpacing="10" Margin="0,10,0,0">
-                        <Button Grid.Column="0" Text="Anuluj" Command="{Binding CloseDeleteAccountPopupCommand}" BackgroundColor="{StaticResource SurfaceDark}" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44"/>
-                        <Button Grid.Column="1" Text="Usuń Trwale" Command="{Binding SubmitDeleteAccountCommand}" BackgroundColor="#EF4444" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44"/>
+                        <Button Grid.Column="0" Text="Anuluj" Command="{Binding CloseDeleteAccountPopupCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+                        <Button Grid.Column="1" Text="Usuń Trwale" Command="{Binding SubmitDeleteAccountCommand}" Style="{StaticResource DangerButtonStyle}" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>

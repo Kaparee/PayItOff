@@ -34,6 +34,7 @@ namespace PayItOff.MauiClient
             builder.Services.AddScoped<FriendService>();
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<ExpenseService>();
+            builder.Services.AddScoped<GroupMemberService>();
 
             // ViewModels
             builder.Services.AddTransient<RegisterViewModel>();
@@ -60,6 +61,66 @@ namespace PayItOff.MauiClient
             builder.Services.AddTransient<WalletPage>();
             builder.Services.AddTransient<GroupDetailsPage>();
             builder.Services.AddTransient<AddExpensePage>();
+
+            Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("NoBorder", (h, v) =>
+            {
+#if WINDOWS
+                h.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+                h.PlatformView.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                h.PlatformView.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+
+                h.PlatformView.GotFocus += (s, e) =>
+                {
+                    h.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+                    h.PlatformView.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                };
+#endif
+            });
+
+            Microsoft.Maui.Handlers.SearchBarHandler.Mapper.AppendToMapping("NoBorder", (h, v) =>
+            {
+#if WINDOWS
+                h.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+                h.PlatformView.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                h.PlatformView.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+
+                h.PlatformView.GotFocus += (s, e) =>
+                {
+                    h.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+                    h.PlatformView.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                };
+#endif
+            });
+
+            Microsoft.Maui.Handlers.PickerHandler.Mapper.AppendToMapping("NoBorder", (h, v) =>
+            {
+#if WINDOWS
+                h.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+                h.PlatformView.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                h.PlatformView.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+
+                h.PlatformView.GotFocus += (s, e) =>
+                {
+                    h.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+                    h.PlatformView.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                };
+#endif
+            });
+
+            Microsoft.Maui.Handlers.EditorHandler.Mapper.AppendToMapping("NoBorder", (h, v) =>
+            {
+#if WINDOWS
+                h.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+                h.PlatformView.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                h.PlatformView.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+
+                h.PlatformView.GotFocus += (s, e) =>
+                {
+                    h.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+                    h.PlatformView.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                };
+#endif
+            });
 
             return builder.Build();
         }

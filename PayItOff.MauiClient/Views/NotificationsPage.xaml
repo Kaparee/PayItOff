@@ -24,7 +24,7 @@
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
                         </HorizontalStackLayout.GestureRecognizers>
-                        <Label Text="☰" TextColor="{StaticResource TextMain}" FontSize="28" VerticalOptions="Center"/>
+                        <Image Source="phone_menu_icon.png" WidthRequest="28" HeightRequest="28" VerticalOptions="Center"/>
                         <Label Text="Menu" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" Margin="5,0,0,0" FontSize="18"/>
                     </HorizontalStackLayout>
 
@@ -60,7 +60,7 @@
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding NavigateCommand}" CommandParameter="//MainPage" />
                         </HorizontalStackLayout.GestureRecognizers>
-                        <Image Source="icon_home.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
+                        <Image Source="home_icon.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
                         <Label Text="Menu Główne" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
                     </HorizontalStackLayout>
 
@@ -68,7 +68,7 @@
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding NavigateCommand}" CommandParameter="//GroupsPage" />
                         </HorizontalStackLayout.GestureRecognizers>
-                        <Image Source="icon_groups.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
+                        <Image Source="groups_icon.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
                         <Label Text="Twoje Grupy" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
                     </HorizontalStackLayout>
 
@@ -77,7 +77,7 @@
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding LogoutCommand}" />
                         </HorizontalStackLayout.GestureRecognizers>
-                        <Label Text="➔" TextColor="{StaticResource StatusRed}" FontSize="20" VerticalOptions="Center" WidthRequest="24" HorizontalTextAlignment="Center"/>
+                        <Image Source="logout_icon.png" WidthRequest="24" HeightRequest="24" VerticalOptions="Center"/>
                         <Label Text="Wyloguj się" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" VerticalOptions="Center" FontSize="16"/>
                     </HorizontalStackLayout>
                 </VerticalStackLayout>

@@ -1,4 +1,4 @@
-﻿namespace PayItOff.Shared.Responses;
+namespace PayItOff.Shared.Responses;
 
 public class UserDebtComponentResponse
 {
@@ -15,5 +15,6 @@ public class UserDebtComponentResponse
     public List<string> Categories { get; set; } = new();
     public bool IsSettlement { get; set; }
     public string Status { get; set; } = string.Empty;
+    public string TransferReference { get; set; } = string.Empty;
     public bool CanSendDebtReminder { get; set; }
 }

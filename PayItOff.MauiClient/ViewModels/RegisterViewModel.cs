@@ -50,7 +50,7 @@ public partial class RegisterViewModel : ObservableObject
     public partial bool IsPasswordHidden { get; set; } = true;
 
     [ObservableProperty]
-    public partial string PasswordIcon { get; set; } = "👁️";
+    public partial string PasswordIcon { get; set; } = "eye_closed.png";
 
     public RegisterViewModel(RegisterService registerService)
     {
@@ -138,7 +138,7 @@ public partial class RegisterViewModel : ObservableObject
     private void TogglePasswordVisibility()
     {
         IsPasswordHidden = !IsPasswordHidden;
-        PasswordIcon = IsPasswordHidden ? "👁️" : "🙈";
+        PasswordIcon = IsPasswordHidden ? "eye_closed.png" : "eye_open.png";
     }
 
     [RelayCommand]

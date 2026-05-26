@@ -22,7 +22,7 @@
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
                         </HorizontalStackLayout.GestureRecognizers>
-                        <Label Text="☰" TextColor="{StaticResource TextMain}" FontSize="28" VerticalOptions="Center"/>
+                        <Image Source="phone_menu_icon.png" WidthRequest="28" HeightRequest="28" VerticalOptions="Center"/>
                         <Label Text="Menu" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" Margin="5,0,0,0" FontSize="18"/>
                     </HorizontalStackLayout>
 
@@ -30,7 +30,8 @@
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding GoBackCommand}" />
                         </HorizontalStackLayout.GestureRecognizers>
-                        <Label Text="← Powrót" TextColor="{StaticResource TextSubtle}" FontSize="16" VerticalOptions="Center" FontAttributes="Bold"/>
+                        <Image Source="arrow_left_icon.png" WidthRequest="24" HeightRequest="24" VerticalOptions="Center"/>
+                        <Label Text="Powrót" TextColor="{StaticResource TextSubtle}" FontSize="16" VerticalOptions="Center" FontAttributes="Bold"/>
                         <BoxView WidthRequest="1" HeightRequest="20" Color="{StaticResource Border}" VerticalOptions="Center" Margin="10,0"/>
                         <Label Text="Portfel" TextColor="{StaticResource TextMain}" FontSize="{OnIdiom Phone=24, Default=32}" FontAttributes="Bold" VerticalOptions="Center"/>
                     </HorizontalStackLayout>
@@ -87,7 +88,7 @@
 
                     <Grid Grid.Row="3" ColumnDefinitions="*, Auto" ColumnSpacing="15">
                         <Button Grid.Column="0" Text="Opłać wydatki" BackgroundColor="#7F00FF" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="45" Command="{Binding OpenPaymentPopupCommand}" />
-                        <Button Grid.Column="1" Text="✖ Usuń filtry" BackgroundColor="{StaticResource SurfaceDark}" TextColor="{StaticResource TextMain}" CornerRadius="10" HeightRequest="45" Padding="20,0" Command="{Binding ClearFiltersCommand}" />
+                        <Button Grid.Column="1" ImageSource="x_icon.png" Text="Usuń filtry" BackgroundColor="{StaticResource SurfaceDark}" TextColor="{StaticResource TextMain}" CornerRadius="10" HeightRequest="45" Padding="20,0" Command="{Binding ClearFiltersCommand}" />
                     </Grid>
 
                     <Border Grid.Row="4" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="5" StrokeThickness="0">
@@ -103,6 +104,9 @@
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <ContentView Padding="0,0,0,15">
+                                    <ContentView.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WalletViewModel}}, Path=ShowTransactionDetailsCommand}" CommandParameter="{Binding .}" />
+                                    </ContentView.GestureRecognizers>
                                     <Border BackgroundColor="{StaticResource SurfaceDark}" Stroke="{Binding ItemBorderBrush}" StrokeThickness="{Binding ItemBorderThickness}" StrokeShape="RoundRectangle 10" Padding="0" MinimumHeightRequest="80">
                                         <Grid ColumnDefinitions="5, 80, 2*, 2*, 1.5*, 1.5*, Auto" ColumnSpacing="15">
                                             <BoxView Grid.Column="0" BackgroundColor="{Binding StatusColor}" IsVisible="{Binding ShowStatusBlock}"/>
@@ -126,9 +130,13 @@
                                                 <Label Text="Data" FontSize="12" TextColor="{StaticResource TextMain}" FontAttributes="Bold" HorizontalOptions="Center"/>
                                                 <Label Text="{Binding Date, StringFormat='{0:dd.MM.yyyy}'}" FontSize="13" TextColor="{StaticResource TextSubtle}" Margin="0,4,0,0" HorizontalOptions="Center"/>
                                             </VerticalStackLayout>
-                                            <VerticalStackLayout Grid.Column="5" VerticalOptions="Center" Spacing="0" HorizontalOptions="Center">
-                                                <Label Text="Unikalny ID" FontSize="12" TextColor="{StaticResource TextMain}" FontAttributes="Bold" HorizontalOptions="Center"/>
-                                                <Label Text="{Binding ExpenseId}" FontSize="13" TextColor="{StaticResource TextSubtle}" Margin="0,4,0,0" HorizontalOptions="Center"/>
+                                            <VerticalStackLayout Grid.Column="5" VerticalOptions="Center" Spacing="0" HorizontalOptions="Center" IsVisible="{Binding IsSettlement, Converter={StaticResource InverseBool}}">
+                                                <Label Text="Nazwa grupy" FontSize="12" TextColor="{StaticResource TextMain}" FontAttributes="Bold" HorizontalOptions="Center"/>
+                                                <Label Text="{Binding Description}" FontSize="13" TextColor="{StaticResource TextSubtle}" Margin="0,4,0,0" HorizontalOptions="Center"/>
+                                            </VerticalStackLayout>
+                                            <VerticalStackLayout Grid.Column="5" VerticalOptions="Center" Spacing="0" HorizontalOptions="Center" IsVisible="{Binding IsSettlement}">
+                                                <Label Text="Tytuł" FontSize="12" TextColor="{StaticResource TextMain}" FontAttributes="Bold" HorizontalOptions="Center"/>
+                                                <Label Text="Spłata długu" FontSize="13" TextColor="{StaticResource TextSubtle}" Margin="0,4,0,0" HorizontalOptions="Center"/>
                                             </VerticalStackLayout>
                                             <Grid Grid.Column="6" VerticalOptions="Center" Padding="0,0,15,0">
                                                 <VerticalStackLayout Spacing="5" IsVisible="{Binding ShowAcceptRejectButtons}">
@@ -151,22 +159,22 @@
 
                     <Border Grid.Row="6" BackgroundColor="{StaticResource SurfaceDark}" StrokeShape="RoundRectangle 10" Padding="10" Margin="0,10,0,0" VerticalOptions="End">
                         <Grid ColumnDefinitions="Auto, *, Auto">
-                            <Button Grid.Column="0" Text="← Poprzednia" Command="{Binding PreviousPageCommand}" BackgroundColor="#1E232D" TextColor="White" FontSize="12" HeightRequest="40"/>
+                            <Button Grid.Column="0" ImageSource="arrow_left_icon.png" Text="Poprzednia" Command="{Binding PreviousPageCommand}" BackgroundColor="#1E232D" TextColor="White" FontSize="12" HeightRequest="40"/>
                             <HorizontalStackLayout Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
                                 <Label Text="Strona" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center"/>
                                 <Label Text="{Binding CurrentPage}" FontAttributes="Bold" TextColor="White" VerticalOptions="Center"/>
                                 <Label Text="z" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center"/>
                                 <Label Text="{Binding TotalPages}" FontAttributes="Bold" TextColor="White" VerticalOptions="Center"/>
                             </HorizontalStackLayout>
-                            <Button Grid.Column="2" Text="Następna →" Command="{Binding NextPageCommand}" BackgroundColor="#1E232D" TextColor="White" FontSize="12" HeightRequest="40"/>
+                            <Button Grid.Column="2" ImageSource="arrow_right_icon.png" Text="Następna" Command="{Binding NextPageCommand}" BackgroundColor="#1E232D" TextColor="White" FontSize="12" HeightRequest="40"/>
                         </Grid>
                     </Border>
                 </Grid>
             </ScrollView>
         </Grid>
 
-        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsPaymentOverlayVisible}" ZIndex="600" BackgroundColor="#E6121212">
-            <Border StrokeShape="RoundRectangle 16" BackgroundColor="{StaticResource SurfaceDark}" Stroke="{StaticResource Border}" StrokeThickness="1" Padding="20" VerticalOptions="Center" HorizontalOptions="Center" MaximumWidthRequest="480" Margin="20">
+        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsPaymentOverlayVisible}" Style="{StaticResource PopupOverlayStyle}">
+            <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="480">
                 <VerticalStackLayout Spacing="14">
                     <Label Text="Opłać dług" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource TextMain}"/>
                     <Label Text="Domyślnie: saldo netto (jak na Menu Głównym) — serwer rozłoży kwotę na grupy i rozliczy wszystko. Najpierw wybierz tryb spłaty, potem osobę lub grupę." FontSize="12" TextColor="{StaticResource TextSubtle}" LineBreakMode="WordWrap"/>
@@ -322,29 +330,91 @@
                     <Label Text="{Binding PaymentFormHint}" FontSize="12" TextColor="{StaticResource StatusRed}" />
 
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,8,0,0">
-                        <Button Grid.Column="0" Text="Anuluj" Command="{Binding ClosePaymentPopupCommand}" BackgroundColor="#1E232D" TextColor="White" CornerRadius="10" HeightRequest="44"/>
-                        <Button Grid.Column="1" Text="Wyślij spłatę" Command="{Binding SubmitSettlementCommand}" BackgroundColor="#7F00FF" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44"/>
+                        <Button Grid.Column="0" Text="Anuluj" Command="{Binding ClosePaymentPopupCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+                        <Button Grid.Column="1" Text="Wyślij spłatę" Command="{Binding SubmitSettlementCommand}" Style="{StaticResource PrimaryButtonStyle}" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
         </Grid>
 
-        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsCustomAlertVisible}" ZIndex="800" BackgroundColor="#CC121212">
-            <Border StrokeShape="RoundRectangle 16" BackgroundColor="{StaticResource SurfaceDark}" Stroke="{StaticResource Border}" StrokeThickness="1" Padding="25" VerticalOptions="Center" HorizontalOptions="Center" MaximumWidthRequest="400" Margin="20">
+        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsTransactionDetailsPopupVisible}" Style="{StaticResource PopupOverlayStyle}" ZIndex="200">
+            <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400" HorizontalOptions="Center">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Szczegóły transakcji" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
+                    
+                    <!-- Settlement Details -->
+                    <VerticalStackLayout Spacing="10" IsVisible="{Binding SelectedTransactionDetails.IsSettlement}">
+                        <Label Text="Spłata długu" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
+                        <Label Text="{Binding SelectedTransactionDetails.FullName}" FontSize="14" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center"/>
+                        <Label Text="{Binding SelectedTransactionDetails.Amount, StringFormat='{0:N2} zł'}" FontSize="24" FontAttributes="Bold" TextColor="{Binding SelectedTransactionDetails.StatusColor}" HorizontalOptions="Center"/>
+                        
+                        <Border BackgroundColor="#1E232D" Stroke="Transparent" StrokeShape="RoundRectangle 8" Padding="15" Margin="0,10,0,0">
+                            <VerticalStackLayout Spacing="5">
+                                <Label Text="Tytuł przelewu" FontSize="12" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center"/>
+                                <Label Text="{Binding SelectedTransactionDetails.TransferReference}" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Expense Details -->
+                    <VerticalStackLayout Spacing="10" IsVisible="{Binding SelectedTransactionDetails.IsSettlement, Converter={StaticResource InverseBool}}">
+                        <Label Text="{Binding SelectedExpenseDetails.Title}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
+                        <Label Text="{Binding SelectedExpenseDetails.Category}" FontSize="14" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center"/>
+                        <Label Text="{Binding SelectedExpenseDetails.TotalAmount, StringFormat='Całkowita kwota: {0:N2} zł'}" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
+                        
+                        <Label Text="Kto zapłacił:" FontSize="14" TextColor="{StaticResource TextSubtle}" Margin="0,10,0,0"/>
+                        <Grid ColumnDefinitions="Auto, *">
+                            <Border Grid.Column="0" WidthRequest="30" HeightRequest="30" StrokeShape="RoundRectangle 15" BackgroundColor="#1E232D" StrokeThickness="0" Margin="0,0,10,0" VerticalOptions="Center">
+                                <Grid>
+                                    <Path Aspect="Uniform" WidthRequest="20" HeightRequest="20" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444" Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                    <Image Source="{Binding SelectedExpenseDetails.PayerAvatarUrl}" Aspect="AspectFill" />
+                                </Grid>
+                            </Border>
+                            <Label Grid.Column="1" Text="{Binding SelectedExpenseDetails.PayerName}" FontSize="14" TextColor="{StaticResource TextMain}" VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Label Text="W czym brał udział:" FontSize="14" TextColor="{StaticResource TextSubtle}" Margin="0,10,0,0"/>
+                        <ScrollView MaximumHeightRequest="200" Margin="0,0,0,10">
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding SelectedExpenseDetails.Participants}" Spacing="10">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10" Padding="0,0,10,0">
+                                            <Border Grid.Column="0" WidthRequest="30" HeightRequest="30" StrokeShape="RoundRectangle 15" BackgroundColor="#1E232D" StrokeThickness="0" VerticalOptions="Center">
+                                                <Grid>
+                                                    <Path Aspect="Uniform" WidthRequest="20" HeightRequest="20" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444" Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                                    <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
+                                                </Grid>
+                                            </Border>
+                                            <Label Grid.Column="1" Text="{Binding FullName}" FontSize="14" TextColor="{StaticResource TextMain}" VerticalOptions="Center" LineBreakMode="TailTruncation"/>
+                                            <Label Grid.Column="2" Text="{Binding OwedAmount, StringFormat='{0:N2} zł'}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource TextMain}" VerticalOptions="Center" HorizontalOptions="End"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </ScrollView>
+                    </VerticalStackLayout>
+
+                    <Button Text="Zamknij" Command="{Binding CloseTransactionDetailsPopupCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,15,0,0"/>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsCustomAlertVisible}" Style="{StaticResource PopupOverlayStyle}">
+            <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400">
                 <VerticalStackLayout Spacing="15">
                     <Label Text="{Binding CustomAlertTitle}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
                     <Label Text="{Binding CustomAlertMessage}" FontSize="14" TextColor="{StaticResource TextSubtle}" LineBreakMode="WordWrap" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
 
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,15,0,0">
-                        <Button Grid.Column="0" Text="{Binding CustomAlertCancelText}" Command="{Binding CloseAlertCommand}" CommandParameter="False" BackgroundColor="#1E232D" TextColor="White" CornerRadius="10" HeightRequest="44" IsVisible="{Binding IsCustomAlertCancelVisible}"/>
-                        <Button Grid.Column="{Binding AlertAcceptColumn}" Grid.ColumnSpan="{Binding AlertAcceptColumnSpan}" Text="{Binding CustomAlertAcceptText}" Command="{Binding CloseAlertCommand}" CommandParameter="True" BackgroundColor="#7F00FF" TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="44"/>
+                        <Button Grid.Column="0" Text="{Binding CustomAlertCancelText}" Command="{Binding CloseAlertCommand}" CommandParameter="False" Style="{StaticResource SecondaryButtonStyle}" IsVisible="{Binding IsCustomAlertCancelVisible}"/>
+                        <Button Grid.Column="{Binding AlertAcceptColumn}" Grid.ColumnSpan="{Binding AlertAcceptColumnSpan}" Text="{Binding CustomAlertAcceptText}" Command="{Binding CloseAlertCommand}" CommandParameter="True" Style="{StaticResource PrimaryButtonStyle}" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
         </Grid>
 
-        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsActionSheetVisible}" ZIndex="800" BackgroundColor="#CC121212">
-            <Border StrokeShape="RoundRectangle 16" BackgroundColor="{StaticResource SurfaceDark}" Stroke="{StaticResource Border}" StrokeThickness="1" Padding="20" VerticalOptions="Center" HorizontalOptions="Center" MaximumWidthRequest="400" Margin="20">
+        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsActionSheetVisible}" Style="{StaticResource PopupOverlayStyle}">
+            <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400">
                 <VerticalStackLayout Spacing="15">
                     <Label Text="{Binding ActionSheetTitle}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
 
@@ -363,7 +433,7 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
-                    <Button Text="Anuluj" Command="{Binding CancelActionSheetCommand}" BackgroundColor="#1E232D" TextColor="{StaticResource TextSubtle}" CornerRadius="10" HeightRequest="44" Margin="0,10,0,0"/>
+                    <Button Text="Anuluj" Command="{Binding CancelActionSheetCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,10,0,0"/>
                 </VerticalStackLayout>
             </Border>
         </Grid>

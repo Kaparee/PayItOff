@@ -13,5 +13,7 @@ namespace PayItOff.Shared.Responses
         public required decimal Balance { get; set; }
         public required decimal Income { get; set; }
         public required decimal Expense { get; set; }
+
+        public string FullName => $"{Name} {Surname}";
     }
 }

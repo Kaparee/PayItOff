@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PayItOff.MauiClient.Services;
 using PayItOff.Shared.Requests;
@@ -22,6 +22,7 @@ public partial class WalletPersonUiModel : ObservableObject
 
     public bool IsSettlement { get; set; }
     public string Status { get; set; } = string.Empty;
+    public string TransferReference { get; set; } = string.Empty;
     public int GroupId { get; set; }
     public bool CanSendDebtReminder { get; set; }
 
@@ -69,6 +70,7 @@ public partial class WalletPersonUiModel : ObservableObject
 public partial class WalletViewModel : BaseViewModel
 {
     private readonly SettlementService _settlementService;
+    private readonly ExpenseService _expenseService;
     private int _loadId = 0;
     private CancellationTokenSource? _searchCts;
     private List<WalletPersonUiModel> _allTransactions = new();
@@ -148,13 +150,18 @@ public partial class WalletViewModel : BaseViewModel
     [ObservableProperty] public partial string ActionSheetTitle { get; set; } = string.Empty;
     [ObservableProperty] public partial ObservableCollection<string> ActionSheetOptions { get; set; } = new();
 
+    [ObservableProperty] public partial bool IsTransactionDetailsPopupVisible { get; set; }
+    [ObservableProperty] public partial WalletPersonUiModel? SelectedTransactionDetails { get; set; }
+    [ObservableProperty] public partial ExpenseDetailsResponse? SelectedExpenseDetails { get; set; }
+
     public bool IsCustomAlertCancelVisible => !string.IsNullOrEmpty(CustomAlertCancelText);
     public int AlertAcceptColumn => IsCustomAlertCancelVisible ? 1 : 0;
     public int AlertAcceptColumnSpan => IsCustomAlertCancelVisible ? 1 : 2;
 
-    public WalletViewModel(SettlementService settlementService)
+    public WalletViewModel(SettlementService settlementService, ExpenseService expenseService)
     {
         _settlementService = settlementService;
+        _expenseService = expenseService;
         FilterType = "All";
     }
 
@@ -217,6 +224,7 @@ public partial class WalletViewModel : BaseViewModel
                     IsIncome = !item.AmIDebtor,
                     IsSettlement = item.IsSettlement,
                     Status = item.Status,
+                    TransferReference = item.TransferReference,
                     GroupId = item.GroupId,
                     CanSendDebtReminder = item.CanSendDebtReminder
                 }).ToList();
@@ -499,6 +507,42 @@ public partial class WalletViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task ShowTransactionDetails(WalletPersonUiModel item)
+    {
+        if (item == null) return;
+
+        SelectedTransactionDetails = item;
+        SelectedExpenseDetails = null;
+
+        if (!item.IsSettlement)
+        {
+            IsBusy = true;
+            try
+            {
+                var details = await _expenseService.GetExpenseDetailsAsync(item.ExpenseId);
+                SelectedExpenseDetails = details;
+            }
+            catch (Exception ex)
+            {
+                await ShowAlertAsync("Błąd", "Nie udało się pobrać szczegółów wydatku.", "OK");
+                IsBusy = false;
+                return;
+            }
+            IsBusy = false;
+        }
+
+        IsTransactionDetailsPopupVisible = true;
+    }
+
+    [RelayCommand]
+    private void CloseTransactionDetailsPopup()
+    {
+        IsTransactionDetailsPopupVisible = false;
+        SelectedTransactionDetails = null;
+        SelectedExpenseDetails = null;
+    }
+
+    [RelayCommand]
     private async Task RemindDebt(WalletPersonUiModel item)
     {
         if (item == null || item.GroupId == 0) return;
@@ -670,6 +714,9 @@ public partial class WalletViewModel : BaseViewModel
 
     public async Task<bool> ShowAlertAsync(string title, string message, string accept = "OK", string cancel = "")
     {
+        bool wasBusy = IsBusy;
+        if (wasBusy) IsBusy = false;
+
         CustomAlertTitle = title;
         CustomAlertMessage = message;
         CustomAlertAcceptText = accept;
@@ -681,7 +728,10 @@ public partial class WalletViewModel : BaseViewModel
 
         _alertTcs = new TaskCompletionSource<bool>();
         IsCustomAlertVisible = true;
-        return await _alertTcs.Task;
+        var result = await _alertTcs.Task;
+        
+        if (wasBusy) IsBusy = true;
+        return result;
     }
 
     [RelayCommand]
@@ -700,12 +750,18 @@ public partial class WalletViewModel : BaseViewModel
 
     public async Task<string> ShowActionSheetAsync(string title, params string[] options)
     {
+        bool wasBusy = IsBusy;
+        if (wasBusy) IsBusy = false;
+
         ActionSheetTitle = title;
         ActionSheetOptions = new ObservableCollection<string>(options);
 
         _actionSheetTcs = new TaskCompletionSource<string>();
         IsActionSheetVisible = true;
-        return await _actionSheetTcs.Task;
+        var result = await _actionSheetTcs.Task;
+        
+        if (wasBusy) IsBusy = true;
+        return result;
     }
 
     [RelayCommand]

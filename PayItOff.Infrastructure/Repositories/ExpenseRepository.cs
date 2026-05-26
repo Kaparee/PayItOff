@@ -25,10 +25,14 @@ public class ExpenseRepository : IExpenseRepository
     public async Task<Expense?> GetExpenseWithSplitsAsync(int expenseId)
     {
         return await _context.Expenses
+            .Include(e => e.Payer)
             .Include(e => e.Items)
                 .ThenInclude(i => i.Splits)
+                    .ThenInclude(s => s.User)
             .Include(e => e.Groups)
                 .ThenInclude(g => g.Items)
+                    .ThenInclude(i => i.Splits)
+                        .ThenInclude(s => s.User)
             .FirstOrDefaultAsync(x => x.Id == expenseId && x.DeletedAt == null);
     }
 

@@ -186,6 +186,7 @@ public class SettlementService : ISettlementService
                 OtherAvatarUrl = $"{baseUrl}/avatars/{otherUser.AvatarUrl ?? "default-user-avatar.png"}",
                 IsSettlement = true,
                 Status = s.Status.ToString(),
+                TransferReference = s.TransferReference,
                 CanSendDebtReminder = false
             };
         }).ToList();
@@ -303,6 +304,10 @@ public class SettlementService : ISettlementService
             var group = await _groupRepository.GetGroupInfoByIdAsync(settlement.GroupId) ?? throw new SettlementOperationException("Nie znaleziono grupy.");
 
             await _groupDebtRepository.ApplyDebtChangeAsync(group, sender, receiver, -settlement.Amount);
+
+            group.UpdateTimestamp();
+            await _groupRepository.UpdateAsync(group);
+
             await _unitOfWork.CommitAsync();
             return true;
         }

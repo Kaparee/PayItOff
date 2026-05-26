@@ -60,7 +60,7 @@
                                     <Setter Property="Opacity" Value="1.0" />
                                 </DataTrigger>
                             </HorizontalStackLayout.Triggers>
-                            <Image Source="icon_home.png" WidthRequest="44" HeightRequest="44" />
+                            <Image Source="home_icon.png" WidthRequest="44" HeightRequest="44" />
                             <Label Text="Menu Główne" FontAttributes="Bold" VerticalOptions="Center" FontSize="22" TextColor="{StaticResource TextSubtle}">
                                 <Label.Triggers>
                                     <DataTrigger TargetType="Label" Binding="{Binding ActiveTab, Source={x:Reference thisSidebar}}" Value="Home">
@@ -90,7 +90,7 @@
                                     <Setter Property="Opacity" Value="1.0" />
                                 </DataTrigger>
                             </HorizontalStackLayout.Triggers>
-                            <Image Source="icon_groups.png" WidthRequest="44" HeightRequest="44" />
+                            <Image Source="groups_icon.png" WidthRequest="44" HeightRequest="44" />
                             <Label Text="Twoje Grupy" FontAttributes="Bold" VerticalOptions="Center" FontSize="22" TextColor="{StaticResource TextSubtle}">
                                 <Label.Triggers>
                                     <DataTrigger TargetType="Label" Binding="{Binding ActiveTab, Source={x:Reference thisSidebar}}" Value="Groups">
@@ -119,7 +119,7 @@
                                     <Setter Property="Opacity" Value="1.0" />
                                 </DataTrigger>
                             </HorizontalStackLayout.Triggers>
-                            <Image Source="icon_friends.png" WidthRequest="44" HeightRequest="44" />
+                            <Image Source="friends_icon.png" WidthRequest="44" HeightRequest="44" />
                             <Label Text="Twoi Znajomi" FontAttributes="Bold" VerticalOptions="Center" FontSize="22" TextColor="{StaticResource TextSubtle}">
                                 <Label.Triggers>
                                     <DataTrigger TargetType="Label" Binding="{Binding ActiveTab, Source={x:Reference thisSidebar}}" Value="Friends">
@@ -148,7 +148,7 @@
                                     <Setter Property="Opacity" Value="1.0" />
                                 </DataTrigger>
                             </HorizontalStackLayout.Triggers>
-                            <Image Source="icon_wallet.png" WidthRequest="44" HeightRequest="44" />
+                            <Image Source="wallet_icon.png" WidthRequest="44" HeightRequest="44" />
                             <Label Text="Twoje Konto" FontAttributes="Bold" VerticalOptions="Center" FontSize="22" TextColor="{StaticResource TextSubtle}">
                                 <Label.Triggers>
                                     <DataTrigger TargetType="Label" Binding="{Binding ActiveTab, Source={x:Reference thisSidebar}}" Value="Account">
@@ -177,7 +177,7 @@
                                     <Setter Property="Opacity" Value="1.0" />
                                 </DataTrigger>
                             </HorizontalStackLayout.Triggers>
-                            <Image Source="icon_notifications.png" WidthRequest="44" HeightRequest="44" />
+                            <Image Source="notifications_icon.png" WidthRequest="44" HeightRequest="44" />
                             <Label Text="Powiadomienia" FontAttributes="Bold" VerticalOptions="Center" FontSize="22" TextColor="{StaticResource TextSubtle}">
                                 <Label.Triggers>
                                     <DataTrigger TargetType="Label" Binding="{Binding ActiveTab, Source={x:Reference thisSidebar}}" Value="Notifications">
@@ -206,7 +206,7 @@
                                     <Setter Property="Opacity" Value="1.0" />
                                 </DataTrigger>
                             </HorizontalStackLayout.Triggers>
-                            <Image Source="icon_archive.png" WidthRequest="44" HeightRequest="44" />
+                            <Image Source="archive_icon.png" WidthRequest="44" HeightRequest="44" />
                             <Label Text="Archiwum" FontAttributes="Bold" VerticalOptions="Center" FontSize="22" TextColor="{StaticResource TextSubtle}">
                                 <Label.Triggers>
                                     <DataTrigger TargetType="Label" Binding="{Binding ActiveTab, Source={x:Reference thisSidebar}}" Value="Archive">
@@ -228,7 +228,7 @@
                     </Grid.GestureRecognizers>
                     <BoxView Grid.Column="0" WidthRequest="4" Color="Transparent" />
                     <HorizontalStackLayout Grid.Column="1" Spacing="15" Padding="15,12">
-                        <Label Text="➔" TextColor="{StaticResource StatusRed}" FontSize="32" VerticalOptions="Center" WidthRequest="44" HorizontalTextAlignment="Center"/>
+                        <Image Source="logout_icon.png" WidthRequest="32" HeightRequest="32" VerticalOptions="Center"/>
                         <Label Text="Wyloguj się" TextColor="{StaticResource StatusRed}" VerticalOptions="Center" FontSize="20" FontAttributes="Bold"/>
                     </HorizontalStackLayout>
                 </Grid>
