@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Configuration;
+using Org.BouncyCastle.Asn1.Ocsp;
+using PayItOff.Application.Helpers;
 using PayItOff.Application.Interfaces;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Enums;
@@ -17,23 +19,28 @@ public class GroupMemberService : IGroupMemberService
     private readonly IGroupMemberRepository _groupMemberRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IConfiguration _configuration;
+    private readonly INotificationService _notificationService;
 
-    public GroupMemberService(IGroupRepository groupRepository, IUserRepository userRepository, IGroupMemberRepository groupMemberRepository, IUnitOfWork unitOfWork, IJWTService jwtService, IConfiguration configuration)
+    public GroupMemberService(IGroupRepository groupRepository, IUserRepository userRepository, IGroupMemberRepository groupMemberRepository, IUnitOfWork unitOfWork, IJWTService jwtService, IConfiguration configuration, INotificationService notificationService)
     {
         _groupRepository = groupRepository;
         _userRepository = userRepository;
         _groupMemberRepository = groupMemberRepository;
         _unitOfWork = unitOfWork;
         _configuration = configuration;
+        _notificationService = notificationService;
     }
 
-    public async Task InviteUserAsync(GroupInviteUserRequest request)
+    public async Task InviteUserAsync(int userId, GroupInviteUserRequest request)
     {
         await _unitOfWork.BeginTransactionAsync();
         try
         {
             var user = await _userRepository.GetUserByIdAsync(request.UserId);
             if (user is null) { throw new UserNotFoundException(); }
+
+            var inviter = await _userRepository.GetUserByIdAsync(userId);
+            if (inviter == null) { throw new UserNotFoundException(); }
 
             var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId);
             if (group is null) { throw new GroupNotFoundException(); }
@@ -58,6 +65,9 @@ public class GroupMemberService : IGroupMemberService
                     request.Role
                 );
                 await _groupMemberRepository.AddAsync(invite);
+                await _unitOfWork.SaveChangesAsync();
+
+                await _notificationService.CreateNotificationAsync(request.UserId, userId, NotificationType.NeedAction, $"Użytkownik {inviter.FullName} zaprosił Cię do grupy: '{group.Name}'", invite.Id, EntityType.GroupMembers);
             }
 
             group!.UpdateTimestamp();
@@ -88,6 +98,9 @@ public class GroupMemberService : IGroupMemberService
         }
 
         await _groupMemberRepository.UpdateAsync(invitation);
+        
+        await _notificationService.ResolveActionNotificationAsync(userId, invitationId, EntityType.GroupMembers, true);
+        
         await _unitOfWork.SaveChangesAsync();
     }
     public async Task DeclineInviteAsync(int userId, int invitationId)
@@ -100,6 +113,9 @@ public class GroupMemberService : IGroupMemberService
         invitation.Decline();
 
         await _groupMemberRepository.UpdateAsync(invitation);
+
+        await _notificationService.ResolveActionNotificationAsync(userId, invitationId, EntityType.GroupMembers, false);
+
         await _unitOfWork.SaveChangesAsync();
 
     }
@@ -110,6 +126,9 @@ public class GroupMemberService : IGroupMemberService
 
         var targetUser = await _groupMemberRepository.GetMemberAsync(request.GroupId, request.TargetUserId);
         if (targetUser is null || targetUser.Status != GroupMemberStatus.Accepted) { throw new GroupMemberNotFoundException(); }
+
+        var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId);
+        if(group == null) { throw new GroupNotFoundException(); }
 
         if (actor.Role == GroupMemberRole.Member) { throw new InvalidUserRoleException(); }
         if (actor.Role == GroupMemberRole.Admin && targetUser!.Role == GroupMemberRole.Owner) { throw new InvalidUserRoleException(); }
@@ -125,6 +144,7 @@ public class GroupMemberService : IGroupMemberService
             await _groupRepository.UpdateAsync(targetUser.Group);
         }
 
+        await _notificationService.CreateNotificationAsync(targetUser.Id, userId, NotificationType.Normal, $"Twoja rola w grupie '{group.Name}' została zmieniona przez {actor.User!.FullName} na {request.NewRole.ToString()}", request.GroupId, EntityType.Groups);
         await _groupMemberRepository.UpdateAsync(targetUser);
         await _unitOfWork.SaveChangesAsync();
     }
@@ -160,6 +180,9 @@ public class GroupMemberService : IGroupMemberService
         var actor = await _groupMemberRepository.GetMemberAsync(groupId, userId);
         if (actor is null || actor.Status != GroupMemberStatus.Accepted) { throw new GroupMemberNotFoundException(); }
 
+        var group = await _groupRepository.GetGroupInfoByIdAsync(groupId);
+        if (group == null) { throw new GroupNotFoundException(); }
+
         var targetUser = await _groupMemberRepository.GetMemberAsync(groupId, targetUserId);
         if (targetUser is null || targetUser.Status != GroupMemberStatus.Accepted) { throw new GroupMemberNotFoundException(); }
 
@@ -169,11 +192,13 @@ public class GroupMemberService : IGroupMemberService
 
         targetUser.Kick();
         targetUser.Group?.UpdateTimestamp();
-        
+
         if (targetUser.Group != null)
         {
             await _groupRepository.UpdateAsync(targetUser.Group);
         }
+
+        await _notificationService.CreateNotificationAsync(targetUserId, userId, NotificationType.Deleting, $"{actor.User!.FullName} usunął Cię z grupy {group.Name}", groupId, EntityType.GroupMembers);
 
         await _groupMemberRepository.UpdateAsync(targetUser);
         await _unitOfWork.SaveChangesAsync();
@@ -204,7 +229,7 @@ public class GroupMemberService : IGroupMemberService
         {
             UserId = x.UserId,
             GroupMemberId = x.Id,
-            AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, x.User!.AvatarUrl),
+            AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, x.User!.AvatarUrl),
             Name = x.User.Name,
             Surname = x.User.Surname,
             Email = x.User.Email,

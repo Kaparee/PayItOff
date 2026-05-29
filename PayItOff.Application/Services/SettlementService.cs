@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using PayItOff.Application.Helpers;
 using PayItOff.Application.Interfaces;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Enums;
@@ -21,6 +22,7 @@ public class SettlementService : ISettlementService
     private readonly INotificationRepository _notificationRepository;
     private readonly IEmailService _emailService;
     private readonly IGroupMemberRepository _groupMemberRepository;
+    private readonly INotificationService _notificationService;
 
     public SettlementService(
         IConfiguration configuration,
@@ -32,7 +34,8 @@ public class SettlementService : ISettlementService
         ISettlementRepository settlementRepository,
         INotificationRepository notificationRepository,
         IEmailService emailService,
-        IGroupMemberRepository groupMemberRepository)
+        IGroupMemberRepository groupMemberRepository,
+        INotificationService notificationService)
     {
         _configuration = configuration;
         _groupDebtRepository = groupDebtRepository;
@@ -44,6 +47,7 @@ public class SettlementService : ISettlementService
         _notificationRepository = notificationRepository;
         _emailService = emailService;
         _groupMemberRepository = groupMemberRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<GlobalSettlementResponse> GetUserAllIncomesSummaryAsync(int userId)
@@ -56,7 +60,7 @@ public class SettlementService : ISettlementService
             UserId = data.UserId,
             Name = data.Name,
             Surname = data.Surname,
-            AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, data.AvatarUrl),
+            AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, data.AvatarUrl),
             Categories = data.Categories,
             Date = data.Date,
             Amount = data.Amount
@@ -75,7 +79,7 @@ public class SettlementService : ISettlementService
             UserId = data.UserId,
             Name = data.Name,
             Surname = data.Surname,
-            AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, data.AvatarUrl),
+            AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, data.AvatarUrl),
             Categories = data.Categories,
             Date = data.Date,
             Amount = data.Amount
@@ -136,7 +140,7 @@ public class SettlementService : ISettlementService
                     OtherUserId = otherUser.Id,
                     OtherName = otherUser.Name,
                     OtherSurname = otherUser.Surname,
-                    OtherAvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, otherUser.AvatarUrl),
+                    OtherAvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, otherUser.AvatarUrl),
                     IsSettlement = false,
                     Status = "Confirmed",
                     CanSendDebtReminder = false
@@ -183,7 +187,7 @@ public class SettlementService : ISettlementService
                 OtherUserId = otherUser.Id,
                 OtherName = otherUser.Name,
                 OtherSurname = otherUser.Surname,
-                OtherAvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, otherUser.AvatarUrl),
+                OtherAvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, otherUser.AvatarUrl),
                 IsSettlement = true,
                 Status = s.Status.ToString(),
                 TransferReference = s.TransferReference,
@@ -274,7 +278,13 @@ public class SettlementService : ISettlementService
             var settlement = Settlement.Create(sender, receiver, groupInfo, request.Amount, description);
 
             await _settlementRepository.AddAsync(settlement);
+
             await _unitOfWork.SaveChangesAsync();
+
+            if (receiver.NotificationsSettings.NotifyOnTransferConfirmed == true)
+            {
+                await _notificationService.CreateNotificationAsync(receiver.Id, sender.Id, NotificationType.NeedAction, $"{sender.FullName} zadeklarował spłatę {request.Amount} zł w grupie {groupInfo.Name}", settlement.Id, EntityType.Settlements);
+            }
             await _unitOfWork.CommitAsync();
 
             return settlement.Id;
@@ -291,29 +301,92 @@ public class SettlementService : ISettlementService
         await _unitOfWork.BeginTransactionAsync();
         try
         {
-            var settlement = await _settlementRepository.GetSettlementByIdAsync(userId, settlementId)
-                ?? throw new SettlementOperationException("Nie znaleziono spłaty.");
+            var result = await AcceptSettlementInternalAsync(userId, settlementId);
+            await _unitOfWork.CommitAsync();
+            return result;
+        }
+        catch
+        {
+            await _unitOfWork.RollbackAsync();
+            throw;
+        }
+    }
 
-            if (settlement.ReceiverId != userId)
-                throw new UnauthorizedAccessException("Tylko odbiorca może zaakceptować spłatę.");
+    private async Task<bool> AcceptSettlementInternalAsync(int userId, int settlementId)
+    {
+        var settlement = await _settlementRepository.GetSettlementByIdAsync(userId, settlementId)
+            ?? throw new SettlementOperationException("Nie znaleziono spłaty.");
 
-            if (settlement.Status != SettlementStatus.Pending)
-                throw new SettlementOperationException("Ta spłata nie oczekuje już na akceptację.");
+        if (settlement.ReceiverId != userId)
+            throw new UnauthorizedAccessException("Tylko odbiorca może zaakceptować spłatę.");
 
-            var debt = await _groupDebtRepository.GetDebtAsync(settlement.GroupId, settlement.SenderId, settlement.ReceiverId);
-            if (debt is null || debt.Amount < settlement.Amount)
-                throw new SettlementOperationException(
-                    "Saldo długu w grupie jest mniejsze niż proponowana spłata (np. rozliczyły się nowe wydatki). Odrzuć tę propozycję lub poproś dłużnika o nową kwotę.");
+        if (settlement.Status != SettlementStatus.Pending)
+            throw new SettlementOperationException("Ta spłata nie oczekuje już na akceptację.");
 
-            settlement.Confirm();
-            var sender = await _userRepository.GetUserByIdAsync(settlement.SenderId) ?? throw new UserNotFoundException();
-            var receiver = await _userRepository.GetUserByIdAsync(userId) ?? throw new UserNotFoundException();
-            var group = await _groupRepository.GetGroupInfoByIdAsync(settlement.GroupId) ?? throw new SettlementOperationException("Nie znaleziono grupy.");
+        var debt = await _groupDebtRepository.GetDebtAsync(settlement.GroupId, settlement.SenderId, settlement.ReceiverId);
+        if (debt is null || debt.Amount < settlement.Amount)
+            throw new SettlementOperationException(
+                "Saldo długu w grupie jest mniejsze niż proponowana spłata (np. rozliczyły się nowe wydatki). Odrzuć tę propozycję lub poproś dłużnika o nową kwotę.");
 
-            await _groupDebtRepository.ApplyDebtChangeAsync(group, sender, receiver, -settlement.Amount);
+        settlement.Confirm();
+        var sender = await _userRepository.GetUserByIdAsync(settlement.SenderId) ?? throw new UserNotFoundException();
+        var receiver = await _userRepository.GetUserByIdAsync(userId) ?? throw new UserNotFoundException();
+        var group = await _groupRepository.GetGroupInfoByIdAsync(settlement.GroupId) ?? throw new SettlementOperationException("Nie znaleziono grupy.");
 
-            group.UpdateTimestamp();
-            await _groupRepository.UpdateAsync(group);
+        await _groupDebtRepository.ApplyDebtChangeAsync(group, sender, receiver, -settlement.Amount);
+
+        await _notificationService.CreateNotificationAsync(sender.Id, userId, NotificationType.Normal, $"{receiver.FullName} zatwierdził twoją spłatę długu, która wynosiła: {debt} zł", settlement.Id, EntityType.Settlements);
+
+        await _notificationService.ResolveActionNotificationAsync(userId, settlement.Id, EntityType.Settlements, true);
+
+        group.UpdateTimestamp();
+        await _groupRepository.UpdateAsync(group);
+
+        return true;
+    }
+
+    public async Task<bool> RejectSettlementAsync(int userId, int settlementId)
+    {
+        var settlement = await _settlementRepository.GetSettlementByIdAsync(userId, settlementId)
+            ?? throw new SettlementOperationException("Nie znaleziono spłaty.");
+        if (settlement.ReceiverId != userId) throw new UnauthorizedAccessException("Tylko odbiorca może odrzucić spłatę.");
+        if (settlement.Status != SettlementStatus.Pending)
+            throw new SettlementOperationException("Ta spłata nie oczekuje już na decyzję.");
+        settlement.Reject();
+
+        var sender = await _userRepository.GetUserByIdAsync(settlement.SenderId) ?? throw new UserNotFoundException();
+        var receiver = await _userRepository.GetUserByIdAsync(userId) ?? throw new UserNotFoundException();
+
+        await _notificationService.CreateNotificationAsync(sender.Id, userId, NotificationType.Normal, $"{receiver.FullName} odrzucił twoją spłatę długu, wyjaśnij sytuację", settlement.Id, EntityType.Settlements);
+
+        await _notificationService.ResolveActionNotificationAsync(userId, settlement.Id, EntityType.Settlements, false);
+
+        await _unitOfWork.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> AcceptNetSettlementsAsync(int receiverId, int senderId)
+    {
+        var pendingIds = await _settlementRepository.GetPendingSettlementIdsAsync(senderId, receiverId);
+
+        if (!pendingIds.Any()) return false;
+
+        await _unitOfWork.BeginTransactionAsync();
+        try
+        {
+            foreach (var settlementId in pendingIds)
+            {
+                var success = await AcceptSettlementInternalAsync(receiverId, settlementId);
+                if (!success) throw new SettlementOperationException("Błąd podczas zbiorczej akceptacji spłaty.");
+            }
+
+            var notification = await _notificationRepository.GetActionNotificationAsync(receiverId, senderId, EntityType.NetSettlements);
+            if (notification != null)
+            {
+                notification.ChangeTypeToNormal();
+                notification.AppendToBody(" (ZAAKCEPTOWANE)");
+                await _notificationRepository.UpdateAsync(notification);
+            }
 
             await _unitOfWork.CommitAsync();
             return true;
@@ -325,16 +398,37 @@ public class SettlementService : ISettlementService
         }
     }
 
-    public async Task<bool> RejectSettlementAsync(int userId, int settlementId)
+    public async Task<bool> RejectNetSettlementsAsync(int receiverId, int senderId)
     {
-        var settlement = await _settlementRepository.GetSettlementByIdAsync(userId, settlementId)
-            ?? throw new SettlementOperationException("Nie znaleziono spłaty.");
-        if (settlement.ReceiverId != userId) throw new UnauthorizedAccessException("Tylko odbiorca może odrzucić spłatę.");
-        if (settlement.Status != SettlementStatus.Pending)
-            throw new SettlementOperationException("Ta spłata nie oczekuje już na decyzję.");
-        settlement.Reject();
-        await _unitOfWork.SaveChangesAsync();
-        return true;
+        var pendingIds = await _settlementRepository.GetPendingSettlementIdsAsync(senderId, receiverId);
+
+        if (!pendingIds.Any()) return false;
+
+        await _unitOfWork.BeginTransactionAsync();
+        try
+        {
+            foreach (var settlementId in pendingIds)
+            {
+                var success = await RejectSettlementAsync(receiverId, settlementId);
+                if (!success) throw new SettlementOperationException("Błąd podczas zbiorczego odrzucania spłaty.");
+            }
+
+            var notification = await _notificationRepository.GetActionNotificationAsync(receiverId, senderId, EntityType.NetSettlements);
+            if (notification != null)
+            {
+                notification.ChangeTypeToNormal();
+                notification.AppendToBody(" (ODRZUCONE)");
+                await _notificationRepository.UpdateAsync(notification);
+            }
+
+            await _unitOfWork.CommitAsync();
+            return true;
+        }
+        catch
+        {
+            await _unitOfWork.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task SendDebtReminderAsync(int creditorUserId, RemindDebtRequest request)
@@ -359,26 +453,19 @@ public class SettlementService : ISettlementService
         if (await _notificationRepository.HasDebtReminderSinceAsync(creditorUserId, request.DebtorUserId, debt.Id, since))
             throw new SettlementOperationException("Przypomnienie można wysłać najwyżej raz na 24 godziny.");
 
-        var body = $"{creditor.Name} {creditor.Surname} przypomina o zapłacie {debt.Amount:N2} PLN w grupie {group.Name}.";
-        var notification = Notification.Create(debtor, creditor, NotificationType.Normal, body, debt.Id, EntityType.GroupDebts);
-        await _notificationRepository.AddAsync(notification);
-        await _unitOfWork.SaveChangesAsync();
+        await _notificationService.CreateNotificationAsync(debtor.Id, creditorUserId, NotificationType.Normal, $"{creditor.FullName} przypomina o zapłacie {debt.Amount:N2} PLN w grupie {group.Name}.", debt.Id, EntityType.Settlements);
 
-        if (debtor.NotificationsSettings.ReceiveEmail)
-        {
-            try
-            {
-                await _emailService.SendEmailAsync(debtor.Email, "PayItOff — przypomnienie o długu", $"<p>{body}</p>");
-            }
-            catch
-            {
-                // olewamy jak wysylka maila sie wywali
-            }
-        }
+        await _unitOfWork.SaveChangesAsync();
     }
 
     public async Task<PayNetDebtResponse> CreateNetDebtSettlementsAsync(int userId, PayNetDebtRequest request)
     {
+        var sender = await _userRepository.GetUserByIdAsync(userId)
+                ?? throw new SettlementOperationException("Nie znaleziono nadawcy w bazie.");
+
+        var receiver = await _userRepository.GetUserByIdAsync(request.CreditorId)
+            ?? throw new SettlementOperationException("Nie znaleziono odbiorcy w bazie.");
+
         const decimal tol = 0.01m;
 
         if (request.Amount <= 0)
@@ -439,8 +526,14 @@ public class SettlementService : ISettlementService
                     continue;
 
                 var settlement = await BuildPendingSettlementForNetPayAsync(userId, request.CreditorId, row.GroupId, take);
+                await _unitOfWork.SaveChangesAsync();
                 created.Add(settlement);
                 remaining -= take;
+            }
+
+            if (created.Any() && receiver.NotificationsSettings.NotifyOnTransferConfirmed == true)
+            {
+                await _notificationService.CreateNotificationAsync(request.CreditorId, userId, NotificationType.NeedAction, $"{sender.FullName} zadeklarował zbiorczą spłatę netto: {request.Amount:N2} zł. Zaakceptuj, aby rozliczyć wszystkie powiązane grupy.", userId, EntityType.NetSettlements);
             }
 
             if (remaining > tol)

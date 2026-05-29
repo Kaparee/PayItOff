@@ -8,13 +8,13 @@
              Shell.NavBarIsVisible="False">
     <Grid>
         <Grid ColumnDefinitions="{OnIdiom Phone='0, *', Default='360, *'}">
-            
+
             <controls:SidebarMenu Grid.Column="0" ActiveTab="Home" IsVisible="{OnIdiom Phone=False, Default=True}" />
 
             <ScrollView Grid.Column="1" VerticalScrollBarVisibility="Always">
                 <Grid Padding="{OnIdiom Phone='15', Default='30'}" RowDefinitions="Auto, Auto, Auto, Auto, Auto" RowSpacing="30">
 
-                    
+
                     <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" IsVisible="{OnIdiom Phone=True, Default=False}" Margin="0,10,0,0">
                         <HorizontalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
@@ -25,10 +25,10 @@
 
                     <BoxView Grid.Row="1" HeightRequest="1" Color="{StaticResource Border}" VerticalOptions="Start" Margin="-30,10,-30,0" IsVisible="{OnIdiom Phone=False, Default=True}" />
 
-                    
+
                     <Grid Grid.Row="2" ColumnDefinitions="{OnIdiom Phone='*', Default='*, *'}" RowDefinitions="{OnIdiom Phone='Auto, Auto', Default='Auto'}" ColumnSpacing="25" RowSpacing="25">
 
-                        
+
                         <Border Grid.Row="0" Grid.Column="0" StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="5, 20" StrokeThickness="0">
                             <Grid RowDefinitions="Auto, *, Auto, Auto" RowSpacing="15">
                                 <Label Grid.Row="0" Text="Przychody" TextColor="{StaticResource StatusGreen}" FontSize="{OnIdiom Phone=22, Default=32}" HorizontalOptions="Center" FontAttributes="Bold">
@@ -74,7 +74,7 @@
                             </Grid>
                         </Border>
 
-                        
+
                         <Border Grid.Row="{OnIdiom Phone=1, Default=0}" Grid.Column="{OnIdiom Phone=0, Default=1}" StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="5, 20" StrokeThickness="0">
                             <Grid RowDefinitions="Auto, *, Auto, Auto" RowSpacing="15">
                                 <Label Grid.Row="0" Text="Wydatki" TextColor="{StaticResource StatusRed}" FontSize="{OnIdiom Phone=22, Default=32}" HorizontalOptions="Center" FontAttributes="Bold">
@@ -122,32 +122,38 @@
 
                     <BoxView Grid.Row="3" HeightRequest="1" Color="{StaticResource Border}" VerticalOptions="Center" Margin="-30,0,-30,0" />
 
-                    
+
                     <Grid Grid.Row="4" ColumnDefinitions="*, *" ColumnSpacing="30">
-                        
+
                         <Border Grid.Column="0" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="25" StrokeThickness="0">
                             <Grid RowDefinitions="Auto, *">
                                 <Label Grid.Row="0" Text="Ostatnia aktywność" TextColor="{StaticResource TextMain}" FontSize="28" HorizontalOptions="Center" FontAttributes="Bold" Margin="0,0,0,15"/>
-                                <CollectionView Grid.Row="1" ItemsSource="{Binding Notifications}" HeightRequest="200">
+                                <CollectionView Grid.Row="1" ItemsSource="{Binding LastNotifications}" HeightRequest="200">
                                     <CollectionView.EmptyView>
                                         <Label Text="Brak nowych powiadomień." TextColor="{StaticResource TextSubtle}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
                                     </CollectionView.EmptyView>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate>
-                                            <VerticalStackLayout>
-                                                <Grid ColumnDefinitions="40, *" Padding="5,12">
-                                                    <Image Grid.Column="0" Source="icon_activity_item.png" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" Opacity="0.8"/>
-                                                    <Label Grid.Column="1" Text="{Binding Message}" TextColor="{StaticResource TextSubtle}" FontSize="13" VerticalOptions="Center"/>
-                                                </Grid>
-                                                <BoxView HeightRequest="1" Color="{StaticResource Border}" Opacity="0.2" Margin="0,0,0,5"/>
-                                            </VerticalStackLayout>
+                                            <ContentView Padding="0,0,0,10">
+                                                <Border BackgroundColor="{Binding BackgroundColor}" Padding="0" StrokeShape="RoundRectangle 12" StrokeThickness="0">
+                                                    <Grid ColumnDefinitions="Auto, 50, *" ColumnSpacing="10">
+                                                        
+                                                        <BoxView Grid.Column="0" WidthRequest="4" Color="{Binding LeftBarColor}" VerticalOptions="FillAndExpand" />
+                                                        
+                                                        <Image Grid.Column="1" Source="{Binding IconSource}" WidthRequest="22" HeightRequest="22" VerticalOptions="Center" HorizontalOptions="Center" />
+                                                        
+                                                        <Label Grid.Column="2" Text="{Binding Body}" TextColor="{Binding TextColor}" FontAttributes="Bold" FontSize="13" VerticalOptions="Center" LineBreakMode="WordWrap" Margin="0,10" />
+                                                        
+                                                    </Grid>
+                                                </Border>
+                                            </ContentView>
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
                                 </CollectionView>
                             </Grid>
                         </Border>
 
-                        
+
                         <Border Grid.Column="1" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}" Padding="25" StrokeThickness="0">
                             <Grid RowDefinitions="Auto, *">
                                 <Label Grid.Row="0" Text="Aktywne Grupy" TextColor="{StaticResource TextMain}" FontSize="28" HorizontalOptions="Center" FontAttributes="Bold" Margin="0,0,0,5"/>
@@ -189,7 +195,7 @@
             </ScrollView>
         </Grid>
 
-        
+
         <Grid IsVisible="{Binding IsMenuVisible}" BackgroundColor="#CC121212" ZIndex="100">
             <Grid.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />

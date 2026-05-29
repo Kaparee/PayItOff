@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Enums;
 using PayItOff.Domain.Interfaces;
@@ -57,5 +57,14 @@ public class SettlementRepository : ISettlementRepository
             .ToListAsync();
 
         return rows.Select(r => (r.SenderId, r.ReceiverId, r.GroupId)).ToHashSet();
+    }
+
+    public async Task<List<int>> GetPendingSettlementIdsAsync(int senderId, int receiverId)
+    {
+        return await _context.Settlements
+            .AsNoTracking()
+            .Where(s => s.SenderId == senderId && s.ReceiverId == receiverId && s.Status == SettlementStatus.Pending)
+            .Select(s => s.Id)
+            .ToListAsync();
     }
 }

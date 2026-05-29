@@ -9,4 +9,13 @@ public partial class NotificationsPage : ContentPage
         InitializeComponent();
         BindingContext = vm;
     }
+
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+        if (BindingContext is NotificationsViewModel vm)
+        {
+            _ = vm.LoadNotificationsAsync();
+        }
+    }
 }

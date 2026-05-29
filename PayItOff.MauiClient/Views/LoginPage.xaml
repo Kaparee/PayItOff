@@ -18,7 +18,8 @@
         </Style>
     </ContentPage.Resources>
 
-    <ScrollView>
+    <Grid>
+        <ScrollView>
         
         <VerticalStackLayout Spacing="25" Padding="{OnIdiom Phone='20', Default='30'}" VerticalOptions="Center" MaximumWidthRequest="450">
 
@@ -65,9 +66,7 @@
                 </Border>
             </VerticalStackLayout>
 
-            <ActivityIndicator IsRunning="{Binding IsBusy}"
-                               IsVisible="{Binding IsBusy}"
-                               Color="{StaticResource PrimaryViolet}" />
+
 
             
             <Button Text="Zaloguj się"
@@ -83,5 +82,10 @@
                     Command="{Binding LoginAsJakubCommand}"
                     Margin="0,10,0,0" />
         </VerticalStackLayout>
-    </ScrollView>
+        </ScrollView>
+        
+        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#80000000" ZIndex="999">
+            <ActivityIndicator IsRunning="{Binding IsBusy}" Color="#7C3AED" HorizontalOptions="Center" VerticalOptions="Center"/>
+        </Grid>
+    </Grid>
 </ContentPage>

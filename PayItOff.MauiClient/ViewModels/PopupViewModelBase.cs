@@ -31,12 +31,12 @@ public partial class PopupViewModelBase : BaseViewModel
         {
             if (string.IsNullOrEmpty(cancel))
             {
-                await Shell.Current.DisplayAlert(title, message, accept);
+                await Shell.Current.DisplayAlertAsync(title, message, accept);
                 return true;
             }
             else
             {
-                return await Shell.Current.DisplayAlert(title, message, accept, cancel);
+                return await Shell.Current.DisplayAlertAsync(title, message, accept, cancel);
             }
         }
 
@@ -55,7 +55,7 @@ public partial class PopupViewModelBase : BaseViewModel
         _alertTcs = new TaskCompletionSource<bool>();
         IsCustomAlertVisible = true;
         var result = await _alertTcs.Task;
-        
+
         if (wasBusy) IsBusy = true;
         return result;
     }
@@ -85,7 +85,7 @@ public partial class PopupViewModelBase : BaseViewModel
         _actionSheetTcs = new TaskCompletionSource<string>();
         IsActionSheetVisible = true;
         var result = await _actionSheetTcs.Task;
-        
+
         if (wasBusy) IsBusy = true;
         return result;
     }

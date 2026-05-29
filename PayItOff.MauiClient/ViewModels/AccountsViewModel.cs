@@ -39,9 +39,6 @@ public partial class AccountsViewModel : PopupViewModelBase
     public partial string Iban { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial bool ReceiveEmail { get; set; }
-
-    [ObservableProperty]
     public partial bool DailySummary { get; set; }
 
     [ObservableProperty]
@@ -85,7 +82,6 @@ public partial class AccountsViewModel : PopupViewModelBase
                 Iban = info.IBAN ?? "Brak danych";
 
                 _suppressNotificationUpdate = true;
-                ReceiveEmail = info.Notifications.ReceiveEmail;
                 DailySummary = info.Notifications.DailySummary;
                 NotifyOnGroupJoined = info.Notifications.NotifyOnGroupJoined;
                 NotifyOnExpenseAdded = info.Notifications.NotifyOnExpenseAdded;
@@ -107,7 +103,6 @@ public partial class AccountsViewModel : PopupViewModelBase
         }
     }
 
-    partial void OnReceiveEmailChanged(bool value) => TriggerNotificationUpdate();
     partial void OnDailySummaryChanged(bool value) => TriggerNotificationUpdate();
     partial void OnNotifyOnGroupJoinedChanged(bool value) => TriggerNotificationUpdate();
     partial void OnNotifyOnExpenseAddedChanged(bool value) => TriggerNotificationUpdate();
@@ -130,7 +125,6 @@ public partial class AccountsViewModel : PopupViewModelBase
             var request = new UserNotificationChangeRequest
             {
                 Notifications = new UserNotificationSettingsRequest(
-                    ReceiveEmail,
                     DailySummary,
                     NotifyOnGroupJoined,
                     NotifyOnExpenseAdded,
@@ -277,7 +271,7 @@ public partial class AccountsViewModel : PopupViewModelBase
     {
         try
         {
-            var result = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
+            var result = await MediaPicker.Default.PickPhotosAsync(new MediaPickerOptions
             {
                 Title = "Wybierz zdjęcie profilowe"
             });
@@ -285,7 +279,7 @@ public partial class AccountsViewModel : PopupViewModelBase
             if (result != null)
             {
                 IsBusy = true;
-                bool success = await _userService.UpdateAvatarAsync(result);
+                bool success = await _userService.UpdateAvatarAsync(result?.FirstOrDefault()!);
                 if (success)
                 {
                     await LoadProfileAsync();

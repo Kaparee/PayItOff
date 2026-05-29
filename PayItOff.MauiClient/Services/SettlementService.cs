@@ -176,6 +176,34 @@ public class SettlementService
         }
     }
 
+    public async Task<bool> AcceptNetSettlementsAsync(int senderId)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync($"Settlement/accept-net/{senderId}", null);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error accepting net settlements: {ex.Message}");
+            return false;
+        }
+    }
+
+    public async Task<bool> RejectNetSettlementsAsync(int senderId)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync($"Settlement/reject-net/{senderId}", null);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error rejecting net settlements: {ex.Message}");
+            return false;
+        }
+    }
+
     public async Task<(bool Ok, string? ErrorMessage)> CompensateDebtsAsync(CompensateDebtsRequest request)
     {
         try

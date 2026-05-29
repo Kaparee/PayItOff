@@ -110,22 +110,24 @@ public partial class RegisterViewModel : PopupViewModelBase
     }
 
     [RelayCommand]
-    [Obsolete]
     private async Task PickAvatar()
     {
         try
         {
-            var photo = await MediaPicker.Default.PickPhotoAsync();
+            var photo = await MediaPicker.Default.PickPhotosAsync();
             if (photo == null) return;
 
-            SelectedAvatarFile = photo;
+            SelectedAvatarFile = photo?.FirstOrDefault();
 
-            var stream = await photo.OpenReadAsync();
-            AvatarPreviewSource = ImageSource.FromStream(() => stream);
+            if (SelectedAvatarFile != null)
+            {
+                var stream = await SelectedAvatarFile.OpenReadAsync();
+                AvatarPreviewSource = ImageSource.FromStream(() => stream);
 
 
-            IsAvatarPlaceholderVisible = false;
-            IsAvatarImageVisible = true;
+                IsAvatarPlaceholderVisible = false;
+                IsAvatarImageVisible = true;
+            }
         }
         catch (Exception ex)
         {

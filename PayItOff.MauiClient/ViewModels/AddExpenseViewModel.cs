@@ -14,34 +14,33 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
     private readonly ExpenseService _expenseService;
 
     [ObservableProperty]
-    private int _groupId;
+    public partial int GroupId { get; set; }
 
     [ObservableProperty]
-    private string _groupName = string.Empty;
+    public partial string GroupName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string _newItemName = string.Empty;
+    public partial string NewItemName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private ImageSource? _receiptImageSource;
+    public partial ImageSource? ReceiptImageSource { get; set; }
 
     [ObservableProperty]
-    private bool _isAddCategoryPopupVisible;
+    public partial bool IsAddCategoryPopupVisible { get; set; }
 
     [ObservableProperty]
-    private string _newCategoryName = string.Empty;
+    public partial string NewCategoryName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private bool _isAddGroupPopupVisible;
+    public partial bool IsAddGroupPopupVisible { get; set; }
 
     [ObservableProperty]
-    private string _newGroupName = string.Empty;
+    public partial string NewGroupName { get; set; } = string.Empty;
 
     private TaskCompletionSource<string>? _groupNameTcs;
 
     [ObservableProperty]
-    private bool _isMissingMembersPopupVisible;
-
+    public partial bool IsMissingMembersPopupVisible { get; set; }
     public ObservableCollection<ReceiptItem> BufferItems { get; } = new();
     public ObservableCollection<ReceiptItem> UncategorizedItems { get; } = new();
     public ObservableCollection<ReceiptCategory> Categories { get; } = new();
@@ -444,7 +443,7 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
         {
             try
             {
-                FileResult photo = await MediaPicker.Default.CapturePhotoAsync();
+                FileResult? photo = await MediaPicker.Default.CapturePhotoAsync();
                 if (photo != null)
                 {
                     ReceiptImageSource = ImageSource.FromFile(photo.FullPath);

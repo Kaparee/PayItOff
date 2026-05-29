@@ -42,32 +42,31 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     [NotifyPropertyChangedFor(nameof(IsAdminOrFounder))]
     [NotifyPropertyChangedFor(nameof(IsOwner))]
     [NotifyPropertyChangedFor(nameof(RoleSubtitle))]
-    private string _userRole = string.Empty;
+    public partial string UserRole { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string _memberSearchText = string.Empty;
+    public partial string MemberSearchText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string _transactionSearchText = string.Empty;
+    public partial string TransactionSearchText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private bool _isEditGroupPopupVisible;
+    public partial bool IsEditGroupPopupVisible { get; set; }
 
     [ObservableProperty]
-    private string _newGroupName = string.Empty;
+    public partial string NewGroupName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private bool _isManageMembersPopupVisible;
+    public partial bool IsManageMembersPopupVisible { get; set; }
 
     [ObservableProperty]
-    private string _inviteSearchText = string.Empty;
+    public partial string InviteSearchText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private bool _isExpenseDetailsPopupVisible;
+    public partial bool IsExpenseDetailsPopupVisible { get; set; }
 
     [ObservableProperty]
-    private ExpenseDetailsResponse? _selectedExpenseDetails;
-
+    public partial ExpenseDetailsResponse? SelectedExpenseDetails { get; set; }
     public ObservableCollection<GroupMemberResponse> ActiveMembersList { get; } = new();
 
     public ObservableCollection<FriendListResponse> FriendsList { get; } = new();
@@ -146,7 +145,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     private async Task ShowExpenseDetailsAsync(ExpenseSummaryDto expense)
     {
         if (expense == null) return;
-        
+
         IsBusy = true;
         try
         {
@@ -168,20 +167,22 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     private void CloseExpenseDetailsPopup()
     {
         IsExpenseDetailsPopupVisible = false;
-        SelectedExpenseDetails = null;
+        // Do not set SelectedExpenseDetails to null. Setting it to null causes BindableLayout to collapse to 0 height.
+        // When the popup opens next time, going from null -> object forces a massive layout recalculation 
+        // which triggers MAUI's ScrollView jump bug on Windows.
     }
 
     [RelayCommand]
     private async Task ConfirmEditGroupAsync()
     {
         if (string.IsNullOrWhiteSpace(NewGroupName)) return;
-        
+
         IsBusy = true;
         IsEditGroupPopupVisible = false;
-        
+
         var request = new EditGroupInfoRequest { GroupId = GroupId, NewName = NewGroupName.Trim() };
         var success = await _groupService.EditGroupInfoAsync(request);
-        
+
         if (success)
         {
             GroupName = request.NewName;
@@ -236,12 +237,12 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     private async Task ShowManageMembersPopupAsync()
     {
         IsBusy = true;
-        
+
         var friendsTask = _friendService.GetUserFriendListAsync();
         var membersTask = _groupMemberService.GetAllActiveGroupMembersAsync(GroupId);
-        
+
         await Task.WhenAll(friendsTask, membersTask);
-        
+
         FriendsList.Clear();
         if (friendsTask.Result != null)
         {
@@ -253,7 +254,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
                 }
             }
         }
-        
+
         ActiveMembersList.Clear();
         if (membersTask.Result != null)
         {
@@ -262,7 +263,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
                 ActiveMembersList.Add(member);
             }
         }
-        
+
         IsBusy = false;
         IsManageMembersPopupVisible = true;
     }
@@ -274,14 +275,14 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     private async Task InviteUserBySearchAsync()
     {
         if (string.IsNullOrWhiteSpace(InviteSearchText)) return;
-        
+
         IsBusy = true;
         var isEmail = InviteSearchText.Contains('@');
         var searchResponse = await _friendService.SearchUserAsync(
             isEmail ? null : InviteSearchText.Trim(),
             isEmail ? InviteSearchText.Trim() : null,
             null);
-            
+
         if (searchResponse == null)
         {
             IsBusy = false;
@@ -291,7 +292,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
 
         await ExecuteInviteAsync(searchResponse.Id);
     }
-    
+
     [RelayCommand]
     private async Task InviteFriendAsync(FriendListResponse friend)
     {
@@ -299,7 +300,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         IsBusy = true;
         await ExecuteInviteAsync(friend.FriendId);
     }
-    
+
     private async Task ExecuteInviteAsync(int targetUserId)
     {
         var request = new GroupInviteUserRequest
@@ -308,13 +309,13 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
             UserId = targetUserId,
             Role = GroupMemberRole.Member
         };
-        
+
         var (success, errorMsg) = await _groupMemberService.InviteUserAsync(request);
         if (success)
         {
             InviteSearchText = string.Empty;
             await ShowAlertAsync("Sukces", "Wysłano zaproszenie.", "OK");
-            
+
             var invitedFriend = FriendsList.FirstOrDefault(f => f.FriendId == targetUserId);
             if (invitedFriend != null)
             {
@@ -333,15 +334,15 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     {
         if (UserRole != "Owner") return;
         if (member.UserId == _currentUserId) return;
-        
+
         var newRole = member.Role == GroupMemberRole.Admin ? GroupMemberRole.Member : GroupMemberRole.Admin;
-        
+
         bool confirm = await ShowAlertAsync("Zmień rolę", $"Czy chcesz zmienić rolę {member.FullName} na {newRole}?", "Tak", "Anuluj");
         if (!confirm) return;
-        
+
         IsBusy = true;
         var success = await _groupMemberService.UpdateRoleAsync(new GroupMemberUpdateRequest { GroupId = GroupId, TargetUserId = member.UserId, NewRole = newRole });
-        if (success) 
+        if (success)
         {
             member.Role = newRole;
             // Force property change to update UI if it was ObservableObject, but it's not. Re-fetching active members is safer.
@@ -360,13 +361,13 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     {
         if (!IsAdminOrFounder) return;
         if (member.UserId == _currentUserId) return;
-        
+
         bool confirm = await ShowAlertAsync("Wyrzuć członka", $"Czy na pewno chcesz wyrzucić {member.FullName} z grupy?", "Tak", "Anuluj");
         if (!confirm) return;
-        
+
         IsBusy = true;
         var success = await _groupMemberService.KickUserFromGroupAsync(GroupId, member.UserId);
-        if (success) 
+        if (success)
         {
             ActiveMembersList.Remove(member);
             await LoadDataAsync();

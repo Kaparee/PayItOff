@@ -511,7 +511,7 @@ public partial class WalletViewModel : PopupViewModelBase
             }
             catch (Exception ex)
             {
-                await ShowAlertAsync("Błąd", "Nie udało się pobrać szczegółów wydatku.", "OK");
+                await ShowAlertAsync("Błąd", "Nie udało się pobrać szczegółów wydatku."+ ex, "OK");
                 IsBusy = false;
                 return;
             }
@@ -525,8 +525,8 @@ public partial class WalletViewModel : PopupViewModelBase
     private void CloseTransactionDetailsPopup()
     {
         IsTransactionDetailsPopupVisible = false;
-        SelectedTransactionDetails = null;
-        SelectedExpenseDetails = null;
+        // Do not set details to null here to prevent MAUI BindableLayout 0-height collapsing bug
+        // which forces ScrollViews to jump on Windows when the popup is reopened.
     }
 
     [RelayCommand]

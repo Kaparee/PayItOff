@@ -35,6 +35,7 @@ namespace PayItOff.MauiClient
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<ExpenseService>();
             builder.Services.AddScoped<GroupMemberService>();
+            builder.Services.AddScoped<NotificationService>();
 
             // ViewModels
             builder.Services.AddTransient<RegisterViewModel>();
@@ -119,6 +120,13 @@ namespace PayItOff.MauiClient
                     h.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
                     h.PlatformView.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
                 };
+#endif
+            });
+
+            Microsoft.Maui.Handlers.ScrollViewHandler.Mapper.AppendToMapping("PreventScrollOnFocus", (h, v) =>
+            {
+#if WINDOWS
+                h.PlatformView.BringIntoViewOnFocusChange = false;
 #endif
             });
 

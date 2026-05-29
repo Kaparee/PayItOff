@@ -1,5 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PayItOff.MauiClient.Models;
 using PayItOff.MauiClient.Services;
 using PayItOff.Shared.Responses;
 using System.Collections.ObjectModel;
@@ -21,6 +22,7 @@ public partial class MainViewModel : BaseViewModel
 {
     private readonly SettlementService _settlementService;
     private readonly GroupService _groupService;
+    private readonly NotificationService _notificationService;
 
     [ObservableProperty]
     public partial ObservableCollection<DebtDisplayItem> Incomes { get; set; } = new();
@@ -30,6 +32,9 @@ public partial class MainViewModel : BaseViewModel
 
     [ObservableProperty]
     public partial ObservableCollection<ActiveGroupsDisplayResponse> ActiveGroups { get; set; } = new();
+
+    [ObservableProperty]
+    public partial ObservableCollection<NotificationDisplayItem> LastNotifications { get; set; } = new();
 
     [ObservableProperty]
     public partial decimal TotalIncomes { get; set; }
@@ -46,10 +51,11 @@ public partial class MainViewModel : BaseViewModel
     [ObservableProperty]
     public required partial string CurrentUserEmail { get; set; }
 
-    public MainViewModel(SettlementService settlementService, GroupService groupService)
+    public MainViewModel(SettlementService settlementService, GroupService groupService, NotificationService notificationService)
     {
         _settlementService = settlementService;
         _groupService = groupService;
+        _notificationService = notificationService;
     }
 
     public async Task LoadDashboardDataAsync()
@@ -67,12 +73,14 @@ public partial class MainViewModel : BaseViewModel
             var incTask = _settlementService.GetUserAllIncomesSummaryAsync();
             var expTask = _settlementService.GetUserAllExpensesSummaryAsync();
             var groupsTask = _groupService.Get4ActiveGroups();
+            var notifTask = _notificationService.Get5LastNotification();
 
-            await Task.WhenAll(incTask, expTask, groupsTask);
+            await Task.WhenAll(incTask, expTask, groupsTask, notifTask);
 
             var incResult = await incTask ?? new GlobalSettlementResponse();
             var expResult = await expTask ?? new GlobalSettlementResponse();
             var groupsResult = await groupsTask;
+            var notificationsResult = await notifTask;
 
             Incomes = new ObservableCollection<DebtDisplayItem>(incResult.Items.Select(i => new DebtDisplayItem
             {
@@ -99,6 +107,10 @@ public partial class MainViewModel : BaseViewModel
             TotalExpenses = expResult.TotalAmount;
 
             ActiveGroups = new ObservableCollection<ActiveGroupsDisplayResponse>(groupsResult);
+
+            LastNotifications = new ObservableCollection<NotificationDisplayItem>(
+                (notificationsResult ?? Enumerable.Empty<NotificationResponse>()).Select(NotificationDisplayItem.FromResponse)
+            );
         }
         catch (Exception ex)
         {

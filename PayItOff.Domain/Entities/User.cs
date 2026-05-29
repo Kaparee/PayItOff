@@ -11,6 +11,7 @@ namespace PayItOff.Domain.Entities
         public string? AvatarUrl { get; private set; }
         public string? PhoneNumber { get; private set; }
         public string? IBAN { get; private set; }
+        public string FullName => $"{Name} {Surname}";
         public NotificationsSettings NotificationsSettings { get; private set; } = null!;
         public string? VerificationToken { get; private set; }
         public DateTime? VerifiedAt { get; private set; }
@@ -150,5 +151,5 @@ namespace PayItOff.Domain.Entities
             UpdatedAt = DateTime.UtcNow;
         }
     }
-    public record NotificationsSettings(bool ReceiveEmail = true, bool DailySummary = false, bool NotifyOnGroupJoined = true, bool NotifyOnExpenseAdded = true, bool NotifyOnGroupRemoved = true, bool NotifyOnFriendRemoved = true, bool NotifyOnExpenseChanged = true, bool NotifyOnTransferConfirmed = true);
+    public record NotificationsSettings(bool DailySummary = false, bool NotifyOnGroupJoined = true, bool NotifyOnExpenseAdded = true, bool NotifyOnGroupRemoved = true, bool NotifyOnFriendRemoved = true, bool NotifyOnExpenseChanged = true, bool NotifyOnTransferConfirmed = true);
 }

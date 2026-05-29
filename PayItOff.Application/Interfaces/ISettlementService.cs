@@ -1,4 +1,4 @@
-﻿using PayItOff.Shared.Requests;
+using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
 
 namespace PayItOff.Application.Interfaces
@@ -14,6 +14,8 @@ namespace PayItOff.Application.Interfaces
         Task<PayNetDebtResponse> CreateNetDebtSettlementsAsync(int userId, PayNetDebtRequest request);
         Task<bool> AcceptSettlementAsync(int userId, int settlementId);
         Task<bool> RejectSettlementAsync(int userId, int settlementId);
+        Task<bool> AcceptNetSettlementsAsync(int receiverId, int senderId);
+        Task<bool> RejectNetSettlementsAsync(int receiverId, int senderId);
         Task SendDebtReminderAsync(int creditorUserId, RemindDebtRequest request);
         Task CompensateMutualDebtsAsync(int userId, CompensateDebtsRequest request);
     }

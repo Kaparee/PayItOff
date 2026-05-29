@@ -266,7 +266,7 @@ public partial class FriendsViewModel : BaseViewModel
             var lowerQuery = SearchQuery.ToLowerInvariant();
             filteredByStatus = filteredByStatus.Where(f =>
                 f.FullName.ToLowerInvariant().Contains(lowerQuery) ||
-                f.Nickname.ToLowerInvariant().Contains(lowerQuery));
+                f.Nickname!.ToLowerInvariant().Contains(lowerQuery));
         }
 
         foreach (var friend in filteredByStatus)

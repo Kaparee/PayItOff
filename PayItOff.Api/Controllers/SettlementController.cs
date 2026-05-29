@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PayItOff.Application.Interfaces;
 using PayItOff.Shared.Requests;
@@ -78,6 +78,20 @@ public class SettlementController : ControllerBase
     public async Task<IActionResult> Reject(int id)
     {
         await _settlementService.RejectSettlementAsync(GetUserId(), id);
+        return Ok();
+    }
+
+    [HttpPost("accept-net/{senderId}")]
+    public async Task<IActionResult> AcceptNet(int senderId)
+    {
+        await _settlementService.AcceptNetSettlementsAsync(GetUserId(), senderId);
+        return Ok();
+    }
+
+    [HttpPost("reject-net/{senderId}")]
+    public async Task<IActionResult> RejectNet(int senderId)
+    {
+        await _settlementService.RejectNetSettlementsAsync(GetUserId(), senderId);
         return Ok();
     }
 

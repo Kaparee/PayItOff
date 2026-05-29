@@ -45,6 +45,7 @@ public class ExceptionMiddleware
                     FriendInviteNotFoundException => (int)HttpStatusCode.NotFound,  // 404
                     InvitationNotFoundException => (int)HttpStatusCode.NotFound,  // 404
                     GroupMemberNotFoundException => (int)HttpStatusCode.NotFound,  // 404
+                    NotificationNotFoundException => (int)HttpStatusCode.NotFound,  // 404
                     SettlementOperationException => (int)HttpStatusCode.BadRequest,  // 400
                     UserAlreadyExistsException => (int)HttpStatusCode.Conflict,  // 409
                     FriendInvitationAlreadyExistsException => (int)HttpStatusCode.Conflict,  //409

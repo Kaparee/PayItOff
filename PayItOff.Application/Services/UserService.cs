@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using PayItOff.Application.Helpers;
 using PayItOff.Application.Interfaces;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Exceptions;
@@ -105,7 +106,7 @@ public class UserService : IUserService
         return new UserInformationResponse
         {
             Id = user.Id,
-            AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, user.AvatarUrl),
+            AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, user.AvatarUrl),
             Name = user.Name,
             Surname = user.Surname,
             Email = user.Email,
@@ -113,7 +114,6 @@ public class UserService : IUserService
             PhoneNumber = user.PhoneNumber,
             IBAN = user.IBAN,
             Notifications = new UserNotificationSettingsResponse(
-                user.NotificationsSettings.ReceiveEmail,
                 user.NotificationsSettings.DailySummary,
                 user.NotificationsSettings.NotifyOnGroupJoined,
                 user.NotificationsSettings.NotifyOnExpenseAdded,
@@ -131,7 +131,6 @@ public class UserService : IUserService
         if (user is null) { throw new UserNotFoundException(); }
 
         var newSettings = new NotificationsSettings(
-            request.Notifications.ReceiveEmail,
             request.Notifications.DailySummary,
             request.Notifications.NotifyOnGroupJoined,
             request.Notifications.NotifyOnExpenseAdded,

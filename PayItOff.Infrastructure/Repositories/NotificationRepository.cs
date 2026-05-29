@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Enums;
 using PayItOff.Domain.Interfaces;
@@ -27,9 +28,9 @@ public class NotificationRepository : INotificationRepository
         return Task.CompletedTask;
     }
 
-    public Task<bool> HasDebtReminderSinceAsync(int creditorId, int debtorId, int groupDebtId, DateTime sinceUtc)
+    public async Task<bool> HasDebtReminderSinceAsync(int creditorId, int debtorId, int groupDebtId, DateTime sinceUtc)
     {
-        return _context.Notifications.AnyAsync(n =>
+        return await _context.Notifications.AnyAsync(n =>
             n.ActorId == creditorId
             && n.UserId == debtorId
             && n.EntityType == EntityType.GroupDebts
@@ -37,5 +38,52 @@ public class NotificationRepository : INotificationRepository
             && n.CreatedAt >= sinceUtc);
     }
 
+    public async Task<List<Notification>> GetUserNotificationsAsync(int userId, List<string> filters)
+    {
 
+        IQueryable<Notification> notifications = _context.Notifications
+            .Include(n => n.Actor);
+        notifications = notifications.Where(x => x.UserId == userId && x.DeletedAt == null);
+
+        if (filters != null)
+        {
+            if (filters.Contains("Unread"))
+            {
+                notifications = notifications.Where(x => x.ReadAt == null);
+            }
+            if (filters.Contains("NeedAction"))
+            {
+                notifications = notifications.Where(x => x.Type == NotificationType.NeedAction);
+            }
+        }
+
+        return await notifications
+            .OrderBy(x => x.ReadAt == null ? 0 : 1)
+            .ThenByDescending(x => x.CreatedAt)
+            .ToListAsync();
+    }
+
+    public async Task<Notification?> GetUserNotificationByIdAsync(int userId, int notificationId)
+    {
+        return await _context.Notifications
+            .Where(x => x.UserId == userId && x.Id == notificationId && x.DeletedAt == null)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<List<Notification>> GetLast5UserNotificationsAsync(int userId)
+    {
+        return await _context.Notifications
+            .Include(n => n.Actor)
+            .Where(x => x.UserId == userId && x.DeletedAt == null)
+            .OrderByDescending(x => x.CreatedAt)
+            .Take(5)
+            .ToListAsync();
+    }
+
+    public async Task<Notification?> GetActionNotificationAsync(int userId, int entityId, EntityType entityType)
+    {
+        return await _context.Notifications
+            .Where(n => n.UserId == userId && n.EntityId == entityId && n.EntityType == entityType && n.Type == NotificationType.NeedAction && n.DeletedAt == null)
+            .FirstOrDefaultAsync();
+    }
 }

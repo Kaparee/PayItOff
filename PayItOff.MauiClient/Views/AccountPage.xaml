@@ -7,9 +7,9 @@
              Shell.NavBarIsVisible="False">
 
     <Grid>
-        
+
         <Grid ColumnDefinitions="{OnIdiom Phone='0, *', Default='360, *'}">
-            
+
             <controls:SidebarMenu Grid.Column="0"
                                   ActiveTab="Account"
                                   IsVisible="{OnIdiom Phone=False, Default=True}" />
@@ -27,10 +27,10 @@
 
                     <!-- Siatka główna (dwie kolumny) -->
                     <Grid Grid.Row="1" ColumnDefinitions="*, 1, *" ColumnSpacing="30" RowDefinitions="Auto" Margin="0,20,0,0">
-                        
+
                         <!-- LEWA KOLUMNA: profil -->
                         <VerticalStackLayout Grid.Column="0" Spacing="20" HorizontalOptions="Center" MaximumWidthRequest="450">
-                            
+
                             <!-- Awatar -->
                             <Border StrokeShape="RoundRectangle 60" WidthRequest="120" HeightRequest="120" BackgroundColor="White" StrokeThickness="0" HorizontalOptions="Center">
                                 <Grid>
@@ -52,14 +52,14 @@
                                     <Label Text="{Binding Username}" TextColor="White" FontSize="14" />
                                 </Border>
                             </VerticalStackLayout>
-                            
+
                             <VerticalStackLayout Spacing="5">
                                 <Label Text="Imię" TextColor="White" FontSize="12" />
                                 <Border BackgroundColor="{StaticResource SurfaceDark}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="15,10">
                                     <Label Text="{Binding FirstName}" TextColor="White" FontSize="14" />
                                 </Border>
                             </VerticalStackLayout>
-                            
+
                             <VerticalStackLayout Spacing="5">
                                 <Label Text="Nazwisko" TextColor="White" FontSize="12" />
                                 <Border BackgroundColor="{StaticResource SurfaceDark}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="15,10">
@@ -98,11 +98,6 @@
                         <!-- PRAWA KOLUMNA: powiadomienia -->
                         <VerticalStackLayout Grid.Column="2" Spacing="25" Margin="20,0,0,0">
                             <Label Text="Powiadomienia" FontSize="26" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,20"/>
-                            
-                            <Grid ColumnDefinitions="*, Auto">
-                                <Label Grid.Column="0" Text="Chcę otrzymywać powiadomienia także na adres email" TextColor="White" FontSize="12" VerticalOptions="Center" />
-                                <Switch Grid.Column="1" IsToggled="{Binding ReceiveEmail}" OnColor="#10B981" ThumbColor="White" />
-                            </Grid>
 
                             <Grid ColumnDefinitions="*, Auto">
                                 <Label Grid.Column="0" Text="Chcę otrzymywać zbiorcze informacje podsumowujące cały dzień (zamiast pojedynczych informacji)" TextColor="White" FontSize="12" VerticalOptions="Center" MaxLines="2" LineBreakMode="WordWrap"/>
@@ -139,7 +134,7 @@
                                 <Switch Grid.Column="1" IsToggled="{Binding NotifyOnTransferConfirmed}" OnColor="#10B981" ThumbColor="White" />
                             </Grid>
                         </VerticalStackLayout>
-                        
+
                     </Grid>
 
                 </Grid>

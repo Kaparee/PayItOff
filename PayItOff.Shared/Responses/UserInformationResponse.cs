@@ -1,4 +1,4 @@
-﻿namespace PayItOff.Shared.Responses
+namespace PayItOff.Shared.Responses
 {
     public class UserInformationResponse
     {
@@ -14,7 +14,6 @@
     }
 
     public record UserNotificationSettingsResponse(
-        bool ReceiveEmail,
         bool DailySummary,
         bool NotifyOnGroupJoined,
         bool NotifyOnExpenseAdded,

@@ -5,7 +5,7 @@ namespace PayItOff.Application.Interfaces
 {
     public interface IGroupMemberService
     {
-        Task InviteUserAsync(GroupInviteUserRequest request);
+        Task InviteUserAsync(int userId, GroupInviteUserRequest request);
         Task AcceptInviteAsync(int userId, int invitationId);
         Task DeclineInviteAsync(int userId, int invitationId);
         Task UpdateRoleAsync(int userId, GroupMemberUpdateRequest request);

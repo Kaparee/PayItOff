@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Configuration;
+using PayItOff.Application.Helpers;
 using PayItOff.Application.Interfaces;
 using PayItOff.Domain.DomainServices;
 using PayItOff.Domain.Entities;
+using PayItOff.Domain.Enums;
 using PayItOff.Domain.Exceptions;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Shared.Requests;
@@ -17,8 +19,9 @@ namespace PayItOff.Application.Services
         private readonly IExpenseRepository _expenseRepository;
         private readonly IGroupDebtRepository _groupDebtRepository;
         private readonly IFileService _fileService;
+        private readonly INotificationService _notificationService;
 
-        public ExpenseService(IConfiguration configuration, IUnitOfWork unitOfWork, IGroupRepository groupRepository, IUserRepository userRepository, IExpenseRepository expenseRepository, IGroupDebtRepository groupDebtRepository, IFileService fileService)
+        public ExpenseService(IConfiguration configuration, IUnitOfWork unitOfWork, IGroupRepository groupRepository, IUserRepository userRepository, IExpenseRepository expenseRepository, IGroupDebtRepository groupDebtRepository, IFileService fileService, INotificationService notificationService)
         {
             _configuration = configuration;
             _unitOfWork = unitOfWork;
@@ -27,6 +30,7 @@ namespace PayItOff.Application.Services
             _expenseRepository = expenseRepository;
             _groupDebtRepository = groupDebtRepository;
             _fileService = fileService;
+            _notificationService = notificationService;
         }
 
         public async Task CreateExpenseBatch(int userId, CreateExpenseBatchRequest request)
@@ -47,10 +51,10 @@ namespace PayItOff.Application.Services
 
                 var usersDict = await _userRepository.GetUsersByIdsAsync(allUserIds);
 
-                var globalDebts = new Dictionary<(int DebtorId, int CreditorId), decimal>();
-
                 foreach (var subDto in request.Expenses)
                 {
+                    var globalDebts = new Dictionary<(int DebtorId, int CreditorId), decimal>();
+
                     if (!usersDict.ContainsKey(subDto.PayerId)) { throw new UserNotFoundException(); }
                     var payer = usersDict[subDto.PayerId];
 
@@ -104,22 +108,27 @@ namespace PayItOff.Application.Services
 
                     expense.RecalculateTotal();
                     await _expenseRepository.AddAsync(expense);
+                    await _unitOfWork.SaveChangesAsync();
+
+                    foreach (var debt in globalDebts)
+                    {
+                        if (debt.Key.DebtorId == debt.Key.CreditorId) continue;
+                        if (!usersDict.ContainsKey(debt.Key.DebtorId)) { throw new UserNotFoundException(); }
+                        var debtor = usersDict[debt.Key.DebtorId];
+                        if (!usersDict.ContainsKey(debt.Key.CreditorId)) { throw new UserNotFoundException(); }
+                        var creditor = usersDict[debt.Key.CreditorId];
+                        await _groupDebtRepository.ApplyDebtChangeAsync(group, debtor, creditor, debt.Value);
+
+                        if (debtor.NotificationsSettings.NotifyOnExpenseAdded == true)
+                        {
+                            await _notificationService.CreateNotificationAsync(debtor.Id, creator.Id, NotificationType.Adding, $"{creator.FullName} dodał nowy wydatek: {expense.Name} w grupie: '{group.Name}'. Musisz zapłacić {creditor.FullName}: {debt.Value} zł", expense.Id, EntityType.Expenses);
+                        }
+                    }
                 }
-                
+
                 group.UpdateTimestamp();
                 await _groupRepository.UpdateAsync(group);
                 await _unitOfWork.SaveChangesAsync();
-                
-                foreach (var debt in globalDebts)
-                {
-                    if (debt.Key.DebtorId == debt.Key.CreditorId) continue;
-                    if (!usersDict.ContainsKey(debt.Key.DebtorId)) { throw new UserNotFoundException(); }
-                    var debtor = usersDict[debt.Key.DebtorId];
-                    if (!usersDict.ContainsKey(debt.Key.CreditorId)) { throw new UserNotFoundException(); }
-                    var creditor = usersDict[debt.Key.CreditorId];
-                    await _groupDebtRepository.ApplyDebtChangeAsync(group, debtor, creditor, debt.Value);
-                }
-
                 await _unitOfWork.CommitAsync();
             }
             catch
@@ -149,6 +158,8 @@ namespace PayItOff.Application.Services
 
             if (!isAuthorized) throw new InvalidUserRoleException();
 
+            var baseUrl = _configuration["AppUrls:BackendUrl"];
+
             var response = new PayItOff.Shared.Responses.ExpenseDetailsResponse
             {
                 ExpenseId = expense.Id,
@@ -156,7 +167,7 @@ namespace PayItOff.Application.Services
                 TotalAmount = expense.TotalAmount,
                 Date = expense.PurchasedAt,
                 PayerName = $"{expense.Payer.Name} {expense.Payer.Surname}",
-                PayerAvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(_configuration["AppUrls:BackendUrl"], expense.Payer.AvatarUrl),
+                PayerAvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, expense.Payer.AvatarUrl),
                 PayerPhoneNumber = expense.Payer.PhoneNumber,
                 PayerIBAN = expense.Payer.IBAN
             };
@@ -172,7 +183,7 @@ namespace PayItOff.Application.Services
                     {
                         UserId = split.UserId,
                         FullName = $"{split.User.Name} {split.User.Surname}",
-                        AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(_configuration["AppUrls:BackendUrl"], split.User.AvatarUrl),
+                        AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, split.User.AvatarUrl),
                         OwedAmount = 0
                     };
                 }
@@ -211,7 +222,7 @@ namespace PayItOff.Application.Services
             var expense = await _expenseRepository.GetExpenseWithSplitsAsync(expenseId);
             if (expense == null) throw new ExpenseNotFoundException();
 
-            var item = expense.Items.FirstOrDefault(i => i.Id == itemId) 
+            var item = expense.Items.FirstOrDefault(i => i.Id == itemId)
                        ?? expense.Groups.SelectMany(g => g.Items).FirstOrDefault(i => i.Id == itemId);
             if (item == null) throw new ExpenseNotFoundException();
 
@@ -221,6 +232,8 @@ namespace PayItOff.Application.Services
 
             if (!isAuthorized) throw new InvalidUserRoleException();
 
+            var baseUrl = _configuration["AppUrls:BackendUrl"];
+
             var response = new PayItOff.Shared.Responses.ExpenseDetailsResponse
             {
                 ExpenseId = expense.Id,
@@ -228,7 +241,7 @@ namespace PayItOff.Application.Services
                 TotalAmount = item.TotalPrice,
                 Date = expense.PurchasedAt,
                 PayerName = $"{expense.Payer.Name} {expense.Payer.Surname}",
-                PayerAvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(_configuration["AppUrls:BackendUrl"], expense.Payer.AvatarUrl),
+                PayerAvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, expense.Payer.AvatarUrl),
                 PayerPhoneNumber = expense.Payer.PhoneNumber,
                 PayerIBAN = expense.Payer.IBAN,
                 Category = item.Category
@@ -244,7 +257,7 @@ namespace PayItOff.Application.Services
                     {
                         UserId = split.UserId,
                         FullName = $"{split.User.Name} {split.User.Surname}",
-                        AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(_configuration["AppUrls:BackendUrl"], split.User.AvatarUrl),
+                        AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, split.User.AvatarUrl),
                         OwedAmount = 0
                     };
                 }

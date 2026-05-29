@@ -20,17 +20,13 @@ namespace PayItOff.Domain.Entities
 
         protected Notification() { }
 
-        private Notification(User user, User actor, NotificationType type, string body, NotificationStatus status, int entityId, EntityType entityType)
+        private Notification(int userId, int actorId, NotificationType type, string body, NotificationStatus status, int entityId, EntityType entityType)
         {
             if (entityId == 0) { throw new InvalidOperationException("Nie można przypisać do Powiadomien id = 0"); }
-            if (user == null) { throw new ArgumentNullException(nameof(user), "Error przy user"); }
-            if (actor == null) { throw new ArgumentNullException(nameof(actor), "Error przy actor"); }
             if (string.IsNullOrWhiteSpace(body)) { throw new ArgumentException(nameof(body)); }
 
-            User = user;
-            Actor = actor;
-            UserId = user.Id;
-            ActorId = actor.Id;
+            UserId = userId;
+            ActorId = actorId;
             Type = type;
             Body = body;
             Status = status;
@@ -39,26 +35,34 @@ namespace PayItOff.Domain.Entities
             CreatedAt = DateTime.UtcNow;
         }
 
-        public static Notification Create(User user, User actor, NotificationType type, string body, int entityId, EntityType entityType)
+        public static Notification Create(int userId, int actorId, NotificationType type, string body, int entityId, EntityType entityType)
         {
-            return new Notification(user, actor, type, body, NotificationStatus.Unread, entityId, entityType);
+            return new Notification(userId, actorId, type, body, NotificationStatus.Unread, entityId, entityType);
         }
 
         public void MarkAsRead()
         {
-            if (Status == NotificationStatus.Unread)
+            Status = NotificationStatus.Read;
+            if (ReadAt == null)
             {
-                Status = NotificationStatus.Read;
                 ReadAt = DateTime.UtcNow;
             }
         }
 
         public void Delete()
         {
-            if (Type != NotificationType.NeedAction)
-            {
-                DeletedAt = DateTime.UtcNow;
-            }
+            DeletedAt = DateTime.UtcNow;
+
+        }
+
+        public void ChangeTypeToNormal()
+        {
+            Type = NotificationType.Normal;
+        }
+
+        public void AppendToBody(string text)
+        {
+            Body += text;
         }
     }
 }

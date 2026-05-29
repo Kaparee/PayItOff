@@ -196,6 +196,7 @@
         <Setter Property="Padding" Value="24" />
         <Setter Property="Margin" Value="24" />
         <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="HorizontalOptions" Value="Center" />
     </Style>
 
 </ResourceDictionary>

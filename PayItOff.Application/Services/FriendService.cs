@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Configuration;
+using PayItOff.Application.Helpers;
 using PayItOff.Application.Interfaces;
 using PayItOff.Domain.Entities;
+using PayItOff.Domain.Enums;
 using PayItOff.Domain.Exceptions;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Shared.Requests;
@@ -14,13 +16,17 @@ public class FriendService : IFriendService
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IConfiguration _configuration;
+    private readonly INotificationService _notificationService;
+    private readonly IEmailService _emailService;
 
-    public FriendService(IFriendRepository friendRepository, IUserRepository userRepository, IUnitOfWork unitOfWork, IConfiguration configuration)
+    public FriendService(IFriendRepository friendRepository, IUserRepository userRepository, IUnitOfWork unitOfWork, IConfiguration configuration, INotificationService notificationService, IEmailService emailService)
     {
         _friendRepository = friendRepository;
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _configuration = configuration;
+        _notificationService = notificationService;
+        _emailService = emailService;
     }
 
     public async Task<List<FriendListResponse>> GetUserFriendListAsync(int userId)
@@ -32,7 +38,7 @@ public class FriendService : IFriendService
         {
             FriendId = data.Friend!.Id,
             InviteId = data.InviteId,
-            AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, data.Friend!.AvatarUrl),
+            AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, data.Friend!.AvatarUrl),
             Name = data.Friend.Name,
             Surname = data.Friend.Surname,
             Nickname = data.Friend.Nickname,
@@ -45,7 +51,7 @@ public class FriendService : IFriendService
                 {
                     GroupId = group.GroupId,
                     Name = group.Name,
-                    AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildGroupAvatarUrl(baseUrl, group.AvatarUrl)
+                    AvatarUrl = AvatarUrlHelper.BuildGroupAvatarUrl(baseUrl!, group.AvatarUrl)
                 })
                 .ToList()
         }).ToList();
@@ -85,9 +91,12 @@ public class FriendService : IFriendService
 
         var existingFriendship = await _friendRepository.GetUsersFriendshipAsync(userId, friend.Id);
 
+        int entityId;
+
         if (existingFriendship is not null)
         {
-            existingFriendship.ReInvite();
+            existingFriendship.ReInvite(user, friend);
+            entityId = existingFriendship.Id;
             await _friendRepository.UpdateAsync(existingFriendship);
         }
         else
@@ -97,7 +106,11 @@ public class FriendService : IFriendService
                 friend
             );
             await _friendRepository.AddAsync(invite);
+            await _unitOfWork.SaveChangesAsync();
+            entityId = invite.Id;
         }
+
+        await _notificationService.CreateNotificationAsync(friend.Id, userId, NotificationType.NeedAction, $"{user.FullName} wysłał/wysłała Ci zaproszenie do znajomych.", entityId, EntityType.Friends);
 
         await _unitOfWork.SaveChangesAsync();
     }
@@ -112,6 +125,23 @@ public class FriendService : IFriendService
 
         await _friendRepository.UpdateAsync(invitation);
 
+        int otherId;
+        if (invitation.InviterId == userId)
+        {
+            otherId = invitation.ReceiverId;
+        }
+        else
+        {
+            otherId = invitation.InviterId;
+        }
+
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user == null) { throw new UserNotFoundException(); }
+
+        await _notificationService.CreateNotificationAsync(otherId, userId, NotificationType.Adding, $"Użytkownik {user.FullName} przyjął twoje zaproszenie do listy znajomych", invitation.Id, EntityType.Friends);
+
+        await _notificationService.ResolveActionNotificationAsync(userId, invitation.Id, EntityType.Friends, true);
+
         await _unitOfWork.SaveChangesAsync();
     }
 
@@ -124,6 +154,23 @@ public class FriendService : IFriendService
 
         await _friendRepository.UpdateAsync(invitation);
 
+        int otherId;
+        if (invitation.InviterId == userId)
+        {
+            otherId = invitation.ReceiverId;
+        }
+        else
+        {
+            otherId = invitation.InviterId;
+        }
+
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user == null) { throw new UserNotFoundException(); }
+
+        await _notificationService.CreateNotificationAsync(otherId, userId, NotificationType.Deleting, $"Użytkownik {user.FullName} odrzucił twoje zaproszenie do listy znajomych", invitation.Id, EntityType.Friends);
+
+        await _notificationService.ResolveActionNotificationAsync(userId, invitation.Id, EntityType.Friends, false);
+
         await _unitOfWork.SaveChangesAsync();
     }
 
@@ -135,6 +182,27 @@ public class FriendService : IFriendService
         invitation.Remove(userId);
 
         await _friendRepository.UpdateAsync(invitation);
+
+        int otherId;
+        if (invitation.InviterId == userId)
+        {
+            otherId = invitation.ReceiverId;
+        }
+        else
+        {
+            otherId = invitation.InviterId;
+        }
+
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user == null) { throw new UserNotFoundException(); }
+
+        var otherUser = await _userRepository.GetUserByIdAsync(otherId);
+        if(otherUser == null) { throw new UserNotFoundException(); }
+
+        if (otherUser.NotificationsSettings.NotifyOnFriendRemoved == true)
+        {
+            await _notificationService.CreateNotificationAsync(otherId, userId, NotificationType.Deleting, $"Użytkownik {user.FullName} usunął Cię z listy znajomych", invitation.Id, EntityType.Friends);
+        }
 
         await _unitOfWork.SaveChangesAsync();
 
@@ -155,7 +223,7 @@ public class FriendService : IFriendService
             {
                 InvitationId = x.Id,
                 FriendId = targetUser.Id,
-                AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, targetUser.AvatarUrl),
+                AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, targetUser.AvatarUrl),
                 Name = targetUser.Name,
                 Surname = targetUser.Surname,
                 Nickname = targetUser.Nickname,
@@ -188,7 +256,7 @@ public class FriendService : IFriendService
         return new SearchUserResponse
         {
             Id = friend.Id,
-            AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, friend.AvatarUrl),
+            AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, friend.AvatarUrl),
             Name = friend.Name,
             Surname = friend.Surname,
             Nickname = friend.Nickname

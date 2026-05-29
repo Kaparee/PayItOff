@@ -34,7 +34,7 @@ public class GroupMemberController : ControllerBase
     [HttpPost("invite")]
     public async Task<IActionResult> Invite([FromBody] GroupInviteUserRequest request)
     {
-        await _groupMemberService.InviteUserAsync(request);
+        await _groupMemberService.InviteUserAsync(GetUserId(), request);
         return Ok();
     }
 

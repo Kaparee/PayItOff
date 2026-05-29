@@ -2,6 +2,7 @@ using FluentValidation;
 using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using PayItOff.Application.Helpers;
 using PayItOff.Application.Interfaces;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Exceptions;
@@ -88,7 +89,7 @@ public class GroupService : IGroupService
             {
                 Id = groupId,
                 Name = member.Group.Name,
-                AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildGroupAvatarUrl(baseUrl, member.Group.AvatarUrl),
+                AvatarUrl = AvatarUrlHelper.BuildGroupAvatarUrl(baseUrl!, member.Group.AvatarUrl),
                 UpdatedAt = member.Group.UpdatedAt,
                 IsFavorite = member.IsFavorite,
                 Income = income,
@@ -125,7 +126,7 @@ public class GroupService : IGroupService
             {
                 Id = group.GroupId,
                 Name = group.Group!.Name,
-                AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildGroupAvatarUrl(baseUrl, group.Group.AvatarUrl),
+                AvatarUrl = AvatarUrlHelper.BuildGroupAvatarUrl(baseUrl!, group.Group.AvatarUrl),
                 LastUpdate = lastUpdateText
             };
         }).ToList();
@@ -210,7 +211,7 @@ public class GroupService : IGroupService
                 .Select(g => new GroupMemberDebtLineDto
                 {
                     CounterpartyName = ShortPersonLabel(g.First().Payer),
-                    AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, g.First().Payer.AvatarUrl),
+                    AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, g.First().Payer.AvatarUrl),
                     Amount = g.Sum(x => x.Amount),
                     MemberOwes = true
                 })
@@ -221,7 +222,7 @@ public class GroupService : IGroupService
             {
                 UserId = member.UserId,
                 FullName = $"{user.Name} {user.Surname}",
-                AvatarUrl = PayItOff.Application.Helpers.AvatarUrlHelper.BuildUserAvatarUrl(baseUrl, user.AvatarUrl),
+                AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, user.AvatarUrl),
                 OverallBalance = overallBalance,
                 IsCurrentUser = member.UserId == userId,
                 IsCreditorToCurrentUser = isCreditorToCurrent,

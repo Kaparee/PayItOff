@@ -6,25 +6,25 @@ namespace PayItOff.MauiClient.Models;
 public partial class ReceiptMemberShare : ObservableObject
 {
     [ObservableProperty]
-    private int _memberId;
+    public partial int MemberId { get; set; }
 
     [ObservableProperty]
-    private string _memberName = string.Empty;
+    public partial string MemberName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string _avatarUrl = string.Empty;
+    public partial string AvatarUrl { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string _itemName = string.Empty;
+    public partial string ItemName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string _payerName = string.Empty;
+    public partial string PayerName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private decimal _owedAmount;
+    public partial decimal OwedAmount { get; set; }
 
     [ObservableProperty]
-    private bool _isRemainderRecipient;
+    public partial bool IsRemainderRecipient { get; set; }
 }
 
 public partial class ReceiptItem : ObservableObject
@@ -32,28 +32,28 @@ public partial class ReceiptItem : ObservableObject
     public string Id { get; } = Guid.NewGuid().ToString();
 
     [ObservableProperty]
-    private string _name = string.Empty;
+    public partial string Name { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private DisplayGroupMember? _payer;
+    public partial DisplayGroupMember? Payer { get; set; }
 
     [ObservableProperty]
-    private decimal _quantity = 1;
+    public partial decimal Quantity { get; set; } = 1;
 
     [ObservableProperty]
-    private decimal _unitPrice = 0;
+    public partial decimal UnitPrice { get; set; } = 0;
 
     [ObservableProperty]
-    private string _categoryId = string.Empty;
+    public partial string CategoryId { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string _itemGroupId = string.Empty;
+    public partial string ItemGroupId { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string _itemGroupName = string.Empty;
+    public partial string ItemGroupName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string _groupColor = "Transparent";
+    public partial string GroupColor { get; set; } = "Transparent";
 
     public decimal TotalPrice => Quantity * UnitPrice;
 
