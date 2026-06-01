@@ -19,6 +19,10 @@ public class NotificationDisplayItem
     public bool IsRead => NotificationStatus == NotificationStatus.Read;
     public bool IsActionRequired => NotificationType == NotificationType.NeedAction;
     public bool IsDailySummary => NotificationType == NotificationType.DailySummary;
+
+    public string DisplayText => IsDailySummary
+        ? "Kliknij, aby zobaczyć podsumowanie powiadomień"
+        : Body;
     
     public double Opacity => IsRead ? 0.6 : 1.0;
     

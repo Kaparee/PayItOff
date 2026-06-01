@@ -1,4 +1,4 @@
-﻿using PayItOff.Domain.Entities;
+using PayItOff.Domain.Entities;
 
 namespace PayItOff.Domain.Interfaces;
 

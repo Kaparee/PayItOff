@@ -128,6 +128,12 @@ public partial class NotificationsViewModel : PopupViewModelBase
         if (item.IsDailySummary)
         {
             SummaryPopupContent = item.Body;
+            SummaryLines = item.Body
+                .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                .Select(l => l.TrimStart('-', ' ').Trim())
+                .Where(l => !string.IsNullOrWhiteSpace(l) && l != "Podsumowanie z dzisiaj:")
+                .ToList();
+            OnPropertyChanged(nameof(SummaryLines));
             IsSummaryPopupVisible = true;
         }
 
@@ -282,10 +288,14 @@ public partial class NotificationsViewModel : PopupViewModelBase
     [ObservableProperty]
     public partial string SummaryPopupContent { get; set; } = string.Empty;
 
+    public List<string> SummaryLines { get; private set; } = new();
+
     [RelayCommand]
     public void CloseSummaryPopup()
     {
         IsSummaryPopupVisible = false;
         SummaryPopupContent = string.Empty;
+        SummaryLines = new();
+        OnPropertyChanged(nameof(SummaryLines));
     }
 }

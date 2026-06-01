@@ -89,7 +89,7 @@
 
                                                     <Image Grid.Column="1" Source="{Binding IconSource}" WidthRequest="26" HeightRequest="26" VerticalOptions="Center" HorizontalOptions="Center" />
 
-                                                    <Label Grid.Column="2" Text="{Binding Body}" TextColor="{Binding TextColor}" FontAttributes="Bold" FontSize="14" VerticalOptions="Center" LineBreakMode="WordWrap" Margin="0,15" />
+                                                    <Label Grid.Column="2" Text="{Binding DisplayText}" TextColor="{Binding TextColor}" FontAttributes="Bold" FontSize="14" VerticalOptions="Center" LineBreakMode="WordWrap" Margin="0,15" />
 
                                                     <Label Grid.Column="3" Text="{Binding TimeDisplay}" TextColor="{StaticResource TextSubtle}" FontSize="12" VerticalOptions="Center" Margin="0,0,15,0" />
 
@@ -188,15 +188,36 @@
         </Grid>
 
         <Grid IsVisible="{Binding IsSummaryPopupVisible}" Style="{StaticResource PopupOverlayStyle}" ZIndex="510">
-            <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="500" MaximumHeightRequest="600">
-                <Grid RowDefinitions="Auto, *, Auto" RowSpacing="20">
-                    <Label Grid.Row="0" Text="Podsumowanie powiadomień" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
-                    
-                    <ScrollView Grid.Row="1">
-                        <Label Text="{Binding SummaryPopupContent}" FontSize="14" TextColor="{StaticResource TextMain}" LineBreakMode="WordWrap" Margin="0,5"/>
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CloseSummaryPopupCommand}" />
+            </Grid.GestureRecognizers>
+            <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="480" MaximumHeightRequest="600">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer />
+                </Border.GestureRecognizers>
+                <Grid RowDefinitions="Auto, Auto, *, Auto" RowSpacing="0">
+                    <Label Grid.Row="0" Text="Podsumowanie dnia" FontSize="22" FontAttributes="Bold"
+                           TextColor="White" HorizontalOptions="Center" Margin="0,0,0,20"/>
+
+                    <Label Grid.Row="1" Text="Powiadomienia z dzisiaj:"
+                           FontSize="13" TextColor="{StaticResource TextSubtle}" Margin="0,0,0,10"/>
+
+                    <ScrollView Grid.Row="2">
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding SummaryLines}" Spacing="8">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <Border BackgroundColor="{StaticResource SurfaceDark}" StrokeShape="RoundRectangle 10"
+                                            StrokeThickness="1" Stroke="{StaticResource Border}" Padding="14,12">
+                                        <Label Text="{Binding .}" FontSize="13" TextColor="{StaticResource TextMain}"
+                                               LineBreakMode="WordWrap"/>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
                     </ScrollView>
 
-                    <Button Grid.Row="2" Text="Zamknij" Command="{Binding CloseSummaryPopupCommand}" Style="{StaticResource PrimaryButtonStyle}" HorizontalOptions="Fill" />
+                    <Button Grid.Row="3" Text="Zamknij" Command="{Binding CloseSummaryPopupCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}" HorizontalOptions="Fill" Margin="0,20,0,0"/>
                 </Grid>
             </Border>
         </Grid>

@@ -47,13 +47,5 @@ namespace PayItOff.Domain.Entities
             _items.Add(item);
         }
 
-        public void RemoveItem(ExpenseItem item)
-        {
-            if (item == null) throw new ArgumentNullException(nameof(item));
-            if (_items.Remove(item))
-            {
-                TotalAmount -= item.TotalPrice;
-            }
-        }
     }
 }

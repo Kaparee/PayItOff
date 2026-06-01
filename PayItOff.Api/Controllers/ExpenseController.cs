@@ -66,13 +66,4 @@ public class ExpenseController : ControllerBase
         await _expenseService.UpdateExpenseItemAsync(GetUserId(), expenseId, itemId, request);
         return Ok();
     }
-
-    [HttpDelete("{expenseId}/item/{itemId}")]
-    [EndpointSummary("Usuwanie pozycji z wydatku")]
-    [EndpointDescription("Usuwa konkretny produkt z paragonu i cofa powiązane z nim zadłużenia.")]
-    public async Task<IActionResult> DeleteExpenseItem(int expenseId, int itemId)
-    {
-        await _expenseService.DeleteExpenseItemAsync(GetUserId(), expenseId, itemId);
-        return Ok();
-    }
 }

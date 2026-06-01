@@ -205,31 +205,6 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     }
 
     [RelayCommand]
-    private async Task DeleteExpenseAsync()
-    {
-        if (SelectedExpenseDetails == null) return;
-
-        bool confirm = await ShowAlertAsync("Usuń wydatek", "Czy na pewno chcesz usunąć tę pozycję z wydatku? Ta operacja jest nieodwracalna.", "Tak, usuń", "Anuluj");
-        if (!confirm) return;
-
-        IsBusy = true;
-        try
-        {
-            await _expenseService.DeleteExpenseItemAsync(SelectedExpenseDetails.ExpenseId, SelectedExpenseDetails.ItemId);
-            IsExpenseDetailsPopupVisible = false;
-            await LoadDataAsync();
-        }
-        catch (Exception)
-        {
-            await ShowAlertAsync("Błąd", "Nie udało się usunąć wydatku.", "OK");
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    [RelayCommand]
     private void ShowEditExpensePopup()
     {
         if (SelectedExpenseDetails == null) return;

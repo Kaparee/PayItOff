@@ -159,4 +159,10 @@ public partial class MainViewModel : BaseViewModel
         if (group == null) return;
         await Shell.Current.GoToAsync($"//GroupDetailsPage?groupId={group.Id}");
     });
+
+    [RelayCommand]
+    private async Task NavigateToNotifications()
+    {
+        await Shell.Current.GoToAsync("//NotificationsPage");
+    }
 }
