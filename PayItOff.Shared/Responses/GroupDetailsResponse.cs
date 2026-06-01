@@ -5,8 +5,9 @@ public class GroupDetailsResponse
     public int GroupId { get; set; }
     public string GroupName { get; set; }
     public string UserRole { get; set; }
-    public List<GroupMemberBalanceDto> Members { get; set; }
-    public List<ExpenseSummaryDto> Expenses { get; set; }
+    public List<GroupMemberBalanceDto> Members { get; set; } = new();
+    public List<ExpenseSummaryDto> Expenses { get; set; } = new();
+    public bool IsArchived { get; set; }
 }
 
 public class GroupMemberDebtLineDto

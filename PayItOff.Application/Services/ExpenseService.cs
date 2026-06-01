@@ -21,7 +21,9 @@ namespace PayItOff.Application.Services
         private readonly IFileService _fileService;
         private readonly INotificationService _notificationService;
 
-        public ExpenseService(IConfiguration configuration, IUnitOfWork unitOfWork, IGroupRepository groupRepository, IUserRepository userRepository, IExpenseRepository expenseRepository, IGroupDebtRepository groupDebtRepository, IFileService fileService, INotificationService notificationService)
+        private readonly IGroupMemberRepository _groupMemberRepository;
+
+        public ExpenseService(IConfiguration configuration, IUnitOfWork unitOfWork, IGroupRepository groupRepository, IUserRepository userRepository, IExpenseRepository expenseRepository, IGroupDebtRepository groupDebtRepository, IFileService fileService, INotificationService notificationService, IGroupMemberRepository groupMemberRepository)
         {
             _configuration = configuration;
             _unitOfWork = unitOfWork;
@@ -31,6 +33,7 @@ namespace PayItOff.Application.Services
             _groupDebtRepository = groupDebtRepository;
             _fileService = fileService;
             _notificationService = notificationService;
+            _groupMemberRepository = groupMemberRepository;
         }
 
         public async Task CreateExpenseBatch(int userId, CreateExpenseBatchRequest request)
@@ -150,7 +153,6 @@ namespace PayItOff.Application.Services
             var expense = await _expenseRepository.GetExpenseWithSplitsAsync(expenseId);
             if (expense == null) throw new ExpenseNotFoundException();
 
-            // Autoryzacja: użytkownik musi być płatnikiem, twórcą lub uczestnikiem wydatku
             var isAuthorized = expense.PayerId == userId
                 || expense.CreatorId == userId
                 || expense.Items.Any(i => i.Splits.Any(s => s.UserId == userId))
@@ -237,6 +239,7 @@ namespace PayItOff.Application.Services
             var response = new PayItOff.Shared.Responses.ExpenseDetailsResponse
             {
                 ExpenseId = expense.Id,
+                ItemId = item.Id,
                 Title = item.Name,
                 TotalAmount = item.TotalPrice,
                 Date = expense.PurchasedAt,
@@ -267,6 +270,180 @@ namespace PayItOff.Application.Services
             response.Participants = userSplits.Values.ToList();
 
             return response;
+        }
+        public async Task UpdateExpenseItemAsync(int userId, int expenseId, int itemId, UpdateExpenseItemRequest request)
+        {
+            var expense = await _expenseRepository.GetExpenseWithSplitsAsync(expenseId);
+            if (expense == null) throw new ExpenseNotFoundException();
+
+            var item = expense.Items.FirstOrDefault(i => i.Id == itemId);
+            ExpenseGroup? parentGroup = null;
+            if (item == null)
+            {
+                foreach (var group in expense.Groups)
+                {
+                    item = group.Items.FirstOrDefault(i => i.Id == itemId);
+                    if (item != null)
+                    {
+                        parentGroup = group;
+                        break;
+                    }
+                }
+            }
+            if (item == null) throw new Exception("Expense item not found");
+
+            var isOwner = await _groupMemberRepository.IsUserOwner(userId, expense.GroupId);
+            var member = await _groupMemberRepository.GetMemberAsync(expense.GroupId, userId);
+            if (!isOwner && member?.Role != GroupMemberRole.Admin && expense.CreatorId != userId)
+                throw new InvalidUserRoleException();
+
+            var oldName = item.Name;
+            var oldSplits = item.Splits.ToList();
+
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var group = await _groupRepository.GetGroupInfoByIdAsync(expense.GroupId);
+                if (group == null) throw new GroupNotFoundException();
+                
+                var allUserIds = item.Splits.Select(s => s.UserId).Concat(new[] { expense.PayerId }).Distinct().ToList();
+                if (request.Splits != null && request.Splits.Any())
+                {
+                    allUserIds = allUserIds.Concat(request.Splits.Select(s => s.UserId)).Distinct().ToList();
+                }
+                var usersDict = await _userRepository.GetUsersByIdsAsync(allUserIds);
+                var payer = usersDict[expense.PayerId];
+
+                if (request.Splits != null && request.Splits.Any())
+                {
+                    foreach (var split in item.Splits)
+                    {
+                        if (split.UserId == payer.Id) continue;
+                        var debtor = usersDict[split.UserId];
+                        await _groupDebtRepository.ApplyDebtChangeAsync(group, debtor, payer, -split.OwedAmount);
+                    }
+                    
+                    item.ClearSplits();
+                    
+                    foreach (var newSplit in request.Splits)
+                    {
+                        var newSplitEntity = ExpenseSplit.Create(item, usersDict[newSplit.UserId], newSplit.Amount);
+                        item.AddSplit(newSplitEntity);
+                        
+                        if (newSplit.UserId == payer.Id) continue;
+                        var debtor = usersDict[newSplit.UserId];
+                        await _groupDebtRepository.ApplyDebtChangeAsync(group, debtor, payer, newSplit.Amount);
+                    }
+                    
+                    item.UpdateUnitPrice(request.TotalPrice / item.Quantity);
+                    if (parentGroup != null)
+                    {
+                        parentGroup.UpdateAmount(parentGroup.Items.Sum(i => i.TotalPrice));
+                    }
+                    expense.RecalculateTotal();
+                }
+
+                item.Edit(request.Name, request.Category);
+
+                await _expenseRepository.UpdateAsync(expense);
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitAsync();
+
+                var affectedUserIds = oldSplits.Select(s => s.UserId).ToList();
+                if (request.Splits != null) affectedUserIds.AddRange(request.Splits.Select(s => s.UserId));
+                affectedUserIds = affectedUserIds.Distinct().Where(id => id != userId).ToList();
+
+                foreach (var id in affectedUserIds)
+                {
+                    string notificationBody = $"Użytkownik zaktualizował wydatek \"{oldName}\" w grupie {group.Name}.";
+                    if (oldName != request.Name) notificationBody += $" Nowa nazwa to \"{request.Name}\".";
+                    
+                    await _notificationService.CreateNotificationAsync(id, userId, NotificationType.Normal, notificationBody, expense.Id, EntityType.Expenses);
+                }
+            }
+            catch
+            {
+                await _unitOfWork.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task DeleteExpenseItemAsync(int userId, int expenseId, int itemId)
+        {
+            var expense = await _expenseRepository.GetExpenseWithSplitsAsync(expenseId);
+            if (expense == null) throw new ExpenseNotFoundException();
+
+            var item = expense.Items.FirstOrDefault(i => i.Id == itemId);
+            ExpenseGroup? parentGroup = null;
+            if (item == null)
+            {
+                foreach (var group in expense.Groups)
+                {
+                    item = group.Items.FirstOrDefault(i => i.Id == itemId);
+                    if (item != null)
+                    {
+                        parentGroup = group;
+                        break;
+                    }
+                }
+            }
+
+            if (item == null) throw new Exception("Expense item not found");
+
+            var isOwner = await _groupMemberRepository.IsUserOwner(userId, expense.GroupId);
+            var member = await _groupMemberRepository.GetMemberAsync(expense.GroupId, userId);
+            if (!isOwner && member?.Role != GroupMemberRole.Admin && expense.CreatorId != userId)
+                throw new InvalidUserRoleException();
+
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var group = await _groupRepository.GetGroupInfoByIdAsync(expense.GroupId);
+                if (group == null) throw new GroupNotFoundException();
+                var allUserIds = item.Splits.Select(s => s.UserId).Concat(new[] { expense.PayerId }).Distinct().ToList();
+                var usersDict = await _userRepository.GetUsersByIdsAsync(allUserIds);
+                var payer = usersDict[expense.PayerId];
+
+                foreach (var split in item.Splits)
+                {
+                    if (split.UserId == payer.Id) continue;
+                    var debtor = usersDict[split.UserId];
+                    await _groupDebtRepository.ApplyDebtChangeAsync(group, debtor, payer, -split.OwedAmount);
+                }
+
+                if (parentGroup != null)
+                {
+                    parentGroup.RemoveItem(item);
+                }
+                else
+                {
+                    expense.RemoveItem(item);
+                }
+                
+                expense.RecalculateTotal();
+
+                if (expense.Items.Count == 0 && !expense.Groups.Any(g => g.Items.Count > 0))
+                {
+                    expense.Delete();
+                }
+
+                await _expenseRepository.UpdateAsync(expense);
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitAsync();
+
+                var affectedUserIds = item.Splits.Select(s => s.UserId).Distinct().Where(id => id != userId).ToList();
+
+                foreach (var id in affectedUserIds)
+                {
+                    string notificationBody = $"Użytkownik usunął wydatek \"{item.Name}\" z grupy {group.Name}. Twój dług został zmieniony.";
+                    await _notificationService.CreateNotificationAsync(id, userId, NotificationType.Deleting, notificationBody, expense.Id, EntityType.Expenses);
+                }
+            }
+            catch
+            {
+                await _unitOfWork.RollbackAsync();
+                throw;
+            }
         }
     }
 }

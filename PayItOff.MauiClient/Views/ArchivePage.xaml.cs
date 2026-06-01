@@ -9,4 +9,13 @@ public partial class ArchivePage : ContentPage
         InitializeComponent();
         BindingContext = vm;
     }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        if (BindingContext is ArchiveViewModel vm)
+        {
+            await vm.LoadArchivedGroupsAsync();
+        }
+    }
 }

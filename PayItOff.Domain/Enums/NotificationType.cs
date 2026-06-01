@@ -5,6 +5,7 @@ namespace PayItOff.Domain.Enums
         Normal = 1,
         Deleting = 2,
         NeedAction = 3,
-        Adding = 4
+        Adding = 4,
+        DailySummary = 5
     }
 }

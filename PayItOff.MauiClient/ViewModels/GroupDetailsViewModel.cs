@@ -45,6 +45,12 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     public partial string UserRole { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsNotArchived))]
+    public partial bool IsArchived { get; set; }
+
+    public bool IsNotArchived => !IsArchived;
+
+    [ObservableProperty]
     public partial string MemberSearchText { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -66,12 +72,31 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     public partial bool IsExpenseDetailsPopupVisible { get; set; }
 
     [ObservableProperty]
+    public partial bool IsEditExpensePopupVisible { get; set; }
+
+    [ObservableProperty]
+    public partial string EditExpenseName { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string EditExpenseCategory { get; set; } = string.Empty;
+
+    [ObservableProperty]
     public partial ExpenseDetailsResponse? SelectedExpenseDetails { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RemainingAmountToSplit))]
+    public partial decimal EditExpenseTotalAmount { get; set; }
+
+    public ObservableCollection<EditableExpenseSplit> EditExpenseSplits { get; } = new();
+
+    public decimal RemainingAmountToSplit => EditExpenseTotalAmount - EditExpenseSplits.Sum(s => s.OwedAmount);
+
     public ObservableCollection<GroupMemberResponse> ActiveMembersList { get; } = new();
 
     public ObservableCollection<FriendListResponse> FriendsList { get; } = new();
     public ObservableCollection<GroupMemberBalanceDto> FilteredMembers { get; } = new();
     public ObservableCollection<TransactionGroup> TransactionSections { get; } = new();
+    public ObservableCollection<AuditLogResponse> HistoryLogs { get; } = new();
 
     public bool IsAdminOrFounder => UserRole is "Owner" or "Admin";
     public bool IsOwner => UserRole == "Owner";
@@ -119,7 +144,17 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     partial void OnTransactionSearchTextChanged(string value) => ApplyTransactionFilter();
 
     [RelayCommand]
-    private async Task GoBackAsync() => await Shell.Current.GoToAsync("//GroupsPage");
+    private async Task GoBackAsync()
+    {
+        if (IsArchived)
+        {
+            await Shell.Current.GoToAsync("//ArchivePage");
+        }
+        else
+        {
+            await Shell.Current.GoToAsync("//GroupsPage");
+        }
+    }
 
     [RelayCommand]
     private async Task AddExpenseAsync() =>
@@ -167,9 +202,116 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     private void CloseExpenseDetailsPopup()
     {
         IsExpenseDetailsPopupVisible = false;
-        // Do not set SelectedExpenseDetails to null. Setting it to null causes BindableLayout to collapse to 0 height.
-        // When the popup opens next time, going from null -> object forces a massive layout recalculation 
-        // which triggers MAUI's ScrollView jump bug on Windows.
+    }
+
+    [RelayCommand]
+    private async Task DeleteExpenseAsync()
+    {
+        if (SelectedExpenseDetails == null) return;
+
+        bool confirm = await ShowAlertAsync("Usuń wydatek", "Czy na pewno chcesz usunąć tę pozycję z wydatku? Ta operacja jest nieodwracalna.", "Tak, usuń", "Anuluj");
+        if (!confirm) return;
+
+        IsBusy = true;
+        try
+        {
+            await _expenseService.DeleteExpenseItemAsync(SelectedExpenseDetails.ExpenseId, SelectedExpenseDetails.ItemId);
+            IsExpenseDetailsPopupVisible = false;
+            await LoadDataAsync();
+        }
+        catch (Exception)
+        {
+            await ShowAlertAsync("Błąd", "Nie udało się usunąć wydatku.", "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private void ShowEditExpensePopup()
+    {
+        if (SelectedExpenseDetails == null) return;
+        EditExpenseName = SelectedExpenseDetails.Title;
+        EditExpenseCategory = SelectedExpenseDetails.Category;
+        EditExpenseTotalAmount = SelectedExpenseDetails.TotalAmount;
+        
+        foreach(var old in EditExpenseSplits) old.PropertyChanged -= OnSplitPropertyChanged;
+        EditExpenseSplits.Clear();
+        foreach (var p in SelectedExpenseDetails.Participants)
+        {
+            var split = new EditableExpenseSplit
+            {
+                UserId = p.UserId,
+                FullName = p.FullName,
+                AvatarUrl = p.AvatarUrl,
+                OwedAmount = p.OwedAmount
+            };
+            split.PropertyChanged += OnSplitPropertyChanged;
+            EditExpenseSplits.Add(split);
+        }
+        
+        OnPropertyChanged(nameof(RemainingAmountToSplit));
+        IsEditExpensePopupVisible = true;
+    }
+
+    private void OnSplitPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(EditableExpenseSplit.OwedAmount))
+        {
+            OnPropertyChanged(nameof(RemainingAmountToSplit));
+        }
+    }
+
+    [RelayCommand]
+    private void CancelEditExpensePopup()
+    {
+        IsEditExpensePopupVisible = false;
+    }
+
+    [RelayCommand]
+    private async Task ConfirmEditExpenseAsync()
+    {
+        if (SelectedExpenseDetails == null || string.IsNullOrWhiteSpace(EditExpenseName) || string.IsNullOrWhiteSpace(EditExpenseCategory))
+            return;
+
+        if (Math.Abs(RemainingAmountToSplit) > 0.01m)
+        {
+            await ShowAlertAsync("Błąd", "Suma podziałów musi być równa kwocie całkowitej.", "OK");
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            var splits = EditExpenseSplits.Select(s => new PayItOff.Shared.Requests.ExpenseSplitDto
+            {
+                UserId = s.UserId,
+                Amount = s.OwedAmount
+            }).ToList();
+
+            var request = new PayItOff.Shared.Requests.UpdateExpenseItemRequest
+            {
+                Name = EditExpenseName.Trim(),
+                Category = EditExpenseCategory.Trim(),
+                TotalPrice = EditExpenseTotalAmount,
+                Splits = splits
+            };
+            await _expenseService.UpdateExpenseItemAsync(SelectedExpenseDetails.ExpenseId, SelectedExpenseDetails.ItemId, request);
+            
+            IsEditExpensePopupVisible = false;
+            IsExpenseDetailsPopupVisible = false;
+            await LoadDataAsync();
+        }
+        catch (Exception)
+        {
+            await ShowAlertAsync("Błąd", "Nie udało się edytować wydatku.", "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand]
@@ -345,7 +487,6 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         if (success)
         {
             member.Role = newRole;
-            // Force property change to update UI if it was ObservableObject, but it's not. Re-fetching active members is safer.
             var membersTask = await _groupMemberService.GetAllActiveGroupMembersAsync(GroupId);
             if (membersTask != null)
             {
@@ -375,7 +516,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         IsBusy = false;
     }
 
-    private async Task LoadDataAsync()
+    public async Task LoadDataAsync()
     {
         if (GroupId <= 0) return;
 
@@ -397,14 +538,23 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
 
             GroupName = response.GroupName ?? string.Empty;
             UserRole = response.UserRole ?? string.Empty;
+            IsArchived = response.IsArchived;
             OnPropertyChanged(nameof(IsAdminOrFounder));
             OnPropertyChanged(nameof(RoleSubtitle));
+            OnPropertyChanged(nameof(IsNotArchived));
 
             _loadedMembers = response.Members ?? new List<GroupMemberBalanceDto>();
             _loadedExpenses = response.Expenses ?? new List<ExpenseSummaryDto>();
 
             ApplyMemberFilter();
             ApplyTransactionFilter();
+
+            var history = await _groupService.GetGroupHistory(GroupId);
+            HistoryLogs.Clear();
+            foreach (var log in history)
+            {
+                HistoryLogs.Add(log);
+            }
         }
         finally
         {

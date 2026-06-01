@@ -58,6 +58,16 @@ namespace PayItOff.Domain.Entities
             UpdatedAt = DateTime.UtcNow;
         }
 
+        public void RemoveItem(ExpenseItem item)
+        {
+            if (item == null) { throw new ArgumentNullException(nameof(item), "Error przy item"); }
+            if (_items.Remove(item))
+            {
+                TotalAmount -= item.TotalPrice;
+                UpdatedAt = DateTime.UtcNow;
+            }
+        }
+
         public void AddGroup(ExpenseGroup group)
         {
             if (group == null) { throw new ArgumentNullException(nameof(group), "Error przy group"); }

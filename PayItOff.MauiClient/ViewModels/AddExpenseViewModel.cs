@@ -157,10 +157,15 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
     }
 
     [RelayCommand]
-    private void ConfirmItem(ReceiptItem item)
+    private async Task ConfirmItem(ReceiptItem item)
     {
         if (item != null && BufferItems.Contains(item))
         {
+            if (string.IsNullOrWhiteSpace(item.Name))
+            {
+                await ShowAlertAsync("Błąd", "Nazwa przedmiotu nie może być pusta.", "OK");
+                return;
+            }
             BufferItems.Remove(item);
             item.CategoryId = "Uncategorized";
             UncategorizedItems.Add(item);
@@ -220,11 +225,15 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
             {
                 UncategorizedItems.Remove(item);
             }
+            else if (BufferItems.Contains(item))
+            {
+                BufferItems.Remove(item);
+            }
 
             // Usuniecie wszystkich przypisan
             foreach (var member in GroupMembers)
             {
-                var share = member.AssignedShares.FirstOrDefault(s => s.ItemName == item.Name);
+                var share = member.AssignedShares.FirstOrDefault(s => s.ItemId == item.Id);
                 if (share != null)
                 {
                     member.AssignedShares.Remove(share);
@@ -289,7 +298,7 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
                 var allItems = Categories.SelectMany(c => c.Items).ToList();
                 allItems.AddRange(UncategorizedItems);
                 allItems.AddRange(BufferItems);
-                var item = allItems.FirstOrDefault(i => i.Name == share.ItemName);
+                var item = allItems.FirstOrDefault(i => i.Id == share.ItemId);
                 if (item != null)
                 {
                     item.RemoveMember(share.MemberId);
@@ -493,6 +502,12 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
         if (allItems.Count == 0)
         {
             await ShowAlertAsync("Błąd", "Brak produktów do rozliczenia.", "OK");
+            return;
+        }
+
+        if (allItems.Any(i => string.IsNullOrWhiteSpace(i.Name)))
+        {
+            await ShowAlertAsync("Błąd", "Wszystkie przedmioty muszą mieć podaną nazwę.", "OK");
             return;
         }
 

@@ -16,5 +16,6 @@ public interface IUserRepository
     Task<Dictionary<int, User>> GetUsersByIdsAsync(IEnumerable<int> userIds);
     Task<User?> GetUserByNicknameAsync(string nickname);
     Task<User?> GetUserByPhoneNumberAsync(string phoneNumber);
+    Task<List<User>> GetAllUsersWithDailySummaryAsync();
 }
 

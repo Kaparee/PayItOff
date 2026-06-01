@@ -7,5 +7,7 @@ namespace PayItOff.Application.Interfaces
         Task CreateExpenseBatch(int userId, CreateExpenseBatchRequest request);
         Task<PayItOff.Shared.Responses.ExpenseDetailsResponse> GetExpenseDetailsAsync(int userId, int expenseId);
         Task<PayItOff.Shared.Responses.ExpenseDetailsResponse> GetExpenseItemDetailsAsync(int userId, int expenseId, int itemId);
+        Task UpdateExpenseItemAsync(int userId, int expenseId, int itemId, UpdateExpenseItemRequest request);
+        Task DeleteExpenseItemAsync(int userId, int expenseId, int itemId);
     }
 }

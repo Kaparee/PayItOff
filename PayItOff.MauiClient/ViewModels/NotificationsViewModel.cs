@@ -121,6 +121,31 @@ public partial class NotificationsViewModel : PopupViewModelBase
     }
 
     [RelayCommand]
+    public async Task HandleNotificationTappedAsync(NotificationDisplayItem item)
+    {
+        if (item == null) return;
+        
+        if (item.IsDailySummary)
+        {
+            SummaryPopupContent = item.Body;
+            IsSummaryPopupVisible = true;
+        }
+
+        if (!item.IsRead)
+        {
+            try
+            {
+                await _notificationService.MarkAsReadAsync(item.NotificationId);
+                await LoadNotificationsAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to mark as read: {ex.Message}");
+            }
+        }
+    }
+
+    [RelayCommand]
     public async Task MarkAsReadAsync(NotificationDisplayItem item)
     {
         if (item == null || item.IsRead) return;
@@ -249,5 +274,18 @@ public partial class NotificationsViewModel : PopupViewModelBase
         {
             System.Diagnostics.Debug.WriteLine($"Failed to delete all notifications: {ex.Message}");
         }
+    }
+
+    [ObservableProperty]
+    public partial bool IsSummaryPopupVisible { get; set; }
+
+    [ObservableProperty]
+    public partial string SummaryPopupContent { get; set; } = string.Empty;
+
+    [RelayCommand]
+    public void CloseSummaryPopup()
+    {
+        IsSummaryPopupVisible = false;
+        SummaryPopupContent = string.Empty;
     }
 }

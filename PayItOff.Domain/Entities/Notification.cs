@@ -55,6 +55,11 @@ namespace PayItOff.Domain.Entities
 
         }
 
+        public void Hide()
+        {
+            Status = NotificationStatus.Hidden;
+        }
+
         public void ChangeTypeToNormal()
         {
             Type = NotificationType.Normal;

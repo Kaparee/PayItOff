@@ -43,6 +43,13 @@ public class GroupRepository : IGroupRepository
             .FirstOrDefaultAsync();
     }
 
+    public async Task<Group?> GetGroupInfoIncludingArchivedByIdAsync(int groupId)
+    {
+        return await _context.Groups
+            .Where(x => x.Id == groupId)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<List<GroupMember>> GetTop4UserActiveGroupsAsync(int userId)
     {
         return await _context.GroupMembers
@@ -51,6 +58,16 @@ public class GroupRepository : IGroupRepository
             .Where(x => x.Group!.DeletedAt == null)
             .OrderByDescending(x => x.Group!.UpdatedAt)
             .Take(4)
+            .ToListAsync();
+    }
+
+    public async Task<List<GroupMember>> GetArchivedUserGroupsAsync(int userId)
+    {
+        return await _context.GroupMembers
+            .Include(x => x.Group)
+            .Where(x => x.UserId == userId && x.Status == GroupMemberStatus.Accepted)
+            .Where(x => x.Group!.DeletedAt != null)
+            .OrderByDescending(x => x.Group!.DeletedAt)
             .ToListAsync();
     }
 }

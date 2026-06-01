@@ -43,7 +43,7 @@ public class NotificationRepository : INotificationRepository
 
         IQueryable<Notification> notifications = _context.Notifications
             .Include(n => n.Actor);
-        notifications = notifications.Where(x => x.UserId == userId && x.DeletedAt == null);
+        notifications = notifications.Where(x => x.UserId == userId && x.DeletedAt == null && x.Status != NotificationStatus.Hidden);
 
         if (filters != null)
         {
@@ -74,7 +74,7 @@ public class NotificationRepository : INotificationRepository
     {
         return await _context.Notifications
             .Include(n => n.Actor)
-            .Where(x => x.UserId == userId && x.DeletedAt == null)
+            .Where(x => x.UserId == userId && x.DeletedAt == null && x.Status != NotificationStatus.Hidden)
             .OrderByDescending(x => x.CreatedAt)
             .Take(5)
             .ToListAsync();
@@ -85,5 +85,13 @@ public class NotificationRepository : INotificationRepository
         return await _context.Notifications
             .Where(n => n.UserId == userId && n.EntityId == entityId && n.EntityType == entityType && n.Type == NotificationType.NeedAction && n.DeletedAt == null)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<List<Notification>> GetHiddenNotificationsFromTodayAsync(int userId)
+    {
+        var today = DateTime.UtcNow.Date;
+        return await _context.Notifications
+            .Where(n => n.UserId == userId && n.Status == NotificationStatus.Hidden && n.DeletedAt == null && n.CreatedAt >= today)
+            .ToListAsync();
     }
 }

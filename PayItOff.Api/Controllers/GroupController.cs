@@ -58,5 +58,22 @@ public class GroupController : ControllerBase
         await _groupService.DeleteGroupAsync(GetUserId(), request);
         return NoContent();
     }
+    [HttpGet("archived")]
+    [EndpointSummary("Pobieranie usuniętych (zarchiwizowanych) grup")]
+    [EndpointDescription("Endpoint zwracający listę grup, które zostały usunięte i znajdują się w archiwum.")]
+    public async Task<IActionResult> GetArchivedGroups()
+    {
+        var response = await _groupService.GetArchivedUserGroupsAsync(GetUserId());
+        return Ok(response);
+    }
+
+    [HttpGet("{groupId}/history")]
+    [EndpointSummary("Historia zmian w grupie")]
+    [EndpointDescription("Zwraca listę logów audytowych dla danej grupy.")]
+    public async Task<IActionResult> GetGroupHistory(int groupId)
+    {
+        var response = await _groupService.GetGroupHistoryAsync(groupId, GetUserId());
+        return Ok(response);
+    }
 }
 

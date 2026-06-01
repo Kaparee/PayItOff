@@ -55,10 +55,24 @@ namespace PayItOff.Domain.Entities
             TotalPrice = newUnitPrice * Quantity;
         }
 
+        public void Edit(string name, string category)
+        {
+            if (string.IsNullOrWhiteSpace(name)) { throw new ArgumentException("Name cannot be empty", nameof(name)); }
+            if (string.IsNullOrWhiteSpace(category)) { throw new ArgumentException("Category cannot be empty", nameof(category)); }
+
+            Name = name;
+            Category = category;
+        }
+
         public void AddSplit(ExpenseSplit split)
         {
             if (split == null) { throw new ArgumentNullException(nameof(split), "Nie może być null"); }
             _splits.Add(split);
+        }
+
+        public void ClearSplits()
+        {
+            _splits.Clear();
         }
     }
 }

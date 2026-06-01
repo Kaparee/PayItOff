@@ -2,6 +2,8 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:PayItOff.MauiClient.Controls"
+             xmlns:models="clr-namespace:PayItOff.Shared.Responses;assembly=PayItOff.Shared"
+             xmlns:vm="clr-namespace:PayItOff.MauiClient.ViewModels"
              x:Class="PayItOff.MauiClient.Views.ArchivePage"
              BackgroundColor="{StaticResource MainBackground}"
              Shell.NavBarIsVisible="False">
@@ -35,14 +37,45 @@
                     
                     
                     <VerticalStackLayout Grid.Row="2" Spacing="20">
-                        <Label Text="Tytuł Sekcji" TextColor="{StaticResource TextMain}" FontSize="32" FontAttributes="Bold" HorizontalOptions="Start"/>
+                        <Label Text="Zarchiwizowane Grupy" TextColor="{StaticResource TextMain}" FontSize="32" FontAttributes="Bold" HorizontalOptions="Start"/>
 
-                        <Border StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" HeightRequest="200" Padding="20">
-                            <Label Text="Miejsce na Twoją treść..." TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" VerticalOptions="Center"/>
-                        </Border>
+                        <CollectionView ItemsSource="{Binding ArchivedGroups}">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:GroupInfoResponse">
+                                    <Grid Padding="0,0,0,20">
+                                        <Border StrokeShape="RoundRectangle 15"
+                                                BackgroundColor="{StaticResource SurfaceDark}"
+                                                Padding="20" StrokeThickness="0">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ArchiveViewModel}}, Path=GroupTappedCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
+
+                                            <Grid ColumnDefinitions="60, *, Auto" ColumnSpacing="20">
+                                                <Border Grid.Column="0" HeightRequest="60" WidthRequest="60"
+                                                        StrokeShape="RoundRectangle 30" StrokeThickness="0" BackgroundColor="#1E232D">
+                                                    <Grid>
+                                                        <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
+                                                    </Grid>
+                                                </Border>
+
+                                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                                    <Label Text="{Binding Name}" TextColor="White"
+                                                           FontAttributes="Bold" FontSize="20"/>
+                                                    <Label Text="{Binding UpdatedAt, StringFormat='Usunięto: {0:dd.MM.yyyy}'}" TextColor="{StaticResource TextSubtle}" FontSize="14"/>
+                                                </VerticalStackLayout>
+                                            </Grid>
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                            <CollectionView.EmptyView>
+                                <Label Text="Brak usuniętych grup." TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" Margin="0,30,0,0"/>
+                            </CollectionView.EmptyView>
+                        </CollectionView>
                     </VerticalStackLayout>
                     
-
                 </Grid>
             </ScrollView>
         </Grid>

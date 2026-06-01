@@ -15,6 +15,9 @@ public partial class ReceiptMemberShare : ObservableObject
     public partial string AvatarUrl { get; set; } = string.Empty;
 
     [ObservableProperty]
+    public partial string ItemId { get; set; } = string.Empty;
+
+    [ObservableProperty]
     public partial string ItemName { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -42,6 +45,40 @@ public partial class ReceiptItem : ObservableObject
 
     [ObservableProperty]
     public partial decimal UnitPrice { get; set; } = 0;
+
+    private string _unitPriceInput = "0";
+    public string UnitPriceInput
+    {
+        get => _unitPriceInput;
+        set
+        {
+            if (SetProperty(ref _unitPriceInput, value))
+            {
+                ParseUnitPrice();
+            }
+        }
+    }
+
+    private void ParseUnitPrice()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(_unitPriceInput))
+            {
+                UnitPrice = 0;
+                return;
+            }
+            string expression = _unitPriceInput.Replace(',', '.');
+            var result = new System.Data.DataTable().Compute(expression, null);
+            if (result != DBNull.Value && result != null)
+            {
+                UnitPrice = Math.Round(Convert.ToDecimal(result), 2);
+            }
+        }
+        catch
+        {
+        }
+    }
 
     [ObservableProperty]
     public partial string CategoryId { get; set; } = string.Empty;
@@ -87,6 +124,7 @@ public partial class ReceiptItem : ObservableObject
                 MemberId = memberId,
                 MemberName = memberName,
                 AvatarUrl = avatarUrl,
+                ItemId = this.Id,
                 ItemName = this.Name,
                 PayerName = this.Payer?.FullName ?? string.Empty
             });
@@ -156,7 +194,32 @@ public partial class DisplayGroupMember : ObservableObject
 
     public DisplayGroupMember()
     {
-        AssignedShares.CollectionChanged += (_, _) => OnPropertyChanged(nameof(TotalOwed));
+        AssignedShares.CollectionChanged += (s, e) =>
+        {
+            if (e.NewItems != null)
+            {
+                foreach (ReceiptMemberShare item in e.NewItems)
+                {
+                    item.PropertyChanged += Share_PropertyChanged;
+                }
+            }
+            if (e.OldItems != null)
+            {
+                foreach (ReceiptMemberShare item in e.OldItems)
+                {
+                    item.PropertyChanged -= Share_PropertyChanged;
+                }
+            }
+            OnPropertyChanged(nameof(TotalOwed));
+        };
+    }
+
+    private void Share_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ReceiptMemberShare.OwedAmount))
+        {
+            OnPropertyChanged(nameof(TotalOwed));
+        }
     }
 
     public decimal TotalOwed => AssignedShares.Sum(s => s.OwedAmount);

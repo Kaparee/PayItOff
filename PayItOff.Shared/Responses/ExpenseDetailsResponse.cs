@@ -3,6 +3,7 @@ namespace PayItOff.Shared.Responses;
 public class ExpenseDetailsResponse
 {
     public int ExpenseId { get; set; }
+    public int ItemId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public decimal TotalAmount { get; set; }

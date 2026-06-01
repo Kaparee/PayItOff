@@ -78,7 +78,7 @@
                                         <ContentView Padding="0,0,0,10">
                                             <ContentView.GestureRecognizers>
                                                 <TapGestureRecognizer
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.MarkAsReadCommand}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.HandleNotificationTappedCommand}"
                                                     CommandParameter="{Binding .}" />
                                             </ContentView.GestureRecognizers>
 
@@ -184,6 +184,20 @@
                         <Button Grid.Column="{Binding AlertAcceptColumn}" Grid.ColumnSpan="{Binding AlertAcceptColumnSpan}" Text="{Binding CustomAlertAcceptText}" Command="{Binding CloseAlertCommand}" CommandParameter="True" Style="{StaticResource PrimaryButtonStyle}" />
                     </Grid>
                 </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <Grid IsVisible="{Binding IsSummaryPopupVisible}" Style="{StaticResource PopupOverlayStyle}" ZIndex="510">
+            <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="500" MaximumHeightRequest="600">
+                <Grid RowDefinitions="Auto, *, Auto" RowSpacing="20">
+                    <Label Grid.Row="0" Text="Podsumowanie powiadomień" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
+                    
+                    <ScrollView Grid.Row="1">
+                        <Label Text="{Binding SummaryPopupContent}" FontSize="14" TextColor="{StaticResource TextMain}" LineBreakMode="WordWrap" Margin="0,5"/>
+                    </ScrollView>
+
+                    <Button Grid.Row="2" Text="Zamknij" Command="{Binding CloseSummaryPopupCommand}" Style="{StaticResource PrimaryButtonStyle}" HorizontalOptions="Fill" />
+                </Grid>
             </Border>
         </Grid>
 

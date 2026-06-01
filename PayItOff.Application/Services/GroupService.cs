@@ -24,8 +24,9 @@ public class GroupService : IGroupService
     private readonly IFileService _fileService;
     private readonly IGroupDebtRepository _groupDebtRepository;
     private readonly IExpenseRepository _expenseRepository;
+    private readonly IAuditLogRepository _auditLogRepository;
 
-    public GroupService(IGroupRepository groupRepository, IUserRepository userRepository, IGroupMemberRepository groupMemberRepository, IUnitOfWork unitOfWork, IValidator<CreateGroupRequest> validator, IJWTService jwtService, IConfiguration configuration, IFileService fileService, IGroupDebtRepository groupDebtRepository, IExpenseRepository expenseRepository)
+    public GroupService(IGroupRepository groupRepository, IUserRepository userRepository, IGroupMemberRepository groupMemberRepository, IUnitOfWork unitOfWork, IValidator<CreateGroupRequest> validator, IJWTService jwtService, IConfiguration configuration, IFileService fileService, IGroupDebtRepository groupDebtRepository, IExpenseRepository expenseRepository, IAuditLogRepository auditLogRepository)
     {
         _groupRepository = groupRepository;
         _userRepository = userRepository;
@@ -36,6 +37,7 @@ public class GroupService : IGroupService
         _configuration = configuration;
         _groupDebtRepository = groupDebtRepository;
         _expenseRepository = expenseRepository;
+        _auditLogRepository = auditLogRepository;
     }
     public async Task CreateAsync(CreateGroupRequest request, int userId, IFormFile? avatar)
     {
@@ -144,7 +146,7 @@ public class GroupService : IGroupService
 
         var savedFileName = await _fileService.SaveAvatarAsync(avatar);
 
-        if (savedFileName != null && group.AvatarUrl != null)
+        if (savedFileName != null && group.AvatarUrl != null && group.AvatarUrl != "default-group-avatar.png")
         {
             _fileService.DeleteFile(group.AvatarUrl);
         }
@@ -165,7 +167,7 @@ public class GroupService : IGroupService
         var hasDebt = await _groupDebtRepository.HasActiveGroupDebt(request.GroupId);
         if (hasDebt) { throw new InvalidGroupActionException(); }
 
-        if (group!.AvatarUrl != null)
+        if (group!.AvatarUrl != null && group.AvatarUrl != "default-group-avatar.png")
         {
             _fileService.DeleteFile(group.AvatarUrl);
         }
@@ -177,7 +179,7 @@ public class GroupService : IGroupService
 
     public async Task<GroupDetailsResponse> GetGroupDetailsAsync(int groupId, int userId)
     {
-        var group = await _groupRepository.GetGroupInfoByIdAsync(groupId);
+        var group = await _groupRepository.GetGroupInfoIncludingArchivedByIdAsync(groupId);
         if (group == null) throw new GroupNotFoundException();
 
         var currentMember = await _groupMemberRepository.GetMemberAsync(groupId, userId);
@@ -204,7 +206,7 @@ public class GroupService : IGroupService
 
             var lines = expenses
                 .Where(e => e.PayerId != member.UserId)
-                .SelectMany(e => e.Items.Concat(e.Groups.SelectMany(g => g.Items)).SelectMany(i => i.Splits
+                .SelectMany(e => e.Items.SelectMany(i => i.Splits
                     .Where(s => s.UserId == member.UserId && e.Payer != null)
                     .Select(s => new { PayerId = e.PayerId, Payer = e.Payer!, Amount = s.OwedAmount })))
                 .GroupBy(x => x.PayerId)
@@ -234,7 +236,7 @@ public class GroupService : IGroupService
         }
 
         var expenseDtos = expenses
-            .SelectMany(e => e.Items.Concat(e.Groups.SelectMany(g => g.Items)).Select(i => new ExpenseSummaryDto
+            .SelectMany(e => e.Items.Select(i => new ExpenseSummaryDto
             {
                 ExpenseId = e.Id,
                 ItemId = i.Id,
@@ -251,10 +253,90 @@ public class GroupService : IGroupService
             GroupId = group.Id,
             GroupName = group.Name,
             UserRole = currentMember.Role.ToString(),
+            IsArchived = group.DeletedAt != null,
 
             Members = memberDtos.OrderByDescending(m => m.IsCurrentUser).ThenBy(m => m.FullName).ToList(),
             Expenses = expenseDtos
         };
+    }
+
+    public async Task<List<GroupInfoResponse>> GetArchivedUserGroupsAsync(int userId)
+    {
+        var baseUrl = _configuration["AppUrls:BackendUrl"];
+        var userGroups = await _groupRepository.GetArchivedUserGroupsAsync(userId);
+
+        var groupResponses = new List<GroupInfoResponse>();
+
+        foreach (var groupMember in userGroups)
+        {
+            var group = groupMember.Group;
+            if (group == null) continue;
+
+            var activeMembersCount = (await _groupMemberRepository.GetAllActiveGroupMembersAsync(group.Id)).Count;
+            var isOwner = await _groupMemberRepository.IsUserOwner(userId, group.Id);
+
+            groupResponses.Add(new GroupInfoResponse
+            {
+                Id = group.Id,
+                Name = group.Name,
+                AvatarUrl = AvatarUrlHelper.BuildGroupAvatarUrl(baseUrl!, group.AvatarUrl),
+                UpdatedAt = group.DeletedAt ?? group.UpdatedAt,
+                IsFavorite = groupMember.IsFavorite,
+                Income = 0m,
+                Expense = 0m,
+                Balance = 0m
+            });
+        }
+
+        return groupResponses.OrderByDescending(g => g.UpdatedAt).ToList();
+    }
+
+    public async Task<List<AuditLogResponse>> GetGroupHistoryAsync(int groupId, int userId)
+    {
+        var group = await _groupRepository.GetGroupInfoIncludingArchivedByIdAsync(groupId);
+        if (group == null) throw new GroupNotFoundException();
+        
+        var currentMember = await _groupMemberRepository.GetMemberAsync(groupId, userId);
+        if (currentMember == null) throw new GroupMemberNotFoundException();
+
+        var baseUrl = _configuration["AppUrls:BackendUrl"];
+        var logs = await _auditLogRepository.GetAuditLogsForGroupAsync(groupId);
+
+        var result = new List<AuditLogResponse>();
+        foreach (var log in logs)
+        {
+            string actorName = "Nieznany";
+            string actorAvatar = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, "default-avatar.png");
+            
+            if (log.User != null)
+            {
+                actorName = $"{log.User.Name} {log.User.Surname}";
+                actorAvatar = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, log.User.AvatarUrl);
+            }
+
+            string desc = log.Action switch
+            {
+                PayItOff.Domain.Enums.AuditLogAction.Created => $"Utworzono {log.EntityType}",
+                PayItOff.Domain.Enums.AuditLogAction.Updated => $"Zaktualizowano {log.EntityType}",
+                PayItOff.Domain.Enums.AuditLogAction.Deleted => $"Usunięto {log.EntityType}",
+                _ => "Wykonano operację"
+            };
+
+            result.Add(new AuditLogResponse
+            {
+                Id = log.Id,
+                Action = log.Action.ToString(),
+                EntityType = log.EntityType.ToString(),
+                EntityId = log.EntityId,
+                ActorName = actorName,
+                ActorAvatarUrl = actorAvatar,
+                CreatedAt = log.CreatedAt,
+                FriendlyDescription = desc,
+                OldValues = log.OldValues,
+                NewValues = log.NewValues
+            });
+        }
+        return result;
     }
 
     private static string ShortPersonLabel(User u)

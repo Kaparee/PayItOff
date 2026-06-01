@@ -1,4 +1,4 @@
-﻿using PayItOff.Domain.Entities;
+using PayItOff.Domain.Entities;
 
 namespace PayItOff.Domain.Interfaces;
 
@@ -8,5 +8,7 @@ public interface IGroupRepository
     Task AddAsync(Group group);
     Task UpdateAsync(Group group);
     Task<Group?> GetGroupInfoByIdAsync(int groupId);
+    Task<Group?> GetGroupInfoIncludingArchivedByIdAsync(int groupId);
     Task<List<GroupMember>> GetTop4UserActiveGroupsAsync(int userId);
+    Task<List<GroupMember>> GetArchivedUserGroupsAsync(int userId);
 }

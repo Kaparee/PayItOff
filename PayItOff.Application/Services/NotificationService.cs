@@ -120,6 +120,12 @@ public class NotificationService : INotificationService
     {
         var newNotification = Notification.Create(userId, actorId, notificationType, body, entityId, entityType);
 
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user != null && user.NotificationsSettings.DailySummary && notificationType != NotificationType.NeedAction)
+        {
+            newNotification.Hide();
+        }
+
         await _notificationRepository.AddAsync(newNotification);
     }
 

@@ -165,7 +165,7 @@ public class UserService : IUserService
         var savedFileName = await _fileService.SaveAvatarAsync(avatar);
         if (savedFileName != null)
         {
-            if (user!.AvatarUrl != null)
+            if (user!.AvatarUrl != null && user.AvatarUrl != "default-user-avatar.png")
             {
                 _fileService.DeleteFile(user.AvatarUrl);
             }
@@ -318,7 +318,7 @@ public class UserService : IUserService
         await _unitOfWork.BeginTransactionAsync();
         try
         {
-            if (user!.AvatarUrl != null)
+            if (user!.AvatarUrl != null && user.AvatarUrl != "default-user-avatar.png")
             {
                 _fileService.DeleteFile(user.AvatarUrl);
             }

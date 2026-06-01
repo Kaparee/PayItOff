@@ -97,4 +97,20 @@ public class GroupService
         var response = await _httpClient.SendAsync(requestMsg);
         return response.IsSuccessStatusCode;
     }
+
+    public async Task<List<GroupInfoResponse>> GetArchivedGroups()
+    {
+        var response = await _httpClient.GetAsync("Group/archived");
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<List<GroupInfoResponse>>(_options) ?? []
+            : [];
+    }
+
+    public async Task<List<AuditLogResponse>> GetGroupHistory(int groupId)
+    {
+        var response = await _httpClient.GetAsync($"Group/{groupId}/history");
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<List<AuditLogResponse>>(_options) ?? []
+            : [];
+    }
 }

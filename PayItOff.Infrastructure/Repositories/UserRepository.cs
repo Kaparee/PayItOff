@@ -92,5 +92,14 @@ public class UserRepository : IUserRepository
             .Where(x => x.DeletedAt == null)
             .FirstOrDefaultAsync(x => x.PhoneNumber == phoneNumber);
     }
+
+    public async Task<List<User>> GetAllUsersWithDailySummaryAsync()
+    {
+        var users = await _context.Users
+            .Where(x => x.DeletedAt == null)
+            .ToListAsync();
+            
+        return users.Where(x => x.NotificationsSettings != null && x.NotificationsSettings.DailySummary).ToList();
+    }
 }
 

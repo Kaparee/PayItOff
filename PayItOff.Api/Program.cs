@@ -14,6 +14,8 @@ using PayItOff.Infrastructure.Repositories;
 using PayItOff.Infrastructure.Services;
 using PayItOff.Shared.Requests;
 using System.Text;
+using Hangfire;
+using Hangfire.PostgreSql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,9 +26,15 @@ builder.Services.AddEndpointsApiExplorer();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-// Rejestracja PayItOffDbContext
-builder.Services.AddDbContext<PayItOffDbContext>(options =>
-    options.UseNpgsql(connectionString));
+// Rejestracja PayItOffDbContext i Interceptorów
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<PayItOff.Infrastructure.Persistence.Interceptors.AuditLogInterceptor>();
+
+builder.Services.AddDbContext<PayItOffDbContext>((sp, options) =>
+{
+    options.UseNpgsql(connectionString)
+           .AddInterceptors(sp.GetRequiredService<PayItOff.Infrastructure.Persistence.Interceptors.AuditLogInterceptor>());
+});
 
 // KONFIGURACJA JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -78,6 +86,7 @@ builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 builder.Services.AddScoped<IExpenseSplitRepository, ExpenseSplitRepository>();
 builder.Services.AddScoped<ISettlementRepository, SettlementRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 
 // Services
 builder.Services.AddScoped<IUserService, UserService>();
@@ -95,6 +104,16 @@ builder.Services.AddScoped<ISettlementService, SettlementService>();
 // Validators
 builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
 builder.Services.AddScoped<IValidator<CreateGroupRequest>, CreateGroupRequestValidator>();
+
+builder.Services.AddScoped<IDailySummaryJob, DailySummaryJob>();
+
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UsePostgreSqlStorage(c => c.UseNpgsqlConnection(connectionString)));
+    
+builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 
@@ -127,6 +146,14 @@ app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseHangfireDashboard();
+
+RecurringJob.AddOrUpdate<IDailySummaryJob>(
+    "daily-summary-job",
+    job => job.ExecuteAsync(),
+    "0 20 * * *"
+);
 
 app.MapControllers();
 

@@ -12,4 +12,5 @@ public interface INotificationRepository
     Task<Notification?> GetUserNotificationByIdAsync(int userId, int notificationId);
     Task<List<Notification>> GetLast5UserNotificationsAsync(int userId);
     Task<Notification?> GetActionNotificationAsync(int userId, int entityId, EntityType entityType);
+    Task<List<Notification>> GetHiddenNotificationsFromTodayAsync(int userId);
 }

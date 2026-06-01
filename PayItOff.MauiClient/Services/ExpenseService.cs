@@ -40,4 +40,16 @@ public class ExpenseService
     {
         return await _httpClient.GetFromJsonAsync<PayItOff.Shared.Responses.ExpenseDetailsResponse>($"Expense/{expenseId}/item/{itemId}");
     }
+
+    public async Task DeleteExpenseItemAsync(int expenseId, int itemId)
+    {
+        var response = await _httpClient.DeleteAsync($"Expense/{expenseId}/item/{itemId}");
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task UpdateExpenseItemAsync(int expenseId, int itemId, PayItOff.Shared.Requests.UpdateExpenseItemRequest request)
+    {
+        var response = await _httpClient.PutAsJsonAsync($"Expense/{expenseId}/item/{itemId}", request);
+        response.EnsureSuccessStatusCode();
+    }
 }

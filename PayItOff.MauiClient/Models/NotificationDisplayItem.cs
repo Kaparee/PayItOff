@@ -18,6 +18,7 @@ public class NotificationDisplayItem
 
     public bool IsRead => NotificationStatus == NotificationStatus.Read;
     public bool IsActionRequired => NotificationType == NotificationType.NeedAction;
+    public bool IsDailySummary => NotificationType == NotificationType.DailySummary;
     
     public double Opacity => IsRead ? 0.6 : 1.0;
     
@@ -34,6 +35,7 @@ public class NotificationDisplayItem
             {
                 NotificationType.Deleting => "#EF4444",
                 NotificationType.NeedAction => "#F59E0B",
+                NotificationType.DailySummary => "#8B5CF6",
                 NotificationType.Adding => "#10B981",
                 _ => "#10B981"
             };
@@ -44,6 +46,9 @@ public class NotificationDisplayItem
     {
         get
         {
+            if (NotificationType == NotificationType.DailySummary)
+                return "calendar_icon.png";
+
             if (EntityType == EntityType.Friends) 
             {
                 if (NotificationType == NotificationType.Deleting || Body.Contains("odrzucone") || Body.Contains("Odrzucono") || Body.Contains("odrzucił") || Body.Contains("usunięte"))

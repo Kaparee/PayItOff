@@ -16,6 +16,15 @@ public partial class GroupDetailsPage : ContentPage, IQueryAttributable
             vm.ApplyQueryAttributes(query);
     }
 
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+        if (BindingContext is GroupDetailsViewModel vm && vm.GroupId > 0)
+        {
+            _ = vm.LoadDataAsync();
+        }
+    }
+
     private int _currentIndex = 0;
 
     private void OnPrevMemberClicked(object? sender, TappedEventArgs e)
