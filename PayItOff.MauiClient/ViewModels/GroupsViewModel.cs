@@ -34,6 +34,7 @@ public partial class GroupsViewModel : PopupViewModelBase
     {
         _groupService = groupService;
         Groups = new ObservableCollection<GroupInfoResponse>();
+        IsCustomAlertSupported = true;
 
         _ = LoadGroupsAsync();
     }

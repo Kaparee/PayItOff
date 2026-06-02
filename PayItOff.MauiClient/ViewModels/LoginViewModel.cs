@@ -30,6 +30,7 @@ public partial class LoginViewModel : PopupViewModelBase
     public LoginViewModel(AuthService authService)
     {
         _authService = authService;
+        IsCustomAlertSupported = true;
     }
 
     partial void OnEmailOrNicknameChanged(string value)

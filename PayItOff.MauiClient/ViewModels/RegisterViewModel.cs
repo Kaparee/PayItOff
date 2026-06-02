@@ -54,6 +54,7 @@ public partial class RegisterViewModel : PopupViewModelBase
     public RegisterViewModel(RegisterService registerService)
     {
         _registerService = registerService;
+        IsCustomAlertSupported = true;
     }
 
     partial void OnEmailChanged(string value)

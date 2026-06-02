@@ -12,6 +12,7 @@ public partial class AccountsViewModel : PopupViewModelBase
     public AccountsViewModel(UserService userService)
     {
         _userService = userService;
+        IsCustomAlertSupported = true;
     }
 
     [ObservableProperty]

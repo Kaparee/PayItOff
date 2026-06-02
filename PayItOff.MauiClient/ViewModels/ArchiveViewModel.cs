@@ -5,7 +5,7 @@ using PayItOff.Shared.Responses;
 
 namespace PayItOff.MauiClient.ViewModels;
 
-public partial class ArchiveViewModel : BaseViewModel
+public partial class ArchiveViewModel : PopupViewModelBase
 {
     private readonly GroupService _groupService;
     public ObservableCollection<GroupInfoResponse> ArchivedGroups { get; } = new();
@@ -13,6 +13,7 @@ public partial class ArchiveViewModel : BaseViewModel
     public ArchiveViewModel(GroupService groupService)
     {
         _groupService = groupService;
+        IsCustomAlertSupported = true;
     }
 
     public async Task LoadArchivedGroupsAsync()
@@ -29,7 +30,7 @@ public partial class ArchiveViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            await Shell.Current.DisplayAlert("Błąd", $"Nie udało się pobrać zarchiwizowanych grup: {ex.Message}", "OK");
+            await ShowAlertAsync("Błąd", $"Nie udało się pobrać zarchiwizowanych grup: {ex.Message}", "OK");
         }
         finally
         {

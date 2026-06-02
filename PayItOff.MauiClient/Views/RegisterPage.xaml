@@ -18,7 +18,8 @@
         </Style>
     </ContentPage.Resources>
 
-    <ScrollView>
+    <Grid>
+        <ScrollView>
         <VerticalStackLayout Spacing="15" Padding="{OnIdiom Phone='20', Default='30'}" VerticalOptions="Center" MaximumWidthRequest="450">
 
             <Label Text="Stwórz konto" Style="{StaticResource Headline}" HorizontalOptions="Center" Margin="0,0,0,10" />
@@ -146,4 +147,21 @@
 
         </VerticalStackLayout>
     </ScrollView>
+
+        <!-- Custom Alert Popup -->
+        <Grid IsVisible="{Binding IsCustomAlertVisible}" Style="{StaticResource PopupOverlayStyle}" ZIndex="500">
+            <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="{Binding CustomAlertTitle}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
+                    <Label Text="{Binding CustomAlertMessage}" FontSize="14" TextColor="{StaticResource TextSubtle}" LineBreakMode="WordWrap" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,15,0,0">
+                        <Button Grid.Column="0" Text="{Binding CustomAlertCancelText}" Command="{Binding CloseAlertCommand}" CommandParameter="False" Style="{StaticResource SecondaryButtonStyle}" IsVisible="{Binding IsCustomAlertCancelVisible}"/>
+                        <Button Grid.Column="{Binding AlertAcceptColumn}" Grid.ColumnSpan="{Binding AlertAcceptColumnSpan}" Text="{Binding CustomAlertAcceptText}" Command="{Binding CloseAlertCommand}" CommandParameter="True" Style="{StaticResource PrimaryButtonStyle}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+    </Grid>
 </ContentPage>
