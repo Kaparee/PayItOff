@@ -43,4 +43,14 @@ public class AuthService
             }
         }
     }
+
+    public async Task SeedHeavyLoginDataAsync()
+    {
+        var response = await _httpClient.PostAsync("Seeder/heavy-login-seed", null);
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            throw new Exception(string.IsNullOrWhiteSpace(error) ? "Seeder zwrócił błąd." : error);
+        }
+    }
 }

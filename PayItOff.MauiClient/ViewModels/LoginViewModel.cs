@@ -107,6 +107,30 @@ public partial class LoginViewModel : PopupViewModelBase
     }
 
     [RelayCommand]
+    private async Task SeedHeavyDataAsync()
+    {
+        if (IsBusy) return;
+
+        IsBusy = true;
+        HasError = false;
+
+        try
+        {
+            await _authService.SeedHeavyLoginDataAsync();
+            await ShowAlertAsync("Seeder", "Seeder został wykonany. Możesz zalogować się na JakubPlocica.", "OK");
+        }
+        catch (Exception ex)
+        {
+            HasError = true;
+            await ShowAlertAsync("Błąd seedera", ex.Message, "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
     private void TogglePasswordVisibility()
     {
         IsPasswordHidden = !IsPasswordHidden;

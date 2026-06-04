@@ -81,6 +81,10 @@
             <Button Text="Zaloguj się jako Jakub Płocica"
                     Command="{Binding LoginAsJakubCommand}"
                     Margin="0,10,0,0" />
+
+            <Button Text="Wykonaj pełny seeder (dużo danych)"
+                    Command="{Binding SeedHeavyDataCommand}"
+                    Margin="0,6,0,0" />
         </VerticalStackLayout>
         </ScrollView>
         
