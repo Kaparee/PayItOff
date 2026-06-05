@@ -98,30 +98,22 @@ public class SettlementService : ISettlementService
 
         var counts = await _expenseSplitRepository.GetMixedHistoryCountsAsync(userId, request.TargetId);
 
-        var groupedSplits = splits
-            .GroupBy(s => s.ExpenseItem.ExpenseId)
+        var validSplits = splits.Where(s => s.UserId != s.ExpenseItem.Expense.PayerId).ToList();
+
+        var groupedSplits = validSplits
+            .GroupBy(s => new 
+            { 
+                ExpenseId = s.ExpenseItem.ExpenseId, 
+                TargetUserId = s.ExpenseItem.Expense.PayerId == userId ? s.UserId : s.ExpenseItem.Expense.PayerId 
+            })
             .Select(group =>
             {
                 var expense = group.First().ExpenseItem.Expense;
                 bool amIPayer = expense.PayerId == userId;
 
-                User otherUser;
-                if (amIPayer)
-                {
-                    var otherSplit = group.FirstOrDefault(s => s.UserId != userId);
-                    otherUser = otherSplit?.User ?? expense.Payer;
-                }
-                else
-                {
-                    otherUser = expense.Payer;
-                }
-
-                if (otherUser.Id == userId)
-                {
-                    var fallbackId = group.Select(s => s.UserId).FirstOrDefault(uid => uid != userId);
-                    if (fallbackId != 0)
-                        otherUser = group.First(s => s.UserId == fallbackId).User;
-                }
+                User otherUser = amIPayer 
+                    ? group.First().User 
+                    : expense.Payer;
 
                 if (otherUser.Id == userId)
                     throw new InvalidOperationException("Nie udało się ustalić drugiej strony transakcji.");
@@ -133,9 +125,7 @@ public class SettlementService : ISettlementService
                     Date = expense.PurchasedAt,
                     GroupName = expense.Group?.Name!,
                     AmIDebtor = !amIPayer,
-                    Amount = amIPayer
-                        ? group.Where(s => s.UserId != userId).Sum(s => s.OwedAmount)
-                        : group.Where(s => s.UserId == userId).Sum(s => s.OwedAmount),
+                    Amount = group.Sum(s => s.OwedAmount),
                     Categories = group.Select(s => s.ExpenseItem.Category).Distinct().ToList(),
                     OtherUserId = otherUser.Id,
                     OtherName = otherUser.Name,
@@ -335,7 +325,7 @@ public class SettlementService : ISettlementService
 
         await _groupDebtRepository.ApplyDebtChangeAsync(group, sender, receiver, -settlement.Amount);
 
-        await _notificationService.CreateNotificationAsync(sender.Id, userId, NotificationType.Normal, $"{receiver.FullName} zatwierdził twoją spłatę długu, która wynosiła: {debt} zł", settlement.Id, EntityType.Settlements);
+        await _notificationService.CreateNotificationAsync(sender.Id, userId, NotificationType.Normal, $"{receiver.FullName} zatwierdził twoją spłatę długu, która wynosiła: {settlement.Amount} zł", settlement.Id, EntityType.Settlements);
 
         await _notificationService.ResolveActionNotificationAsync(userId, settlement.Id, EntityType.Settlements, true);
 

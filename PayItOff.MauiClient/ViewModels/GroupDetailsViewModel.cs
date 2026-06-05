@@ -96,7 +96,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     public ObservableCollection<FriendListResponse> FriendsList { get; } = new();
     public ObservableCollection<GroupMemberBalanceDto> FilteredMembers { get; } = new();
     public ObservableCollection<TransactionGroup> TransactionSections { get; } = new();
-    public ObservableCollection<AuditLogResponse> HistoryLogs { get; } = new();
+
 
     public bool IsAdminOrFounder => UserRole is "Owner" or "Admin";
     public bool IsOwner => UserRole == "Owner";
@@ -523,13 +523,6 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
 
             ApplyMemberFilter();
             ApplyTransactionFilter();
-
-            var history = await _groupService.GetGroupHistory(GroupId);
-            HistoryLogs.Clear();
-            foreach (var log in history)
-            {
-                HistoryLogs.Add(log);
-            }
         }
         finally
         {

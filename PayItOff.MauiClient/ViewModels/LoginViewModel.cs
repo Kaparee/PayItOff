@@ -120,7 +120,7 @@ public partial class LoginViewModel : PopupViewModelBase
         try
         {
             await _authService.SeedHeavyLoginDataAsync(password);
-            await ShowAlertAsync("Seeder", "Seeder został wykonany. Możesz zalogować się na JakubPlocica.", "OK");
+            await ShowAlertAsync("Seeder", "Seeder został wykonany. Możesz się zalogować!.", "OK");
         }
         catch (Exception ex)
         {

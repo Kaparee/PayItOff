@@ -196,6 +196,7 @@ namespace PayItOff.Application.Services
 
             foreach (var item in expense.Items)
             {
+                if (item.ExpenseGroupId != null) continue; // Skip group items as they are processed below
                 categories.Add(item.Category);
                 foreach (var split in item.Splits)
                 {

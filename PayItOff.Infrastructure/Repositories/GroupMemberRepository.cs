@@ -53,6 +53,7 @@ public class GroupMemberRepository : IGroupMemberRepository
     {
         return await _context.GroupMembers
             .Include(x => x.Group)
+            .Include(x => x.User)
             .Where(x => x.GroupId == groupId && x.UserId == userId)
             .FirstOrDefaultAsync();
     }

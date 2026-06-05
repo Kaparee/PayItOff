@@ -391,3 +391,10 @@ temp
 
 # Gradle build reports
 src/Core/AndroidNative/build/reports/
+# LaTeX build artifacts
+*.aux
+*.out
+*.toc
+*.synctex.gz
+img.zip
+

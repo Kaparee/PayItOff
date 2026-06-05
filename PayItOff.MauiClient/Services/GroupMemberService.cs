@@ -49,15 +49,13 @@ public class GroupMemberService
 
     public async Task<bool> AcceptInviteAsync(int invitationId)
     {
-        var requestMsg = new HttpRequestMessage(new HttpMethod("PATCH"), $"GroupMember/accept?invitationId={invitationId}");
-        var response = await _httpClient.SendAsync(requestMsg);
+        var response = await _httpClient.PatchAsync($"GroupMember/accept?invitationId={invitationId}", null);
         return response.IsSuccessStatusCode;
     }
 
     public async Task<bool> DeclineInviteAsync(int invitationId)
     {
-        var requestMsg = new HttpRequestMessage(new HttpMethod("PATCH"), $"GroupMember/decline?invitationId={invitationId}");
-        var response = await _httpClient.SendAsync(requestMsg);
+        var response = await _httpClient.PatchAsync($"GroupMember/decline?invitationId={invitationId}", null);
         return response.IsSuccessStatusCode;
     }
 

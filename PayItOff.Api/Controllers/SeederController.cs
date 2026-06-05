@@ -129,7 +129,7 @@ public class SeederController : ControllerBase
         {
             Email = "marek.kowalski@payitoff.local",
             Password = "MarekKowalski123!",
-            Nickname = "MarekK",
+            Nickname = "MarekKowalski",
             Name = "Marek",
             Surname = "Kowalski"
         }, null);
@@ -138,7 +138,7 @@ public class SeederController : ControllerBase
         {
             Email = "zosia.wisniewska@payitoff.local",
             Password = "ZosiaWisniewska123!",
-            Nickname = "ZosiaW",
+            Nickname = "ZosiaWisniewska",
             Name = "Zofia",
             Surname = "Wiśniewska",
             PhoneNumber = "509909808"
@@ -174,7 +174,6 @@ public class SeederController : ControllerBase
             Notifications = new UserNotificationSettingsRequest(false, false, true, true, true, false, true)
         });
 
-        // Dodatkowe wywołania serwisów urozmaicające pokrycie funkcji dla użytkowników
         await _userService.UpdateInfoAsync(u1.Id, new UserInfoUpdateRequest
         {
             Nickname = "JakubPlocica",
@@ -201,7 +200,6 @@ public class SeederController : ControllerBase
         var groups = await _dbContext.Groups.OrderBy(x => x.Id).ToListAsync();
         var trip = groups[0]; var home = groups[1]; var work = groups[2]; var gaming = groups[3];
 
-        // Wyjazd Chorwacja
         await _groupMemberService.InviteUserAsync(u1.Id, new GroupInviteUserRequest { GroupId = trip.Id, UserId = u2.Id, Role = GroupMemberRole.Admin });
         await _groupMemberService.InviteUserAsync(u1.Id, new GroupInviteUserRequest { GroupId = trip.Id, UserId = u3.Id, Role = GroupMemberRole.Member });
         await _groupMemberService.InviteUserAsync(u1.Id, new GroupInviteUserRequest { GroupId = trip.Id, UserId = u4.Id, Role = GroupMemberRole.Member });
@@ -209,12 +207,10 @@ public class SeederController : ControllerBase
         await AcceptAllPendingInvitationsAsync(u2.Id, trip.Id);
         await AcceptAllPendingInvitationsAsync(u3.Id, trip.Id);
 
-        // Dodatkowe wywołania dla pełnego pokrycia serwisu grupy
         await _groupService.EditGroupInfoAsync(u1.Id, new EditGroupInfoRequest { GroupId = trip.Id, NewName = "Wyjazd Chorwacja 2026+" }, null);
         await _groupMemberService.SetGroupAsFavoriteAsync(u1.Id, trip.Id);
         await _groupMemberService.UpdateRoleAsync(u1.Id, new GroupMemberUpdateRequest { GroupId = trip.Id, TargetUserId = u3.Id, NewRole = GroupMemberRole.Admin });
 
-        // Mieszkanie Centrum
         await _groupMemberService.InviteUserAsync(u2.Id, new GroupInviteUserRequest { GroupId = home.Id, UserId = u1.Id, Role = GroupMemberRole.Admin });
         await _groupMemberService.InviteUserAsync(u2.Id, new GroupInviteUserRequest { GroupId = home.Id, UserId = u3.Id, Role = GroupMemberRole.Member });
         await _groupMemberService.InviteUserAsync(u2.Id, new GroupInviteUserRequest { GroupId = home.Id, UserId = u4.Id, Role = GroupMemberRole.Member });
@@ -223,7 +219,6 @@ public class SeederController : ControllerBase
         await AcceptAllPendingInvitationsAsync(u3.Id, home.Id);
         await DeclineAllPendingInvitationsAsync(u4.Id, home.Id);
 
-        // Biuro i Eventy
         await _groupMemberService.InviteUserAsync(u3.Id, new GroupInviteUserRequest { GroupId = work.Id, UserId = u1.Id, Role = GroupMemberRole.Member });
         await _groupMemberService.InviteUserAsync(u3.Id, new GroupInviteUserRequest { GroupId = work.Id, UserId = u2.Id, Role = GroupMemberRole.Admin });
         await _groupMemberService.InviteUserAsync(u3.Id, new GroupInviteUserRequest { GroupId = work.Id, UserId = u4.Id, Role = GroupMemberRole.Member });
@@ -233,7 +228,6 @@ public class SeederController : ControllerBase
         await AcceptAllPendingInvitationsAsync(u4.Id, work.Id);
         await _groupMemberService.LeaveGroupAsync(u4.Id, work.Id);
 
-        // Gaming Team
         await _groupMemberService.InviteUserAsync(u4.Id, new GroupInviteUserRequest { GroupId = gaming.Id, UserId = u1.Id, Role = GroupMemberRole.Member });
         await _groupMemberService.InviteUserAsync(u4.Id, new GroupInviteUserRequest { GroupId = gaming.Id, UserId = u2.Id, Role = GroupMemberRole.Member });
         await _groupMemberService.InviteUserAsync(u4.Id, new GroupInviteUserRequest { GroupId = gaming.Id, UserId = u3.Id, Role = GroupMemberRole.Member });
@@ -346,7 +340,6 @@ public class SeederController : ControllerBase
             await _expenseService.CreateExpenseBatch(creator.Id, request);
         }
 
-        // Dodatkowe pokrycie: aktualizacja wybranego wydatku
         var firstExpense = await _dbContext.Expenses.Include(e => e.Items).FirstOrDefaultAsync();
         if (firstExpense != null && firstExpense.Items.Any())
         {
@@ -378,7 +371,6 @@ public class SeederController : ControllerBase
 
         await _friendService.InviteAsync(user4.Id, new FriendInviteRequest { TargetUserId = user1.Id });
 
-        // Dodatkowe pokrycie serwisu znajomych (Odrzucenie i usunięcie)
         var user3 = users[2];
         await _friendService.InviteAsync(user3.Id, new FriendInviteRequest { TargetUserId = user4.Id });
         var f2 = await _dbContext.Friends.FirstOrDefaultAsync(f => f.InviterId == user3.Id && f.ReceiverId == user4.Id);
@@ -410,14 +402,12 @@ public class SeederController : ControllerBase
         {
             if (i % 2 == 0)
             {
-                // Zamiast tworzyć nową wpłatę, wyślijmy przypomnienie o zapłacie istniejącego długu
                 await _settlementService.SendDebtReminderAsync(debt.CreditorId, new RemindDebtRequest { GroupId = debt.GroupId, DebtorUserId = debt.DebtorId });
                 i++;
                 _dbContext.ChangeTracker.Clear();
                 continue;
             }
 
-            // Settle a random portion of the debt (between 10% and 100%)
             var percentage = (decimal)(rnd.NextDouble() * 0.9 + 0.1);
             var amount = Math.Round(debt.Amount * percentage, 2);
             if (amount <= 0) amount = debt.Amount;

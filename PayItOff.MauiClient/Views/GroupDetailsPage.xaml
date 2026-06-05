@@ -363,39 +363,6 @@
                     </Border>
 
 
-                    <Border StrokeShape="RoundRectangle 24" BackgroundColor="{StaticResource SurfaceDark}"
-                            Padding="0" StrokeThickness="0" Margin="0,0,0,40">
-                        <VerticalStackLayout Spacing="0">
-                            <VerticalStackLayout Padding="30,24" Spacing="16">
-                                <Label Text="Historia zmian"
-                                       FontSize="28" FontAttributes="Bold"
-                                       TextColor="White"
-                                       HorizontalOptions="Center"/>
-                            </VerticalStackLayout>
-                            
-                            <BoxView HeightRequest="1" Color="#11FFFFFF" Margin="30,0" />
-
-                            <CollectionView ItemsSource="{Binding HistoryLogs}" Margin="30,15,30,30">
-                                <CollectionView.ItemTemplate>
-                                    <DataTemplate x:DataType="dto:AuditLogResponse">
-                                        <Border StrokeShape="RoundRectangle 16"
-                                                BackgroundColor="#15FFFFFF"
-                                                StrokeThickness="1" Stroke="#11FFFFFF"
-                                                Padding="16,12" Margin="0,0,0,15">
-                                            <Grid ColumnDefinitions="*, Auto" ColumnSpacing="10">
-                                                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
-                                                    <Label Text="{Binding ActionType}" FontSize="15" FontAttributes="Bold" TextColor="White"/>
-                                                    <Label Text="{Binding Details}" FontSize="13" TextColor="{StaticResource TextSubtle}" LineBreakMode="WordWrap"/>
-                                                </VerticalStackLayout>
-                                                <Label Grid.Column="1" Text="{Binding Timestamp, StringFormat='{0:dd.MM.yyyy HH:mm}'}" 
-                                                       FontSize="12" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center"/>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </CollectionView.ItemTemplate>
-                            </CollectionView>
-                        </VerticalStackLayout>
-                    </Border>
 
                 </VerticalStackLayout>
             </ScrollView>

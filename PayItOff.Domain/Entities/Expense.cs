@@ -69,7 +69,7 @@ namespace PayItOff.Domain.Entities
         {
             var debts = new Dictionary<int, decimal>();
 
-            foreach (ExpenseItem item in _items)
+            foreach (ExpenseItem item in _items.Where(i => i.ExpenseGroupId == null))
             {
                 foreach (ExpenseSplit split in item.Splits)
                 {
@@ -108,7 +108,7 @@ namespace PayItOff.Domain.Entities
         }
         public void RecalculateTotal()
         {
-            decimal itemsSum = _items.Sum(item => item.TotalPrice);
+            decimal itemsSum = _items.Where(i => i.ExpenseGroupId == null).Sum(item => item.TotalPrice);
             decimal groupsSum = _groups.Sum(group => group.TotalAmount);
 
             TotalAmount = itemsSum + groupsSum;
