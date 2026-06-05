@@ -835,6 +835,20 @@ Aby poprawnie uruchomić system PayItOff, należy skonfigurować i uruchomić ob
     \item Zainstalowane i uruchomione narzędzie \textbf{Docker Desktop} (niezbędne do konteneryzacji bazy danych i serwera API).
 \end{itemize}
 
+\subsection{Krok 0: Pobranie projektu i instalacja zależności}
+Przed przystąpieniem do uruchomienia, pobierz kod źródłowy z repozytorium:
+\begin{enumerate}
+    \item Wykonaj klonowanie repozytorium przy użyciu klienta Git:
+    \begin{verbatim}
+    git clone https://github.com/Kaparee/PayItOff.git
+    \end{verbatim}
+    \item Wejdź do utworzonego katalogu i przywróć pakiety NuGet:
+    \begin{verbatim}
+    cd PayItOff
+    dotnet restore PayItOff.sln
+    \end{verbatim}
+\end{enumerate}
+
 \subsection{Krok 1: Uruchomienie Serwera i Bazy Danych (Backend)}
 Zarządzanie środowiskiem serwerowym oraz bazą danych odbywa się za pomocą środowisk kontenerowych, co wyklucza typowe problemy z konfiguracją środowiska lokalnego u różnych programistów.
 \begin{enumerate}
@@ -844,6 +858,20 @@ Zarządzanie środowiskiem serwerowym oraz bazą danych odbywa się za pomocą �
     docker-compose up -d --build
     \end{verbatim}
     \item Proces ten pobierze odpowiednie obrazy systemowe, uruchomi relacyjną bazę danych, a następnie zaimplementuje migracje struktury bazy (Entity Framework). Serwer Web API rozpocznie nasłuchiwanie żądań HTTP.
+    \item Po uruchomieniu kontenerów zaleca się napełnienie bazy danymi testowymi. W tym celu należy wejść pod adres \url{http://localhost:5180/swagger}, zlokalizować kontroler \textbf{Seeder} i wywołać metodę \texttt{heavy-login-seed} wpisując hasło admin1234. Można to także zrobić bedąc w oknie Logowania aplikacji MAUI.
+    \item Po jej wykonaniu, wygenerowane zostaną cztery konta: 
+    \newline Użytkownik 1
+    \newline Nickname: \texttt{JakubPlocica} 
+    \newline Password: \texttt{JakubPlocica123!}
+    \newline Użytkownik 2
+    \newline Nickname: \texttt{JaninaKwiat} 
+    \newline Password: \texttt{JaninaKwiat123!}
+    \newline Użytkownik 3
+    \newline Nickname: \texttt{MarekKowalski}
+    \newline Password: \texttt{MarekKowalski123!}
+    \newline Użytkownik 4
+    \newline Nickname: \texttt{ZosiaWisniewska}
+    \newline Password: \texttt{ZosiaWisniewska123!}
 \end{enumerate}
 \textit{Alternatywa deweloperska:} Serwer API można również uruchomić bezpośrednio z poziomu Visual Studio, wybierając projekt \texttt{PayItOff.Api} jako startowy (np. profil \texttt{http} / \texttt{https}), przy czym kontener z samą bazą danych nadal musi być aktywny.
 
