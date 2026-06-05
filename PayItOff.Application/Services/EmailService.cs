@@ -1,4 +1,4 @@
-﻿using MailKit.Net.Smtp;
+using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
@@ -9,6 +9,8 @@ namespace PayItOff.Application.Services
 {
     public class EmailService : IEmailService
     {
+        public static bool IsDisabledForSeeder { get; set; } = false;
+
         private readonly IConfiguration _configuration;
 
         public EmailService(IConfiguration configuration)
@@ -18,6 +20,8 @@ namespace PayItOff.Application.Services
 
         public async Task SendEmailAsync(string to, string subject, string body)
         {
+            if (IsDisabledForSeeder) return;
+
             var email = new MimeMessage();
 
             email.From.Add(new MailboxAddress(_configuration["EmailSettings:FromName"], _configuration["EmailSettings:FromAddress"]!));

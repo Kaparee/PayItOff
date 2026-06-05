@@ -111,12 +111,15 @@ public partial class LoginViewModel : PopupViewModelBase
     {
         if (IsBusy) return;
 
+        var password = await App.Current.MainPage!.DisplayPromptAsync("Seeder", "Wpisz hasło do seedera", "Uruchom", "Anuluj", "Hasło");
+        if (string.IsNullOrWhiteSpace(password)) return;
+
         IsBusy = true;
         HasError = false;
 
         try
         {
-            await _authService.SeedHeavyLoginDataAsync();
+            await _authService.SeedHeavyLoginDataAsync(password);
             await ShowAlertAsync("Seeder", "Seeder został wykonany. Możesz zalogować się na JakubPlocica.", "OK");
         }
         catch (Exception ex)

@@ -44,9 +44,9 @@ public class AuthService
         }
     }
 
-    public async Task SeedHeavyLoginDataAsync()
+    public async Task SeedHeavyLoginDataAsync(string password)
     {
-        var response = await _httpClient.PostAsync("Seeder/heavy-login-seed", null);
+        var response = await _httpClient.PostAsync($"Seeder/heavy-login-seed?password={password}", null);
         if (!response.IsSuccessStatusCode)
         {
             var error = await response.Content.ReadAsStringAsync();

@@ -144,7 +144,7 @@ public class GroupMemberService : IGroupMemberService
             await _groupRepository.UpdateAsync(targetUser.Group);
         }
 
-        await _notificationService.CreateNotificationAsync(targetUser.Id, userId, NotificationType.Normal, $"Twoja rola w grupie '{group.Name}' została zmieniona przez {actor.User!.FullName} na {request.NewRole.ToString()}", request.GroupId, EntityType.Groups);
+        await _notificationService.CreateNotificationAsync(targetUser.UserId, userId, NotificationType.Normal, $"Twoja rola w grupie '{group.Name}' została zmieniona przez {actor.User!.FullName} na {request.NewRole.ToString()}", request.GroupId, EntityType.Groups);
         await _groupMemberRepository.UpdateAsync(targetUser);
         await _unitOfWork.SaveChangesAsync();
     }
