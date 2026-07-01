@@ -102,11 +102,12 @@ PayItOff/
 ### Dashboard i Nawigacja
 
 <p align="center">
-  <img src="img/main/main_pusty.png" width="30%" alt="Dashboard pusty"/>
+  <img src="img/main/main_pusty.png" width="45%" alt="Dashboard pusty"/>
   &nbsp;
-  <img src="img/main/main_po_dodaniu_wydatku.png" width="30%" alt="Dashboard z wydatkami"/>
-  &nbsp;
-  <img src="img/sidebar.png" width="30%" alt="Menu boczne"/>
+  <img src="img/main/main_po_dodaniu_wydatku.png" width="45%" alt="Dashboard z wydatkami"/>
+</p>
+<p align="center">
+  <img src="img/sidebar.png" width="25%" alt="Menu boczne"/>
 </p>
 
 Dashboard prezentuje sumaryczne saldo przychodów i wydatków, karuzelę aktywnych grup oraz ostatnie powiadomienia. Boczne menu (SidebarMenu) podświetla aktualnie otwartą zakładkę i obsługuje wylogowanie z czyszczeniem SecureStorage.
