@@ -14,9 +14,10 @@ public partial class MainPage : ContentPage
         BindingContext = _viewModel;
     }
 
-    protected override async void OnAppearing()
+    protected override async void OnNavigatedTo(NavigatedToEventArgs args)
     {
-        base.OnAppearing();
+        base.OnNavigatedTo(args);
+
         if (_viewModel != null)
         {
             await _viewModel.LoadDashboardDataAsync();

@@ -1,10 +1,10 @@
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace PayItOff.MauiClient.Converters;
 
 public class DecimalConverter : IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is decimal d)
         {
@@ -13,7 +13,7 @@ public class DecimalConverter : IValueConverter
         return value;
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is string s && !string.IsNullOrWhiteSpace(s))
         {
@@ -28,3 +28,4 @@ public class DecimalConverter : IValueConverter
         return 0m;
     }
 }
+

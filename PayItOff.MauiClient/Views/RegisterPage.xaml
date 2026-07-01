@@ -1,6 +1,7 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:PayItOff.MauiClient.Controls"
              xmlns:viewmodels="clr-namespace:PayItOff.MauiClient.ViewModels"
              x:Class="PayItOff.MauiClient.Views.RegisterPage"
              x:DataType="viewmodels:RegisterViewModel"
@@ -20,43 +21,79 @@
 
     <Grid>
         <ScrollView>
-        <VerticalStackLayout Spacing="15" Padding="{OnIdiom Phone='20', Default='30'}" VerticalOptions="Center" MaximumWidthRequest="450">
+        <VerticalStackLayout Spacing="15" Padding="{OnPlatform iOS='20,40,20,40', Android='20,30,20,40', Default='30'}" VerticalOptions="Start" MaximumWidthRequest="450">
 
             <Label Text="Stwórz konto" Style="{StaticResource Headline}" HorizontalOptions="Center" Margin="0,0,0,10" />
 
             <VerticalStackLayout Spacing="5">
-                <Label Text="Email" TextColor="{StaticResource TextSubtle}" Margin="15,0,0,0" />
-                <Border Style="{StaticResource BaseEntryBorderStyle}">
-                    <Entry Text="{Binding Email}" Placeholder="email@przyklad.pl" Keyboard="Email" ReturnType="Next" />
+                <Label Margin="15,0,0,0">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Email " TextColor="{StaticResource TextSubtle}" />
+                            <Span Text="*" TextColor="Red" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label Text="Służy tylko do logowania. Nie wysyłamy żadnych wiadomości." FontSize="10" TextColor="{StaticResource TextSubtle}" Margin="15,0,0,5" />
+                <Border StrokeShape="RoundRectangle 10" Style="{StaticResource BaseEntryBorderStyle}">
+                    <Entry Text="{Binding Email}" Placeholder="email@przyklad.pl" Keyboard="Email" ReturnType="Next" IsSpellCheckEnabled="False" IsTextPredictionEnabled="False" />
                 </Border>
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="5">
-                <Label Text="Nazwa użytkownika (Nick)" TextColor="{StaticResource TextSubtle}" Margin="15,0,0,0" />
-                <Border Style="{StaticResource BaseEntryBorderStyle}">
-                    <Entry Text="{Binding Nickname}" Placeholder="TwojNick" ReturnType="Next" />
+                <Label Margin="15,0,0,0">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Nazwa użytkownika (Nick) " TextColor="{StaticResource TextSubtle}" />
+                            <Span Text="*" TextColor="Red" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Border StrokeShape="RoundRectangle 10" Style="{StaticResource BaseEntryBorderStyle}">
+                    <Entry Text="{Binding Nickname}" Placeholder="TwojNick" ReturnType="Next" IsSpellCheckEnabled="False" IsTextPredictionEnabled="False" />
                 </Border>
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="5">
-                <Label Text="Imię" TextColor="{StaticResource TextSubtle}" Margin="15,0,0,0" />
-                <Border Style="{StaticResource BaseEntryBorderStyle}">
-                    <Entry Text="{Binding Name}" Placeholder="Jan" ReturnType="Next" />
+                <Label Margin="15,0,0,0">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Imię " TextColor="{StaticResource TextSubtle}" />
+                            <Span Text="*" TextColor="Red" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Border StrokeShape="RoundRectangle 10" Style="{StaticResource BaseEntryBorderStyle}">
+                    <Entry Text="{Binding Name}" Placeholder="Jan" ReturnType="Next" IsSpellCheckEnabled="False" IsTextPredictionEnabled="False" />
                 </Border>
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="5">
-                <Label Text="Nazwisko" TextColor="{StaticResource TextSubtle}" Margin="15,0,0,0" />
-                <Border Style="{StaticResource BaseEntryBorderStyle}">
-                    <Entry Text="{Binding Surname}" Placeholder="Kowalski" ReturnType="Next" />
+                <Label Margin="15,0,0,0">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Nazwisko " TextColor="{StaticResource TextSubtle}" />
+                            <Span Text="*" TextColor="Red" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Border StrokeShape="RoundRectangle 10" Style="{StaticResource BaseEntryBorderStyle}">
+                    <Entry Text="{Binding Surname}" Placeholder="Kowalski" ReturnType="Next" IsSpellCheckEnabled="False" IsTextPredictionEnabled="False" />
                 </Border>
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="5">
-                <Label Text="Hasło" TextColor="{StaticResource TextSubtle}" Margin="15,10,0,0" />
+                <Label Margin="15,10,0,0">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Hasło " TextColor="{StaticResource TextSubtle}" />
+                            <Span Text="*" TextColor="Red" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
                 <Label Text="Min. 8 znaków, wielka litera, cyfra i znak specjalny" FontSize="10" TextColor="{StaticResource TextSubtle}" Margin="15,0,0,5" />
 
-                <Border Style="{StaticResource PasswordEntryBorderStyle}">
+                <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PasswordEntryBorderStyle}">
                     <Grid ColumnDefinitions="*, Auto">
                         <Entry Grid.Column="0"
                                Text="{Binding Password}"
@@ -78,30 +115,34 @@
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="5">
-                <Label Text="Numer telefonu" TextColor="{StaticResource TextSubtle}" Margin="15,0,0,0" />
-                <Border Style="{StaticResource BaseEntryBorderStyle}">
+                <Label Text="Numer telefonu (Opcjonalne)" TextColor="{StaticResource TextSubtle}" Margin="15,0,0,0" />
+                <Border StrokeShape="RoundRectangle 10" Style="{StaticResource BaseEntryBorderStyle}">
                     <Entry Text="{Binding PhoneNumber}"
                            Placeholder="+48 123 456 789"
                            Keyboard="Telephone"
-                           ReturnType="Next" />
+                           ReturnType="Next"
+                           IsSpellCheckEnabled="False"
+                           IsTextPredictionEnabled="False" />
                 </Border>
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="5">
-                <Label Text="Numer konta (IBAN)" TextColor="{StaticResource TextSubtle}" Margin="15,0,0,0" />
-                <Border Style="{StaticResource BaseEntryBorderStyle}">
+                <Label Text="Numer konta (IBAN) (Opcjonalne)" TextColor="{StaticResource TextSubtle}" Margin="15,0,0,0" />
+                <Border StrokeShape="RoundRectangle 10" Style="{StaticResource BaseEntryBorderStyle}">
                     <Entry Text="{Binding IBAN}"
                            Placeholder="PL 00 0000 0000..."
                            Keyboard="Text"
-                           ReturnType="Done" />
+                           ReturnType="Done"
+                           IsSpellCheckEnabled="False"
+                           IsTextPredictionEnabled="False" />
                 </Border>
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="10" Margin="0,10,0,20" HorizontalOptions="Center">
-                <Border Stroke="#7F00FF"
+                <Border StrokeShape="RoundRectangle 10" Stroke="#7F00FF"
                         StrokeThickness="2"
-                        HeightRequest="120"
-                        WidthRequest="120"
+                        HeightRequest="80"
+                        WidthRequest="80"
                         HorizontalOptions="Center">
 
                     <Border.GestureRecognizers>
@@ -109,15 +150,15 @@
                     </Border.GestureRecognizers>
 
                     <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="60" />
+                        <RoundRectangle />
                     </Border.StrokeShape>
 
                     <Grid>
-                        <BoxView Color="#2B2B3D" CornerRadius="60" />
+                        <BoxView Color="#2B2B3D" />
 
                         <Image Source="camera_icon.png"
-                               WidthRequest="40"
-                               HeightRequest="40"
+                               WidthRequest="32"
+                               HeightRequest="32"
                                HorizontalOptions="Center"
                                VerticalOptions="Center"
                                IsVisible="{Binding IsAvatarPlaceholderVisible}" />
@@ -134,13 +175,12 @@
                        HorizontalOptions="Center" />
             </VerticalStackLayout>
 
-            <Button Text="Zarejestruj się"
+            <controls:AppButton Text="Zarejestruj się"
                     Command="{Binding RegisterCommand}"
                     Margin="0,10,0,0" />
 
-            <Button Text="Masz już konto? Zaloguj się"
-                    Style="{StaticResource GhostButtonStyle}"
-                    TextColor="{StaticResource BrandViolet}"
+            <controls:AppButton Text="Masz już konto? Zaloguj się"
+                    ButtonBackgroundColor="Transparent" ButtonTextColor="{StaticResource BrandViolet}"
                     Command="{Binding GoToLoginCommand}" />
 
             <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" Color="{StaticResource BrandViolet}" />
@@ -150,14 +190,14 @@
 
         <!-- Custom Alert Popup -->
         <Grid IsVisible="{Binding IsCustomAlertVisible}" Style="{StaticResource PopupOverlayStyle}" ZIndex="500">
-            <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400">
+            <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400">
                 <VerticalStackLayout Spacing="15">
                     <Label Text="{Binding CustomAlertTitle}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
                     <Label Text="{Binding CustomAlertMessage}" FontSize="14" TextColor="{StaticResource TextSubtle}" LineBreakMode="WordWrap" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
 
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,15,0,0">
-                        <Button Grid.Column="0" Text="{Binding CustomAlertCancelText}" Command="{Binding CloseAlertCommand}" CommandParameter="False" Style="{StaticResource SecondaryButtonStyle}" IsVisible="{Binding IsCustomAlertCancelVisible}"/>
-                        <Button Grid.Column="{Binding AlertAcceptColumn}" Grid.ColumnSpan="{Binding AlertAcceptColumnSpan}" Text="{Binding CustomAlertAcceptText}" Command="{Binding CloseAlertCommand}" CommandParameter="True" Style="{StaticResource PrimaryButtonStyle}" />
+                        <controls:AppButton Grid.Column="0" Text="{Binding CustomAlertCancelText}" Command="{Binding CloseAlertCommand}" CommandParameter="False" ButtonBackgroundColor="{StaticResource SurfaceDark}" ButtonTextColor="{StaticResource TextMain}" IsVisible="{Binding IsCustomAlertCancelVisible}"/>
+                        <controls:AppButton Grid.Column="{Binding AlertAcceptColumn}" Grid.ColumnSpan="{Binding AlertAcceptColumnSpan}" Text="{Binding CustomAlertAcceptText}" Command="{Binding CloseAlertCommand}" CommandParameter="True" ButtonBackgroundColor="{StaticResource PrimaryViolet}" ButtonTextColor="{StaticResource TextMain}" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
@@ -165,3 +205,5 @@
 
     </Grid>
 </ContentPage>
+
+

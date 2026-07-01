@@ -9,7 +9,7 @@ public class AuditLogResponse
     public string ActorName { get; set; } = string.Empty;
     public string ActorAvatarUrl { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    
+
     // Zserializowane dane starych i nowych wartości (opcjonalnie do wyświetlania detali)
     public string? OldValues { get; set; }
     public string? NewValues { get; set; }

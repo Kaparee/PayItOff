@@ -32,7 +32,7 @@ public class AuditLogRepository : IAuditLogRepository
 
         var logs = await _context.AuditLogs
             .Include(a => a.User)
-            .Where(a => 
+            .Where(a =>
                 (a.EntityType == EntityType.Groups && a.EntityId == groupId) ||
                 (a.EntityType == EntityType.Expenses && expenseIds.Contains(a.EntityId)) ||
                 (a.EntityType == EntityType.GroupMembers && memberIds.Contains(a.EntityId))

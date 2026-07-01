@@ -9,7 +9,7 @@ namespace PayItOff.Application.Validators
         public RegisterRequestValidator()
         {
             RuleFor(x => x.Email).NotEmpty().EmailAddress().WithMessage("Podaj poprawny adres Email.");
-            RuleFor(x => x.Password).MinimumLength(8).Matches(new Regex("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])")).WithMessage("Hasło musi mieć min. 8 znaków, składać się z małych i dużych liter oraz znaku specjalnego");
+            RuleFor(x => x.Password).MinimumLength(8).Matches(new Regex("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*.-])")).WithMessage("Hasło musi mieć min. 8 znaków, składać się z małych i dużych liter oraz znaku specjalnego");
             RuleFor(x => x.Nickname).MinimumLength(3).WithMessage("Nick musi mieć więcej niz 3 znaki.");
             RuleFor(x => x.PhoneNumber)
                 .Matches(@"^(\+48\s?)?[0-9]{3}\s?[0-9]{3}\s?[0-9]{3}$")

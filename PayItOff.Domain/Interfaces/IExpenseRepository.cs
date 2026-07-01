@@ -8,4 +8,6 @@ public interface IExpenseRepository
     Task UpdateAsync(Expense expense);
     Task<Expense?> GetExpenseWithSplitsAsync(int expenseId);
     Task<List<Expense>> GetExpensesByGroupIdAsync(int groupId);
+    Task DeleteAsync(Expense expense);
+    Task DeleteExpenseItemAsync(ExpenseItem item);
 }

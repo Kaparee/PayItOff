@@ -13,9 +13,10 @@ public partial class FriendsPage : ContentPage
         BindingContext = _viewModel;
     }
 
-    protected override void OnAppearing()
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
-        base.OnAppearing();
+        base.OnNavigatedTo(args);
+
         _viewModel.LoadFriendsCommand.Execute(null);
     }
 }

@@ -24,6 +24,18 @@ public class ExpenseRepository : IExpenseRepository
         _context.Expenses.Update(expense);
         return Task.CompletedTask;
     }
+    public Task DeleteAsync(Expense expense)
+    {
+        expense.Delete();
+        _context.Expenses.Update(expense);
+        return Task.CompletedTask;
+    }
+    public Task DeleteExpenseItemAsync(ExpenseItem item)
+    {
+        _context.ExpenseSplits.RemoveRange(item.Splits);
+        _context.ExpenseItems.Remove(item);
+        return Task.CompletedTask;
+    }
     public async Task<Expense?> GetExpenseWithSplitsAsync(int expenseId)
     {
         return await _context.Expenses
@@ -35,6 +47,7 @@ public class ExpenseRepository : IExpenseRepository
                 .ThenInclude(g => g.Items)
                     .ThenInclude(i => i.Splits)
                         .ThenInclude(s => s.User)
+            .Include(e => e.Photos)
             .FirstOrDefaultAsync(x => x.Id == expenseId && x.DeletedAt == null);
     }
 
@@ -49,6 +62,7 @@ public class ExpenseRepository : IExpenseRepository
                 .ThenInclude(g => g.Items)
                     .ThenInclude(i => i.Splits)
                         .ThenInclude(s => s.User)
+            .Include(e => e.Photos)
             .Where(e => e.GroupId == groupId && e.DeletedAt == null)
             .OrderByDescending(e => e.PurchasedAt)
             .ToListAsync();

@@ -23,6 +23,12 @@ public partial class FriendsViewModel : BaseViewModel
     public partial bool IsInvitePopupVisible { get; set; }
 
     [ObservableProperty]
+    public partial bool IsFriendDetailsPopupVisible { get; set; }
+
+    [ObservableProperty]
+    public partial FriendDisplayModel? SelectedFriendForDetails { get; set; }
+
+    [ObservableProperty]
     public partial string InviteFriendId { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -198,6 +204,21 @@ public partial class FriendsViewModel : BaseViewModel
         if (group == null) return;
         IsSharedGroupsPopupVisible = false;
         await Shell.Current.GoToAsync($"//GroupDetailsPage?groupId={group.GroupId}");
+    }
+
+    [RelayCommand]
+    private void ShowFriendDetailsPopup(FriendDisplayModel friend)
+    {
+        if (friend == null) return;
+        SelectedFriendForDetails = friend;
+        IsFriendDetailsPopupVisible = true;
+    }
+
+    [RelayCommand]
+    private void CloseFriendDetailsPopup()
+    {
+        IsFriendDetailsPopupVisible = false;
+        SelectedFriendForDetails = null;
     }
 
     [RelayCommand]
@@ -542,8 +563,8 @@ public class FriendDisplayModel
     public decimal Expense => _friend?.Expense ?? 0;
 
     public string AvatarUrl => string.IsNullOrWhiteSpace(_friend?.AvatarUrl ?? _pending?.AvatarUrl)
-        ? "default-user-avatar.png"
-        : (_friend?.AvatarUrl ?? _pending?.AvatarUrl!);
+        ? "default_user_avatar.png"
+        : _friend?.AvatarUrl ?? _pending?.AvatarUrl!;
 
     public string FullName => _friend != null
         ? $"{_friend.Name} {_friend.Surname}".Trim()
@@ -565,7 +586,7 @@ public class FriendDisplayModel
     public bool IsReceivedPending => Status == FriendshipStatus.ReceivedPending;
 
     public List<SharedGroupResponse> SharedGroupsList => _friend?.SharedGroups ?? new List<SharedGroupResponse>();
-    public bool HasSharedGroups => SharedGroupsList.Count > 0;
+    public bool HasSharedGroups => SharedGroupsList.Count > 0 && IsAccepted;
     public bool HasNickname => !string.IsNullOrWhiteSpace(_friend?.Nickname ?? _pending?.Nickname);
     public bool HasPhoneNumber => !string.IsNullOrWhiteSpace(_friend?.PhoneNumber);
 

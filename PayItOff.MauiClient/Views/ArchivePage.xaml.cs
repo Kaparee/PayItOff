@@ -10,9 +10,10 @@ public partial class ArchivePage : ContentPage
         BindingContext = vm;
     }
 
-    protected override async void OnAppearing()
+    protected override async void OnNavigatedTo(NavigatedToEventArgs args)
     {
-        base.OnAppearing();
+        base.OnNavigatedTo(args);
+
         if (BindingContext is ArchiveViewModel vm)
         {
             await vm.LoadArchivedGroupsAsync();

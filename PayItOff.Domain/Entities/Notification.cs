@@ -5,12 +5,12 @@ namespace PayItOff.Domain.Entities
     public class Notification
     {
         public int Id { get; private set; }
-        public User User { get; private set; }
-        public User Actor { get; private set; }
+        public User User { get; private set; } = null!;
+        public User Actor { get; private set; } = null!;
         public int UserId { get; private set; }
         public int ActorId { get; private set; }
         public NotificationType Type { get; private set; }
-        public string Body { get; private set; }
+        public string Body { get; private set; } = string.Empty;
         public NotificationStatus Status { get; private set; }
         public int EntityId { get; private set; }
         public EntityType EntityType { get; private set; }

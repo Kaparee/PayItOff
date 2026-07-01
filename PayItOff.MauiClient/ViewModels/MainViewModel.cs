@@ -82,35 +82,53 @@ public partial class MainViewModel : BaseViewModel
             var groupsResult = await groupsTask;
             var notificationsResult = await notifTask;
 
-            Incomes = new ObservableCollection<DebtDisplayItem>(incResult.Items.Select(i => new DebtDisplayItem
+            Incomes.Clear();
+            foreach (var i in incResult.Items)
             {
-                UserId = i.UserId,
-                FullName = $"{i.Name} {i.Surname}",
-                AvatarUrl = i.AvatarUrl,
-                Amount = i.Amount,
-                Date = i.Date,
-                CategoriesDisplay = i.Categories != null ? string.Join(", ", i.Categories) : "Brak"
-            }));
+                Incomes.Add(new DebtDisplayItem
+                {
+                    UserId = i.UserId,
+                    FullName = $"{i.Name} {i.Surname}",
+                    AvatarUrl = i.AvatarUrl,
+                    Amount = i.Amount,
+                    Date = i.Date,
+                    CategoriesDisplay = i.Categories != null ? string.Join(", ", i.Categories) : "Brak"
+                });
+            }
 
             TotalIncomes = incResult.TotalAmount;
 
-            Expenses = new ObservableCollection<DebtDisplayItem>(expResult.Items.Select(e => new DebtDisplayItem
+            Expenses.Clear();
+            foreach (var e in expResult.Items)
             {
-                UserId = e.UserId,
-                FullName = $"{e.Name} {e.Surname}",
-                AvatarUrl = e.AvatarUrl,
-                Amount = e.Amount,
-                Date = e.Date,
-                CategoriesDisplay = e.Categories != null ? string.Join(", ", e.Categories) : "Brak"
-            }));
+                Expenses.Add(new DebtDisplayItem
+                {
+                    UserId = e.UserId,
+                    FullName = $"{e.Name} {e.Surname}",
+                    AvatarUrl = e.AvatarUrl,
+                    Amount = e.Amount,
+                    Date = e.Date,
+                    CategoriesDisplay = e.Categories != null ? string.Join(", ", e.Categories) : "Brak"
+                });
+            }
 
             TotalExpenses = expResult.TotalAmount;
 
-            ActiveGroups = new ObservableCollection<ActiveGroupsDisplayResponse>(groupsResult);
+            ActiveGroups.Clear();
+            if (groupsResult != null)
+            {
+                foreach (var g in groupsResult)
+                {
+                    g.AvatarUrl = g.AvatarUrl;
+                    ActiveGroups.Add(g);
+                }
+            }
 
-            LastNotifications = new ObservableCollection<NotificationDisplayItem>(
-                (notificationsResult ?? Enumerable.Empty<NotificationResponse>()).Select(NotificationDisplayItem.FromResponse)
-            );
+            LastNotifications.Clear();
+            if (notificationsResult != null)
+            {
+                foreach (var n in notificationsResult) LastNotifications.Add(NotificationDisplayItem.FromResponse(n));
+            }
         }
         catch (Exception ex)
         {

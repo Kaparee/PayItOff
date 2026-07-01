@@ -141,7 +141,7 @@ public partial class WalletViewModel : PopupViewModelBase
 
     [ObservableProperty] public partial bool IsTransactionDetailsPopupVisible { get; set; }
     [ObservableProperty] public partial WalletPersonUiModel? SelectedTransactionDetails { get; set; }
-    [ObservableProperty] public partial ExpenseDetailsResponse? SelectedExpenseDetails { get; set; }
+    [ObservableProperty][NotifyPropertyChangedFor(nameof(HasExpensePhotos))] public partial ExpenseDetailsResponse? SelectedExpenseDetails { get; set; }
 
 
     public WalletViewModel(SettlementService settlementService, ExpenseService expenseService)
@@ -272,7 +272,8 @@ public partial class WalletViewModel : PopupViewModelBase
     {
         if (string.IsNullOrWhiteSpace(SearchText))
         {
-            Transactions = new ObservableCollection<WalletPersonUiModel>(_allTransactions);
+            Transactions.Clear();
+            foreach (var t in _allTransactions) Transactions.Add(t);
             return;
         }
 
@@ -282,7 +283,8 @@ public partial class WalletViewModel : PopupViewModelBase
             t.Description.ToLower().Contains(lowerValue) ||
             t.Amount.ToString().Contains(lowerValue)).ToList();
 
-        Transactions = new ObservableCollection<WalletPersonUiModel>(filtered);
+        Transactions.Clear();
+        foreach (var f in filtered) Transactions.Add(f);
     }
 
     [RelayCommand]
@@ -506,12 +508,22 @@ public partial class WalletViewModel : PopupViewModelBase
             IsBusy = true;
             try
             {
-                var details = await _expenseService.GetExpenseDetailsAsync(item.ExpenseId);
-                SelectedExpenseDetails = details;
+                SelectedExpenseDetails = await _expenseService.GetExpenseDetailsAsync(item.ExpenseId);
+                if (SelectedExpenseDetails != null)
+                {
+                    SelectedExpenseDetails.PayerAvatarUrl = SelectedExpenseDetails.PayerAvatarUrl;
+                    if (SelectedExpenseDetails.Participants != null)
+                    {
+                        foreach (var participant in SelectedExpenseDetails.Participants)
+                        {
+                            participant.AvatarUrl = participant.AvatarUrl;
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
-                await ShowAlertAsync("Błąd", "Nie udało się pobrać szczegółów wydatku."+ ex, "OK");
+                await ShowAlertAsync("Błąd", "Nie udało się pobrać szczegółów wydatku." + ex, "OK");
                 IsBusy = false;
                 return;
             }
@@ -609,29 +621,37 @@ public partial class WalletViewModel : PopupViewModelBase
     {
         if (string.IsNullOrWhiteSpace(SearchDebtText))
         {
-            FilteredPayableDebtOptions = new ObservableCollection<PayableDebtOptionResponse>(_allDebtOptions);
+            FilteredPayableDebtOptions.Clear();
+            foreach (var o in _allDebtOptions) FilteredPayableDebtOptions.Add(o);
             return;
         }
 
         var lower = SearchDebtText.ToLower();
-        FilteredPayableDebtOptions = new ObservableCollection<PayableDebtOptionResponse>(
-            _allDebtOptions.Where(x =>
+        FilteredPayableDebtOptions.Clear();
+        foreach (var x in _allDebtOptions.Where(x =>
                 x.CreditorName.ToLower().Contains(lower) ||
                 x.CreditorSurname.ToLower().Contains(lower) ||
-                x.GroupName.ToLower().Contains(lower)));
+                x.GroupName.ToLower().Contains(lower)))
+        {
+            FilteredPayableDebtOptions.Add(x);
+        }
     }
 
     private void ApplyNetPaySearchFilter()
     {
         if (string.IsNullOrWhiteSpace(SearchDebtText))
         {
-            FilteredNetPayCreditors = new ObservableCollection<DebtDisplayItem>(_allNetPayCreditors);
+            FilteredNetPayCreditors.Clear();
+            foreach (var c in _allNetPayCreditors) FilteredNetPayCreditors.Add(c);
             return;
         }
 
         var lower = SearchDebtText.ToLower();
-        FilteredNetPayCreditors = new ObservableCollection<DebtDisplayItem>(
-            _allNetPayCreditors.Where(x => x.FullName.ToLower().Contains(lower)));
+        FilteredNetPayCreditors.Clear();
+        foreach (var x in _allNetPayCreditors.Where(x => x.FullName.ToLower().Contains(lower)))
+        {
+            FilteredNetPayCreditors.Add(x);
+        }
     }
 
     private async Task LoadNetPayCreditorsAsync()
@@ -641,7 +661,7 @@ public partial class WalletViewModel : PopupViewModelBase
         {
             UserId = e.UserId,
             FullName = $"{e.Name} {e.Surname}",
-            AvatarUrl = e.AvatarUrl ?? string.Empty,
+            AvatarUrl = e.AvatarUrl,
             CategoriesDisplay = e.Categories != null && e.Categories.Count > 0 ? string.Join(", ", e.Categories) : "—",
             Date = e.Date,
             Amount = e.Amount
@@ -663,7 +683,8 @@ public partial class WalletViewModel : PopupViewModelBase
         {
             var options = await _settlementService.GetPayableDebtOptionsAsync();
             _allDebtOptions = options ?? new List<PayableDebtOptionResponse>();
-            FilteredPayableDebtOptions = new ObservableCollection<PayableDebtOptionResponse>(_allDebtOptions);
+            FilteredPayableDebtOptions.Clear();
+            foreach (var o in _allDebtOptions) FilteredPayableDebtOptions.Add(o);
 
             await LoadNetPayCreditorsAsync();
 
@@ -728,8 +749,85 @@ public partial class WalletViewModel : PopupViewModelBase
         IsNetPayMode = true;
         FilterType = "All";
         TargetIdFilter = null;
-        Transactions = new ObservableCollection<WalletPersonUiModel>();
+        Transactions.Clear();
 
         await Shell.Current.GoToAsync("//MainPage");
+    }
+
+    // ===== PHOTO VIEWER =====
+    [ObservableProperty]
+    public partial bool IsPhotoViewerVisible { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasExpensePhotos))]
+    public partial ObservableCollection<string> ExpensePhotosToView { get; set; } = new();
+
+    [ObservableProperty]
+    public partial string? SelectedExpensePhotoUrl { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PhotoViewerTitle))]
+    public partial int SelectedPhotoIndex { get; set; }
+
+    public bool HasExpensePhotos => SelectedExpenseDetails?.ReceiptPhotos?.Count > 0;
+    public string PhotoViewerTitle => ExpensePhotosToView.Count > 0
+        ? $"Zdjęcie {SelectedPhotoIndex + 1} / {ExpensePhotosToView.Count}"
+        : "Brak zdjęć";
+
+    [RelayCommand]
+    private void ShowExpensePhotos()
+    {
+        if (SelectedExpenseDetails?.ReceiptPhotos == null || SelectedExpenseDetails.ReceiptPhotos.Count == 0)
+            return;
+
+        ExpensePhotosToView.Clear();
+        foreach (var url in SelectedExpenseDetails.ReceiptPhotos)
+        {
+            if (string.IsNullOrEmpty(url)) continue;
+            ExpensePhotosToView.Add(url);
+        }
+
+        SelectedPhotoIndex = 0;
+        SelectedExpensePhotoUrl = ExpensePhotosToView[0];
+        OnPropertyChanged(nameof(HasExpensePhotos));
+        OnPropertyChanged(nameof(PhotoViewerTitle));
+        IsPhotoViewerVisible = true;
+    }
+
+    [RelayCommand]
+    private void ClosePhotoViewer()
+    {
+        IsPhotoViewerVisible = false;
+    }
+
+    [RelayCommand]
+    private void PhotoSwipeLeft()
+    {
+        if (ExpensePhotosToView.Count == 0) return;
+        SelectedPhotoIndex = (SelectedPhotoIndex + 1) % ExpensePhotosToView.Count;
+        SelectedExpensePhotoUrl = ExpensePhotosToView[SelectedPhotoIndex];
+        OnPropertyChanged(nameof(PhotoViewerTitle));
+    }
+
+    [RelayCommand]
+    private void PhotoSwipeRight()
+    {
+        if (ExpensePhotosToView.Count == 0) return;
+        SelectedPhotoIndex = (SelectedPhotoIndex - 1 + ExpensePhotosToView.Count) % ExpensePhotosToView.Count;
+        SelectedExpensePhotoUrl = ExpensePhotosToView[SelectedPhotoIndex];
+        OnPropertyChanged(nameof(PhotoViewerTitle));
+    }
+
+    [RelayCommand]
+    private void SelectPhotoThumbnail(string url)
+    {
+        if (string.IsNullOrEmpty(url)) return;
+        var idx = ExpensePhotosToView.IndexOf(url);
+        if (idx >= 0)
+        {
+            SelectedPhotoIndex = idx;
+            SelectedExpensePhotoUrl = url;
+            OnPropertyChanged(nameof(PhotoViewerTitle));
+        }
     }
 }

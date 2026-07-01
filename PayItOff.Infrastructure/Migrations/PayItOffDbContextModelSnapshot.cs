@@ -55,7 +55,7 @@ namespace PayItOff.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AuditLogs", (string)null);
+                    b.ToTable("AuditLogs");
                 });
 
             modelBuilder.Entity("PayItOff.Domain.Entities.Expense", b =>
@@ -88,9 +88,6 @@ namespace PayItOff.Infrastructure.Migrations
                     b.Property<DateTime>("PurchasedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("ReceiptImageUrl")
-                        .HasColumnType("text");
-
                     b.Property<decimal>("TotalAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
@@ -106,7 +103,7 @@ namespace PayItOff.Infrastructure.Migrations
 
                     b.HasIndex("PayerId");
 
-                    b.ToTable("Expenses", (string)null);
+                    b.ToTable("Expenses");
                 });
 
             modelBuilder.Entity("PayItOff.Domain.Entities.ExpenseGroup", b =>
@@ -132,7 +129,7 @@ namespace PayItOff.Infrastructure.Migrations
 
                     b.HasIndex("ExpenseId");
 
-                    b.ToTable("ExpenseGroups", (string)null);
+                    b.ToTable("ExpenseGroups");
                 });
 
             modelBuilder.Entity("PayItOff.Domain.Entities.ExpenseItem", b =>
@@ -175,7 +172,32 @@ namespace PayItOff.Infrastructure.Migrations
 
                     b.HasIndex("ExpenseId");
 
-                    b.ToTable("ExpenseItems", (string)null);
+                    b.ToTable("ExpenseItems");
+                });
+
+            modelBuilder.Entity("PayItOff.Domain.Entities.ExpensePhoto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("ExpenseId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PhotoUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpenseId");
+
+                    b.ToTable("ExpensePhotos");
                 });
 
             modelBuilder.Entity("PayItOff.Domain.Entities.ExpenseSplit", b =>
@@ -202,7 +224,7 @@ namespace PayItOff.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ExpenseSplits", (string)null);
+                    b.ToTable("ExpenseSplits");
                 });
 
             modelBuilder.Entity("PayItOff.Domain.Entities.Friend", b =>
@@ -237,7 +259,7 @@ namespace PayItOff.Infrastructure.Migrations
 
                     b.HasIndex("ReceiverId");
 
-                    b.ToTable("Friends", (string)null);
+                    b.ToTable("Friends");
                 });
 
             modelBuilder.Entity("PayItOff.Domain.Entities.Group", b =>
@@ -267,7 +289,7 @@ namespace PayItOff.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Groups", (string)null);
+                    b.ToTable("Groups");
                 });
 
             modelBuilder.Entity("PayItOff.Domain.Entities.GroupDebt", b =>
@@ -279,6 +301,7 @@ namespace PayItOff.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
+                        .IsConcurrencyToken()
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
@@ -300,7 +323,7 @@ namespace PayItOff.Infrastructure.Migrations
                     b.HasIndex("GroupId", "DebtorId", "CreditorId")
                         .IsUnique();
 
-                    b.ToTable("GroupDebts", (string)null);
+                    b.ToTable("GroupDebts");
                 });
 
             modelBuilder.Entity("PayItOff.Domain.Entities.GroupMember", b =>
@@ -345,7 +368,7 @@ namespace PayItOff.Infrastructure.Migrations
                     b.HasIndex("UserId", "GroupId")
                         .IsUnique();
 
-                    b.ToTable("GroupMembers", (string)null);
+                    b.ToTable("GroupMembers");
                 });
 
             modelBuilder.Entity("PayItOff.Domain.Entities.Notification", b =>
@@ -393,7 +416,7 @@ namespace PayItOff.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("PayItOff.Domain.Entities.Settlement", b =>
@@ -449,7 +472,7 @@ namespace PayItOff.Infrastructure.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Settlements", (string)null);
+                    b.ToTable("Settlements");
                 });
 
             modelBuilder.Entity("PayItOff.Domain.Entities.User", b =>
@@ -532,7 +555,10 @@ namespace PayItOff.Infrastructure.Migrations
                     b.HasIndex("Nickname")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.HasIndex("PhoneNumber")
+                        .IsUnique();
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("PayItOff.Domain.Entities.AuditLog", b =>
@@ -600,6 +626,17 @@ namespace PayItOff.Infrastructure.Migrations
                     b.Navigation("Expense");
 
                     b.Navigation("ExpenseGroup");
+                });
+
+            modelBuilder.Entity("PayItOff.Domain.Entities.ExpensePhoto", b =>
+                {
+                    b.HasOne("PayItOff.Domain.Entities.Expense", "Expense")
+                        .WithMany("Photos")
+                        .HasForeignKey("ExpenseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Expense");
                 });
 
             modelBuilder.Entity("PayItOff.Domain.Entities.ExpenseSplit", b =>
@@ -752,11 +789,9 @@ namespace PayItOff.Infrastructure.Migrations
 
                             b1.Property<bool>("NotifyOnTransferConfirmed");
 
-                            b1.Property<bool>("ReceiveEmail");
-
                             b1.HasKey("UserId");
 
-                            b1.ToTable("Users", (string)null);
+                            b1.ToTable("Users");
 
                             b1
                                 .ToJson("NotificationsSettings")
@@ -775,6 +810,8 @@ namespace PayItOff.Infrastructure.Migrations
                     b.Navigation("Groups");
 
                     b.Navigation("Items");
+
+                    b.Navigation("Photos");
                 });
 
             modelBuilder.Entity("PayItOff.Domain.Entities.ExpenseGroup", b =>

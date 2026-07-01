@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PayItOff.MauiClient.Controls.AppButton"
+             x:Name="Root">
+    <Border x:Name="ButtonBorder"
+            StrokeThickness="{Binding ButtonBorderWidth, Source={x:Reference Root}}"
+            StrokeShape="RoundRectangle 12"
+            Stroke="{Binding ButtonBorderColor, Source={x:Reference Root}}"
+            BackgroundColor="{Binding ButtonBackgroundColor, Source={x:Reference Root}}"
+            HeightRequest="{Binding ButtonHeight, Source={x:Reference Root}}"
+            Padding="{Binding ButtonPadding, Source={x:Reference Root}}">
+        <Border.GestureRecognizers>
+            <TapGestureRecognizer Command="{Binding Command, Source={x:Reference Root}}"
+                                  CommandParameter="{Binding CommandParameter, Source={x:Reference Root}}" />
+        </Border.GestureRecognizers>
+        <Label x:Name="ButtonLabel"
+               Text="{Binding Text, Source={x:Reference Root}}"
+               TextColor="{Binding ButtonTextColor, Source={x:Reference Root}}"
+               FontSize="{Binding ButtonFontSize, Source={x:Reference Root}}"
+               FontAttributes="{Binding ButtonFontAttributes, Source={x:Reference Root}}"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               HorizontalTextAlignment="Center" />
+    </Border>
+</ContentView>
+

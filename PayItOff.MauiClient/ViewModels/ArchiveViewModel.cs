@@ -1,7 +1,7 @@
-using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using PayItOff.MauiClient.Services;
 using PayItOff.Shared.Responses;
+using System.Collections.ObjectModel;
 
 namespace PayItOff.MauiClient.ViewModels;
 
@@ -42,7 +42,7 @@ public partial class ArchiveViewModel : PopupViewModelBase
     private async Task GroupTapped(GroupInfoResponse group)
     {
         if (group == null) return;
-        
+
         await Shell.Current.GoToAsync($"//GroupDetailsPage?groupId={group.Id}");
     }
 }

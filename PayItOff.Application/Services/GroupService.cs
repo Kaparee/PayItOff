@@ -91,7 +91,7 @@ public class GroupService : IGroupService
             {
                 Id = groupId,
                 Name = member.Group.Name,
-                AvatarUrl = AvatarUrlHelper.BuildGroupAvatarUrl(baseUrl!, member.Group.AvatarUrl),
+                AvatarUrl = UrlHelper.BuildGroupAvatarUrl(baseUrl!, member.Group.AvatarUrl),
                 UpdatedAt = member.Group.UpdatedAt,
                 IsFavorite = member.IsFavorite,
                 Income = income,
@@ -128,7 +128,7 @@ public class GroupService : IGroupService
             {
                 Id = group.GroupId,
                 Name = group.Group!.Name,
-                AvatarUrl = AvatarUrlHelper.BuildGroupAvatarUrl(baseUrl!, group.Group.AvatarUrl),
+                AvatarUrl = UrlHelper.BuildGroupAvatarUrl(baseUrl!, group.Group.AvatarUrl),
                 LastUpdate = lastUpdateText
             };
         }).ToList();
@@ -146,7 +146,7 @@ public class GroupService : IGroupService
 
         var savedFileName = await _fileService.SaveAvatarAsync(avatar);
 
-        if (savedFileName != null && group.AvatarUrl != null && group.AvatarUrl != "default-group-avatar.png")
+        if (savedFileName != null && group.AvatarUrl != null && group.AvatarUrl != "default_group_avatar.png")
         {
             _fileService.DeleteFile(group.AvatarUrl);
         }
@@ -167,7 +167,7 @@ public class GroupService : IGroupService
         var hasDebt = await _groupDebtRepository.HasActiveGroupDebt(request.GroupId);
         if (hasDebt) { throw new InvalidGroupActionException(); }
 
-        if (group!.AvatarUrl != null && group.AvatarUrl != "default-group-avatar.png")
+        if (group!.AvatarUrl != null && group.AvatarUrl != "default_group_avatar.png")
         {
             _fileService.DeleteFile(group.AvatarUrl);
         }
@@ -213,7 +213,7 @@ public class GroupService : IGroupService
                 .Select(g => new GroupMemberDebtLineDto
                 {
                     CounterpartyName = ShortPersonLabel(g.First().Payer),
-                    AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, g.First().Payer.AvatarUrl),
+                    AvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, g.First().Payer.AvatarUrl),
                     Amount = g.Sum(x => x.Amount),
                     MemberOwes = true
                 })
@@ -224,7 +224,8 @@ public class GroupService : IGroupService
             {
                 UserId = member.UserId,
                 FullName = $"{user.Name} {user.Surname}",
-                AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, user.AvatarUrl),
+                Nickname = user.Nickname,
+                AvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, user.AvatarUrl),
                 OverallBalance = overallBalance,
                 IsCurrentUser = member.UserId == userId,
                 IsCreditorToCurrentUser = isCreditorToCurrent,
@@ -279,7 +280,7 @@ public class GroupService : IGroupService
             {
                 Id = group.Id,
                 Name = group.Name,
-                AvatarUrl = AvatarUrlHelper.BuildGroupAvatarUrl(baseUrl!, group.AvatarUrl),
+                AvatarUrl = UrlHelper.BuildGroupAvatarUrl(baseUrl!, group.AvatarUrl),
                 UpdatedAt = group.DeletedAt ?? group.UpdatedAt,
                 IsFavorite = groupMember.IsFavorite,
                 Income = 0m,
@@ -295,7 +296,7 @@ public class GroupService : IGroupService
     {
         var group = await _groupRepository.GetGroupInfoIncludingArchivedByIdAsync(groupId);
         if (group == null) throw new GroupNotFoundException();
-        
+
         var currentMember = await _groupMemberRepository.GetMemberAsync(groupId, userId);
         if (currentMember == null) throw new GroupMemberNotFoundException();
 
@@ -306,12 +307,12 @@ public class GroupService : IGroupService
         foreach (var log in logs)
         {
             string actorName = "Nieznany";
-            string actorAvatar = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, "default-avatar.png");
-            
+            string actorAvatar = UrlHelper.BuildUserAvatarUrl(baseUrl!, "default_user_avatar.png");
+
             if (log.User != null)
             {
                 actorName = $"{log.User.Name} {log.User.Surname}";
-                actorAvatar = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, log.User.AvatarUrl);
+                actorAvatar = UrlHelper.BuildUserAvatarUrl(baseUrl!, log.User.AvatarUrl);
             }
 
             string desc = log.Action switch

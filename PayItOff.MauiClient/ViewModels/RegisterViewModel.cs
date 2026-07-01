@@ -95,7 +95,7 @@ public partial class RegisterViewModel : PopupViewModelBase
 
             if (result == true)
             {
-                await ShowAlertAsync("Sukces", "Konto założone! Potwierdz rejestrację na mailu aby móc się zalogować..", "OK");
+                await ShowAlertAsync("Sukces", "Konto zostało założone! Możesz się teraz zalogować.", "OK");
                 await Shell.Current.GoToAsync("..");
             }
         }

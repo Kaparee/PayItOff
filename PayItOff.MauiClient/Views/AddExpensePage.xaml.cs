@@ -3,7 +3,7 @@ using PayItOff.MauiClient.ViewModels;
 
 namespace PayItOff.MauiClient.Views;
 
-public partial class AddExpensePage : ContentPage
+public partial class AddExpensePage : ContentPage, IQueryAttributable
 {
     private readonly AddExpenseViewModel _viewModel;
     private DateTime _lastItemDropTime = DateTime.MinValue;
@@ -13,6 +13,18 @@ public partial class AddExpensePage : ContentPage
         InitializeComponent();
         BindingContext = viewModel;
         _viewModel = viewModel;
+    }
+
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        _viewModel.ApplyQueryAttributes(query);
+    }
+
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+        if (_viewModel.GroupId > 0)
+            _ = _viewModel.LoadGroupDataAsync();
     }
 
     private List<ReceiptItem> GetItemsToProcess(ReceiptItem item)
@@ -165,6 +177,28 @@ public partial class AddExpensePage : ContentPage
         {
             target.Opacity = 0.7;
             target.BackgroundColor = Color.FromArgb("#3C4556");
+
+            // Auto-scroll logic
+            try
+            {
+                var pos = e.GetPosition(MainScrollView);
+                if (pos.HasValue)
+                {
+                    double y = pos.Value.Y;
+                    double height = MainScrollView.Height;
+                    double scrollY = MainScrollView.ScrollY;
+
+                    if (y < 150 && scrollY > 0)
+                    {
+                        MainScrollView.ScrollToAsync(0, Math.Max(0, scrollY - 30), false);
+                    }
+                    else if (y > height - 150)
+                    {
+                        MainScrollView.ScrollToAsync(0, scrollY + 30, false);
+                    }
+                }
+            }
+            catch { } // Ignore layout/calculation exceptions during rapid drag
         }
     }
 

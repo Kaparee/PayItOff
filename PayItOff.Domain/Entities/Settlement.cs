@@ -6,15 +6,15 @@ namespace PayItOff.Domain.Entities
     public class Settlement
     {
         public int Id { get; private set; }
-        public string TransferReference { get; private set; }
-        public User Sender { get; private set; }
-        public User Receiver { get; private set; }
-        public Group Group { get; private set; }
+        public string TransferReference { get; private set; } = string.Empty;
+        public User Sender { get; private set; } = null!;
+        public User Receiver { get; private set; } = null!;
+        public Group Group { get; private set; } = null!;
         public int SenderId { get; private set; }
         public int ReceiverId { get; private set; }
         public int GroupId { get; private set; }
         public decimal Amount { get; private set; }
-        public string Description { get; private set; }
+        public string Description { get; private set; } = string.Empty;
         public SettlementStatus Status { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime UpdatedAt { get; private set; }

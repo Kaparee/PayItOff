@@ -1,11 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PayItOff.Domain.Enums;
 using PayItOff.MauiClient.Services;
+using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using PayItOff.Shared.Requests;
-using PayItOff.Domain.Enums;
 
 namespace PayItOff.MauiClient.ViewModels;
 
@@ -33,10 +33,10 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     private int _currentUserId;
 
     [ObservableProperty]
-    private int _groupId;
+    public partial int GroupId { get; set; }
 
     [ObservableProperty]
-    private string _groupName = string.Empty;
+    public partial string GroupName { get; set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsAdminOrFounder))]
@@ -63,7 +63,19 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     public partial string NewGroupName { get; set; } = string.Empty;
 
     [ObservableProperty]
+    public partial ImageSource? SelectedEditAvatarSource { get; set; }
+
+    private Stream? _tempEditAvatarStream;
+    private string? _tempEditFileName;
+
+    [ObservableProperty]
     public partial bool IsManageMembersPopupVisible { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsMemberDetailsPopupVisible { get; set; }
+
+    [ObservableProperty]
+    public partial GroupMemberBalanceDto? SelectedMemberDetails { get; set; }
 
     [ObservableProperty]
     public partial string InviteSearchText { get; set; } = string.Empty;
@@ -81,6 +93,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     public partial string EditExpenseCategory { get; set; } = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasExpensePhotos))]
     public partial ExpenseDetailsResponse? SelectedExpenseDetails { get; set; }
 
     [ObservableProperty]
@@ -170,11 +183,41 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     private void ShowEditGroupPopup()
     {
         NewGroupName = GroupName;
+        SelectedEditAvatarSource = null;
+        _tempEditAvatarStream = null;
+        _tempEditFileName = null;
         IsEditGroupPopupVisible = true;
     }
 
     [RelayCommand]
     private void CancelEditGroupPopup() => IsEditGroupPopupVisible = false;
+
+    [RelayCommand]
+    private async Task PickEditAvatarPhoto()
+    {
+        var result = await FilePicker.Default.PickAsync(new PickOptions
+        {
+            PickerTitle = "Wybierz nowy awatar grupy",
+            FileTypes = FilePickerFileType.Images
+        });
+
+        if (result != null)
+        {
+            _tempEditFileName = result.FileName;
+            var stream = await result.OpenReadAsync();
+
+            var memStream = new MemoryStream();
+            await stream.CopyToAsync(memStream);
+            memStream.Position = 0;
+            _tempEditAvatarStream = memStream;
+
+            SelectedEditAvatarSource = ImageSource.FromStream(() =>
+            {
+                var s = new MemoryStream(memStream.ToArray());
+                return s;
+            });
+        }
+    }
 
     [RelayCommand]
     private async Task ShowExpenseDetailsAsync(ExpenseSummaryDto expense)
@@ -185,12 +228,50 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         try
         {
             var details = await _expenseService.GetExpenseItemDetailsAsync(expense.ExpenseId, expense.ItemId);
+            if (details?.Participants != null)
+            {
+                foreach (var p in details.Participants)
+                {
+                    p.AvatarUrl = p.AvatarUrl;
+                }
+            }
+            if (details != null)
+            {
+                details.PayerAvatarUrl = details.PayerAvatarUrl;
+            }
             SelectedExpenseDetails = details;
             IsExpenseDetailsPopupVisible = true;
         }
         catch (Exception)
         {
             await ShowAlertAsync("Błąd", "Nie udało się pobrać szczegółów wydatku.", "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task DeleteExpenseAsync()
+    {
+        if (SelectedExpenseDetails == null || !IsAdminOrFounder) return;
+
+        bool confirm = await ShowAlertAsync("Usuń wydatek", $"Czy na pewno chcesz usunąć wydatek '{SelectedExpenseDetails.Title}'? Wszystkie powiązane długi zostaną wycofane.", "Usuń", "Anuluj");
+        if (!confirm) return;
+
+        IsBusy = true;
+        try
+        {
+            await _expenseService.DeleteExpenseItemAsync(SelectedExpenseDetails.ExpenseId, SelectedExpenseDetails.ItemId);
+            IsEditExpensePopupVisible = false;
+            IsExpenseDetailsPopupVisible = false;
+            SelectedExpenseDetails = null;
+            await LoadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            await ShowAlertAsync("Błąd", $"Nie udało się usunąć wydatku: {ex.Message}", "OK");
         }
         finally
         {
@@ -211,8 +292,8 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         EditExpenseName = SelectedExpenseDetails.Title;
         EditExpenseCategory = SelectedExpenseDetails.Category;
         EditExpenseTotalAmount = SelectedExpenseDetails.TotalAmount;
-        
-        foreach(var old in EditExpenseSplits) old.PropertyChanged -= OnSplitPropertyChanged;
+
+        foreach (var old in EditExpenseSplits) old.PropertyChanged -= OnSplitPropertyChanged;
         EditExpenseSplits.Clear();
         foreach (var p in SelectedExpenseDetails.Participants)
         {
@@ -226,7 +307,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
             split.PropertyChanged += OnSplitPropertyChanged;
             EditExpenseSplits.Add(split);
         }
-        
+
         OnPropertyChanged(nameof(RemainingAmountToSplit));
         IsEditExpensePopupVisible = true;
     }
@@ -274,7 +355,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
                 Splits = splits
             };
             await _expenseService.UpdateExpenseItemAsync(SelectedExpenseDetails.ExpenseId, SelectedExpenseDetails.ItemId, request);
-            
+
             IsEditExpensePopupVisible = false;
             IsExpenseDetailsPopupVisible = false;
             await LoadDataAsync();
@@ -298,7 +379,9 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         IsEditGroupPopupVisible = false;
 
         var request = new EditGroupInfoRequest { GroupId = GroupId, NewName = NewGroupName.Trim() };
-        var success = await _groupService.EditGroupInfoAsync(request);
+        if (_tempEditAvatarStream != null) _tempEditAvatarStream.Position = 0;
+
+        var success = await _groupService.EditGroupInfoAsync(request, _tempEditAvatarStream, _tempEditFileName);
 
         if (success)
         {
@@ -367,6 +450,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
             {
                 if (!FilteredMembers.Any(m => m.UserId == friend.FriendId))
                 {
+                    friend.AvatarUrl = friend.AvatarUrl;
                     FriendsList.Add(friend);
                 }
             }
@@ -377,6 +461,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         {
             foreach (var member in membersTask.Result)
             {
+                member.AvatarUrl = member.AvatarUrl;
                 ActiveMembersList.Add(member);
             }
         }
@@ -387,6 +472,20 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
 
     [RelayCommand]
     private void CancelManageMembersPopup() => IsManageMembersPopupVisible = false;
+
+    [RelayCommand]
+    private void ShowMemberDetails(GroupMemberBalanceDto member)
+    {
+        SelectedMemberDetails = member;
+        IsMemberDetailsPopupVisible = true;
+    }
+
+    [RelayCommand]
+    private void CloseMemberDetailsPopup()
+    {
+        IsMemberDetailsPopupVisible = false;
+        SelectedMemberDetails = null;
+    }
 
     [RelayCommand]
     private async Task InviteUserBySearchAsync()
@@ -449,24 +548,68 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     [RelayCommand]
     private async Task ChangeMemberRoleAsync(GroupMemberResponse member)
     {
-        if (UserRole != "Owner") return;
+        if (!IsAdminOrFounder) return;
         if (member.UserId == _currentUserId) return;
 
-        var newRole = member.Role == GroupMemberRole.Admin ? GroupMemberRole.Member : GroupMemberRole.Admin;
+        var options = new List<string>();
+        if (member.Role != GroupMemberRole.Member) options.Add("Ustaw jako Zwykły członek");
+        if (member.Role != GroupMemberRole.Admin) options.Add("Ustaw jako Administrator");
+        if (IsOwner && member.Role != GroupMemberRole.Owner) options.Add("Przekaż własność grupy");
 
-        bool confirm = await ShowAlertAsync("Zmień rolę", $"Czy chcesz zmienić rolę {member.FullName} na {newRole}?", "Tak", "Anuluj");
+        if (options.Count == 0) return;
+
+        var action = await ShowActionSheetAsync("Wybierz nową rolę", options.ToArray());
+        if (string.IsNullOrEmpty(action) || action == "Anuluj") return;
+
+        GroupMemberRole newRole = member.Role;
+        string confirmMessage = "";
+
+        if (action == "Ustaw jako Zwykły członek")
+        {
+            newRole = GroupMemberRole.Member;
+            confirmMessage = $"Czy na pewno chcesz zdegradować {member.FullName} do roli zwykłego członka?";
+        }
+        else if (action == "Ustaw jako Administrator")
+        {
+            newRole = GroupMemberRole.Admin;
+            confirmMessage = $"Czy na pewno chcesz awansować {member.FullName} na Administratora?";
+        }
+        else if (action == "Przekaż własność grupy")
+        {
+            newRole = GroupMemberRole.Owner;
+            confirmMessage = $"Czy na pewno chcesz przekazać Własność Grupy dla {member.FullName}? Staniesz się administratorem, a ta akcja jest nieodwracalna, dopóki nowy właściciel jej nie zwróci!";
+        }
+        else
+        {
+            return;
+        }
+
+        bool confirm = await ShowAlertAsync("Potwierdzenie zmiany roli", confirmMessage, "Tak", "Anuluj");
         if (!confirm) return;
 
         IsBusy = true;
         var success = await _groupMemberService.UpdateRoleAsync(new GroupMemberUpdateRequest { GroupId = GroupId, TargetUserId = member.UserId, NewRole = newRole });
         if (success)
         {
-            member.Role = newRole;
-            var membersTask = await _groupMemberService.GetAllActiveGroupMembersAsync(GroupId);
-            if (membersTask != null)
+            await ShowAlertAsync("Sukces", "Pomyślnie zmieniono rolę użytkownika.", "OK");
+            if (newRole == GroupMemberRole.Owner)
             {
-                ActiveMembersList.Clear();
-                foreach (var m in membersTask) ActiveMembersList.Add(m);
+                // Current user is no longer owner, let's refresh everything
+                await LoadDataAsync();
+            }
+            else
+            {
+                member.Role = newRole;
+                var membersTask = await _groupMemberService.GetAllActiveGroupMembersAsync(GroupId);
+                if (membersTask != null)
+                {
+                    ActiveMembersList.Clear();
+                    foreach (var m in membersTask)
+                    {
+                        m.AvatarUrl = m.AvatarUrl;
+                        ActiveMembersList.Add(m);
+                    }
+                }
             }
         }
         IsBusy = false;
@@ -498,6 +641,19 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         if (_currentUserId == 0)
         {
             var idStr = await SecureStorage.Default.GetAsync("user_id");
+            if (string.IsNullOrEmpty(idStr))
+            {
+                var token = await SecureStorage.Default.GetAsync("jwt_token");
+                if (!string.IsNullOrEmpty(token))
+                {
+                    var userIdFromToken = PayItOff.MauiClient.Helpers.JwtHelper.GetClaimValue(token, "nameid");
+                    if (!string.IsNullOrEmpty(userIdFromToken))
+                    {
+                        idStr = userIdFromToken;
+                        await SecureStorage.Default.SetAsync("user_id", idStr);
+                    }
+                }
+            }
             _currentUserId = int.TryParse(idStr, out var parsed) ? parsed : 0;
         }
 
@@ -519,6 +675,14 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
             OnPropertyChanged(nameof(IsNotArchived));
 
             _loadedMembers = response.Members ?? new List<GroupMemberBalanceDto>();
+            foreach (var member in _loadedMembers)
+            {
+                member.AvatarUrl = member.AvatarUrl;
+                foreach (var line in member.Lines)
+                {
+                    line.AvatarUrl = line.AvatarUrl;
+                }
+            }
             _loadedExpenses = response.Expenses ?? new List<ExpenseSummaryDto>();
 
             ApplyMemberFilter();
@@ -580,6 +744,83 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         if (!string.IsNullOrWhiteSpace(text))
         {
             await Clipboard.Default.SetTextAsync(text);
+        }
+    }
+
+    // ===== PHOTO VIEWER =====
+    [ObservableProperty]
+    public partial bool IsPhotoViewerVisible { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasExpensePhotos))]
+    public partial ObservableCollection<string> ExpensePhotosToView { get; set; } = new();
+
+    [ObservableProperty]
+    public partial string? SelectedExpensePhotoUrl { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PhotoViewerTitle))]
+    public partial int SelectedPhotoIndex { get; set; }
+
+    public bool HasExpensePhotos => SelectedExpenseDetails?.ReceiptPhotos?.Count > 0;
+    public string PhotoViewerTitle => ExpensePhotosToView.Count > 0
+        ? $"Zdjęcie {SelectedPhotoIndex + 1} / {ExpensePhotosToView.Count}"
+        : "Brak zdjęć";
+
+    [RelayCommand]
+    private void ShowExpensePhotos()
+    {
+        if (SelectedExpenseDetails?.ReceiptPhotos == null || SelectedExpenseDetails.ReceiptPhotos.Count == 0)
+            return;
+
+        ExpensePhotosToView.Clear();
+        foreach (var url in SelectedExpenseDetails.ReceiptPhotos)
+        {
+            if (string.IsNullOrEmpty(url)) continue;
+            ExpensePhotosToView.Add(url);
+        }
+
+        SelectedPhotoIndex = 0;
+        SelectedExpensePhotoUrl = ExpensePhotosToView[0];
+        OnPropertyChanged(nameof(HasExpensePhotos));
+        OnPropertyChanged(nameof(PhotoViewerTitle));
+        IsPhotoViewerVisible = true;
+    }
+
+    [RelayCommand]
+    private void ClosePhotoViewer()
+    {
+        IsPhotoViewerVisible = false;
+    }
+
+    [RelayCommand]
+    private void PhotoSwipeLeft()
+    {
+        if (ExpensePhotosToView.Count == 0) return;
+        SelectedPhotoIndex = (SelectedPhotoIndex + 1) % ExpensePhotosToView.Count;
+        SelectedExpensePhotoUrl = ExpensePhotosToView[SelectedPhotoIndex];
+        OnPropertyChanged(nameof(PhotoViewerTitle));
+    }
+
+    [RelayCommand]
+    private void PhotoSwipeRight()
+    {
+        if (ExpensePhotosToView.Count == 0) return;
+        SelectedPhotoIndex = (SelectedPhotoIndex - 1 + ExpensePhotosToView.Count) % ExpensePhotosToView.Count;
+        SelectedExpensePhotoUrl = ExpensePhotosToView[SelectedPhotoIndex];
+        OnPropertyChanged(nameof(PhotoViewerTitle));
+    }
+
+    [RelayCommand]
+    private void SelectPhotoThumbnail(string url)
+    {
+        if (string.IsNullOrEmpty(url)) return;
+        var idx = ExpensePhotosToView.IndexOf(url);
+        if (idx >= 0)
+        {
+            SelectedPhotoIndex = idx;
+            SelectedExpensePhotoUrl = url;
+            OnPropertyChanged(nameof(PhotoViewerTitle));
         }
     }
 }

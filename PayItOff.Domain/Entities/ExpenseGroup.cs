@@ -3,9 +3,9 @@ namespace PayItOff.Domain.Entities
     public class ExpenseGroup
     {
         public int Id { get; private set; }
-        public Expense Expense { get; private set; }
+        public Expense Expense { get; private set; } = null!;
         public int ExpenseId { get; private set; }
-        public string Name { get; private set; }
+        public string Name { get; private set; } = string.Empty;
         public decimal TotalAmount { get; private set; }
         private readonly List<ExpenseItem> _items = new();
         public IReadOnlyCollection<ExpenseItem> Items => _items.AsReadOnly();

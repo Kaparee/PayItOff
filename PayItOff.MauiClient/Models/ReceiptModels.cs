@@ -90,7 +90,7 @@ public partial class ReceiptItem : ObservableObject
     public partial string ItemGroupName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial string GroupColor { get; set; } = "Transparent";
+    public partial SolidColorBrush GroupColor { get; set; } = new SolidColorBrush(Colors.Transparent);
 
     public decimal TotalPrice => Quantity * UnitPrice;
 
@@ -171,7 +171,7 @@ public partial class ReceiptCategory : ObservableObject
     public string Id { get; } = Guid.NewGuid().ToString();
 
     [ObservableProperty]
-    private string _name = string.Empty;
+    public partial string Name { get; set; } = string.Empty;
 
     public ObservableCollection<ReceiptItem> Items { get; } = new();
 }
@@ -179,16 +179,16 @@ public partial class ReceiptCategory : ObservableObject
 public partial class DisplayGroupMember : ObservableObject
 {
     [ObservableProperty]
-    private int _userId;
+    public partial int UserId { get; set; }
 
     [ObservableProperty]
-    private string _fullName = string.Empty;
+    public partial string FullName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string _avatarUrl = string.Empty;
+    public partial string AvatarUrl { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private bool _isVisible = true;
+    public partial bool IsVisible { get; set; } = true;
 
     public ObservableCollection<ReceiptMemberShare> AssignedShares { get; } = new();
 

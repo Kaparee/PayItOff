@@ -6,11 +6,8 @@ using PayItOff.Domain.Entities;
 using PayItOff.Domain.Enums;
 using PayItOff.Domain.Exceptions;
 using PayItOff.Domain.Interfaces;
-using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
-using System.Buffers.Text;
 using System.Globalization;
-using System.Text.RegularExpressions;
 
 namespace PayItOff.Application.Services;
 
@@ -39,18 +36,18 @@ public class NotificationService : INotificationService
 
         return notifications.Select(notification =>
         {
-        var diff = DateTime.UtcNow - notification.CreatedAt;
+            var diff = DateTime.UtcNow - notification.CreatedAt;
 
-        var lastUpdateText = diff.TotalMinutes < 1
-            ? "Teraz"
-            : $"{diff.Humanize(precision: 1, culture: plCulture)} temu";
+            var lastUpdateText = diff.TotalMinutes < 1
+                ? "Teraz"
+                : $"{diff.Humanize(precision: 1, culture: plCulture)} temu";
 
             return new NotificationResponse
             {
                 NotificationId = notification.Id,
                 NotificationType = notification.Type,
                 ActorId = notification.ActorId,
-                ActorAvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, notification.Actor.AvatarUrl!),
+                ActorAvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, notification.Actor.AvatarUrl!),
                 ActorFullName = notification.Actor.FullName,
                 Body = notification.Body,
                 NotificationStatus = notification.ReadAt == null ? NotificationStatus.Unread : NotificationStatus.Read,
@@ -90,7 +87,7 @@ public class NotificationService : INotificationService
 
         foreach (var notification in notifications)
         {
-            if(notification.ReadAt == null)
+            if (notification.ReadAt == null)
             {
                 notification.MarkAsRead();
                 await _notificationRepository.UpdateAsync(notification);
@@ -149,7 +146,7 @@ public class NotificationService : INotificationService
                 NotificationId = notification.Id,
                 NotificationType = notification.Type,
                 ActorId = notification.ActorId,
-                ActorAvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, notification.Actor.AvatarUrl!),
+                ActorAvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, notification.Actor.AvatarUrl!),
                 ActorFullName = notification.Actor.FullName,
                 Body = notification.Body,
                 NotificationStatus = notification.ReadAt == null ? NotificationStatus.Unread : NotificationStatus.Read,
@@ -173,17 +170,4 @@ public class NotificationService : INotificationService
 }
 
 
-//using PayItOff.Domain.Enums;
 
-//namespace PayItOff.Shared.Requests
-//{
-//    public class CreateNotificationRequest
-//    {
-//        public required int UserId { get; set; }
-//        public required int ActorId { get; set; }
-//        public required NotificationType NotificationType { get; set; }
-//        public required string Body { get; set; }
-//        public required int EntityId { get; set; }
-//        public required EntityType EntityType { get; set; }
-//    }
-//}

@@ -23,7 +23,7 @@ namespace PayItOff.Domain.Entities
 
         public static Group Create(string name, string avatarUrl)
         {
-            var finalAvatar = string.IsNullOrWhiteSpace(avatarUrl) ? "default-group-avatar.png" : avatarUrl;
+            var finalAvatar = string.IsNullOrWhiteSpace(avatarUrl) ? "default_group_avatar.png" : avatarUrl;
             return new Group(name, finalAvatar);
         }
 

@@ -8,13 +8,14 @@ public class ExpenseDetailsResponse
     public string Category { get; set; } = string.Empty;
     public decimal TotalAmount { get; set; }
     public DateTime Date { get; set; }
-    
+
     public string PayerName { get; set; } = string.Empty;
     public string PayerAvatarUrl { get; set; } = string.Empty;
     public string? PayerPhoneNumber { get; set; }
     public string? PayerIBAN { get; set; }
-    
+
     public List<ExpenseParticipantDto> Participants { get; set; } = new();
+    public List<string> ReceiptPhotos { get; set; } = new();
 }
 
 public class ExpenseParticipantDto

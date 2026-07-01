@@ -60,7 +60,7 @@ public class SettlementService : ISettlementService
             UserId = data.UserId,
             Name = data.Name,
             Surname = data.Surname,
-            AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, data.AvatarUrl),
+            AvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, data.AvatarUrl),
             Categories = data.Categories,
             Date = data.Date,
             Amount = data.Amount
@@ -79,7 +79,7 @@ public class SettlementService : ISettlementService
             UserId = data.UserId,
             Name = data.Name,
             Surname = data.Surname,
-            AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, data.AvatarUrl),
+            AvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, data.AvatarUrl),
             Categories = data.Categories,
             Date = data.Date,
             Amount = data.Amount
@@ -90,7 +90,7 @@ public class SettlementService : ISettlementService
 
     public async Task<PagedTransactionResponse> GetHistoryAsync(int userId, UserExpenseHistoryRequest request)
     {
-        const int pageSize = 25;
+        const int pageSize = 10;
         var baseUrl = _configuration["AppUrls:BackendUrl"];
 
         var (splits, settlements, totalCount) = await _expenseSplitRepository.GetMixedHistoryAsync(
@@ -101,18 +101,18 @@ public class SettlementService : ISettlementService
         var validSplits = splits.Where(s => s.UserId != s.ExpenseItem.Expense.PayerId).ToList();
 
         var groupedSplits = validSplits
-            .GroupBy(s => new 
-            { 
-                ExpenseId = s.ExpenseItem.ExpenseId, 
-                TargetUserId = s.ExpenseItem.Expense.PayerId == userId ? s.UserId : s.ExpenseItem.Expense.PayerId 
+            .GroupBy(s => new
+            {
+                ExpenseId = s.ExpenseItem.ExpenseId,
+                TargetUserId = s.ExpenseItem.Expense.PayerId == userId ? s.UserId : s.ExpenseItem.Expense.PayerId
             })
             .Select(group =>
             {
                 var expense = group.First().ExpenseItem.Expense;
                 bool amIPayer = expense.PayerId == userId;
 
-                User otherUser = amIPayer 
-                    ? group.First().User 
+                User otherUser = amIPayer
+                    ? group.First().User
                     : expense.Payer;
 
                 if (otherUser.Id == userId)
@@ -130,7 +130,7 @@ public class SettlementService : ISettlementService
                     OtherUserId = otherUser.Id,
                     OtherName = otherUser.Name,
                     OtherSurname = otherUser.Surname,
-                    OtherAvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, otherUser.AvatarUrl),
+                    OtherAvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, otherUser.AvatarUrl),
                     IsSettlement = false,
                     Status = "Confirmed",
                     CanSendDebtReminder = false
@@ -177,7 +177,7 @@ public class SettlementService : ISettlementService
                 OtherUserId = otherUser.Id,
                 OtherName = otherUser.Name,
                 OtherSurname = otherUser.Surname,
-                OtherAvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, otherUser.AvatarUrl),
+                OtherAvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, otherUser.AvatarUrl),
                 IsSettlement = true,
                 Status = s.Status.ToString(),
                 TransferReference = s.TransferReference,
@@ -271,10 +271,7 @@ public class SettlementService : ISettlementService
 
             await _unitOfWork.SaveChangesAsync();
 
-            if (receiver.NotificationsSettings.NotifyOnTransferConfirmed == true)
-            {
-                await _notificationService.CreateNotificationAsync(receiver.Id, sender.Id, NotificationType.NeedAction, $"{sender.FullName} zadeklarował spłatę {request.Amount} zł w grupie {groupInfo.Name}", settlement.Id, EntityType.Settlements);
-            }
+            await _notificationService.CreateNotificationAsync(receiver.Id, sender.Id, NotificationType.NeedAction, $"{sender.FullName} zadeklarował spłatę {request.Amount} zł w grupie {groupInfo.Name}", settlement.Id, EntityType.Settlements);
             await _unitOfWork.CommitAsync();
 
             return settlement.Id;
@@ -325,7 +322,10 @@ public class SettlementService : ISettlementService
 
         await _groupDebtRepository.ApplyDebtChangeAsync(group, sender, receiver, -settlement.Amount);
 
-        await _notificationService.CreateNotificationAsync(sender.Id, userId, NotificationType.Normal, $"{receiver.FullName} zatwierdził twoją spłatę długu, która wynosiła: {settlement.Amount} zł", settlement.Id, EntityType.Settlements);
+        if (sender.NotificationsSettings.NotifyOnTransferConfirmed == true)
+        {
+            await _notificationService.CreateNotificationAsync(sender.Id, userId, NotificationType.Normal, $"{receiver.FullName} zatwierdził twoją spłatę długu, która wynosiła: {settlement.Amount} zł", settlement.Id, EntityType.Settlements);
+        }
 
         await _notificationService.ResolveActionNotificationAsync(userId, settlement.Id, EntityType.Settlements, true);
 
@@ -521,7 +521,7 @@ public class SettlementService : ISettlementService
                 remaining -= take;
             }
 
-            if (created.Any() && receiver.NotificationsSettings.NotifyOnTransferConfirmed == true)
+            if (created.Any())
             {
                 await _notificationService.CreateNotificationAsync(request.CreditorId, userId, NotificationType.NeedAction, $"{sender.FullName} zadeklarował zbiorczą spłatę netto: {request.Amount:N2} zł. Zaakceptuj, aby rozliczyć wszystkie powiązane grupy.", userId, EntityType.NetSettlements);
             }

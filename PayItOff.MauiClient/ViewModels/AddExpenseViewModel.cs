@@ -4,6 +4,7 @@ using PayItOff.MauiClient.Models;
 using PayItOff.MauiClient.Services;
 using PayItOff.Shared.Requests;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Text.Json;
 
 namespace PayItOff.MauiClient.ViewModels;
@@ -22,8 +23,10 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
     [ObservableProperty]
     public partial string NewItemName { get; set; } = string.Empty;
 
+    public ObservableCollection<ReceiptPhotoItem> ReceiptPhotos { get; } = new();
+
     [ObservableProperty]
-    public partial ImageSource? ReceiptImageSource { get; set; }
+    public partial ReceiptPhotoItem? SelectedPhoto { get; set; }
 
     [ObservableProperty]
     public partial bool IsAddCategoryPopupVisible { get; set; }
@@ -49,24 +52,37 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
 
     private int _currentUserId;
     private DisplayGroupMember? _defaultPayer;
-    private string? _uploadedReceiptFileName;
 
     public AddExpenseViewModel(GroupService groupService, ExpenseService expenseService)
     {
         _groupService = groupService;
         _expenseService = expenseService;
         IsCustomAlertSupported = true;
+
+        ReceiptPhotos.CollectionChanged += (s, e) => OnPropertyChanged(nameof(IsReceiptPhotosEmpty));
     }
+
+    public bool IsReceiptPhotosEmpty => ReceiptPhotos.Count == 0;
+
+    public ImageSource? SelectedPhotoImageSource => SelectedPhoto?.ImageSource;
+
+    partial void OnSelectedPhotoChanged(ReceiptPhotoItem? value) =>
+        OnPropertyChanged(nameof(SelectedPhotoImageSource));
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        if (query.TryGetValue("groupId", out var rawId))
+        if (!query.TryGetValue("groupId", out var raw)) return;
+
+        var id = raw switch
         {
-            if (int.TryParse(rawId?.ToString(), out int id))
-            {
-                GroupId = id;
-            }
-        }
+            int i => i,
+            long l => (int)l,
+            string s when int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var n) => n,
+            _ => 0
+        };
+
+        if (id > 0)
+            GroupId = id;
     }
 
     partial void OnGroupIdChanged(int value)
@@ -77,7 +93,7 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
         }
     }
 
-    private async Task LoadGroupDataAsync()
+    public async Task LoadGroupDataAsync()
     {
         IsBusy = true;
         try
@@ -85,9 +101,9 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
             var details = await _groupService.GetGroupDetails(GroupId);
             if (details != null)
             {
-                GroupName = details.GroupName;
+                GroupName = details.GroupName ?? string.Empty;
                 GroupMembers.Clear();
-                foreach (var member in details.Members)
+                foreach (var member in details.Members ?? [])
                 {
                     GroupMembers.Add(new DisplayGroupMember
                     {
@@ -98,41 +114,31 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
                     });
                 }
 
-                try
+                if (_currentUserId == 0)
                 {
-                    var token = await SecureStorage.Default.GetAsync("jwt_token");
-                    if (!string.IsNullOrEmpty(token))
+                    var idStr = await SecureStorage.Default.GetAsync("user_id");
+                    if (string.IsNullOrEmpty(idStr))
                     {
-                        var parts = token.Split('.');
-                        if (parts.Length > 1)
+                        var token = await SecureStorage.Default.GetAsync("jwt_token");
+                        if (!string.IsNullOrEmpty(token))
                         {
-                            var payload = parts[1];
-                            payload = payload.Replace('-', '+').Replace('_', '/');
-                            switch (payload.Length % 4)
+                            var userIdFromToken = PayItOff.MauiClient.Helpers.JwtHelper.GetClaimValue(token, "nameid");
+                            if (!string.IsNullOrEmpty(userIdFromToken))
                             {
-                                case 2: payload += "=="; break;
-                                case 3: payload += "="; break;
-                            }
-
-                            var jsonString = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(payload));
-                            using var doc = JsonDocument.Parse(jsonString);
-                            var root = doc.RootElement;
-
-                            string? userIdStr = null;
-                            if (root.TryGetProperty("nameid", out var nameIdProp))
-                                userIdStr = nameIdProp.GetString();
-                            else if (root.TryGetProperty("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", out var nameIdPropLong))
-                                userIdStr = nameIdPropLong.GetString();
-
-                            if (userIdStr != null && int.TryParse(userIdStr, out int uid))
-                            {
-                                _currentUserId = uid;
-                                _defaultPayer = GroupMembers.FirstOrDefault(m => m.UserId == uid);
+                                idStr = userIdFromToken;
+                                await SecureStorage.Default.SetAsync("user_id", idStr);
                             }
                         }
                     }
+                    _currentUserId = int.TryParse(idStr, out var parsed) ? parsed : 0;
                 }
-                catch { }
+
+                if (_currentUserId > 0)
+                    _defaultPayer = GroupMembers.FirstOrDefault(m => m.UserId == _currentUserId);
+            }
+            else
+            {
+                await ShowAlertAsync("Błąd", "Nie udało się wczytać danych grupy.", "OK");
             }
         }
         catch (Exception ex)
@@ -255,7 +261,8 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
             target.ItemGroupId = Guid.NewGuid().ToString();
             target.ItemGroupName = groupName.Trim();
             var random = new Random();
-            target.GroupColor = String.Format("#{0:X6}", random.Next(0x1000000));
+            target.GroupColor = new Microsoft.Maui.Controls.SolidColorBrush(
+                Microsoft.Maui.Graphics.Color.FromRgb(random.Next(256), random.Next(256), random.Next(256)));
         }
 
         source.ItemGroupId = target.ItemGroupId;
@@ -455,9 +462,22 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
                 FileResult? photo = await MediaPicker.Default.CapturePhotoAsync();
                 if (photo != null)
                 {
-                    ReceiptImageSource = ImageSource.FromFile(photo.FullPath);
+                    using var stream = await photo.OpenReadAsync();
+                    using var ms = new MemoryStream();
+                    await stream.CopyToAsync(ms);
+                    var bytes = ms.ToArray();
+
+                    var newItem = new ReceiptPhotoItem
+                    {
+                        ImageSource = ImageSource.FromStream(() => new MemoryStream(bytes)),
+                        UploadedFileName = "" // tymczasowo puste
+                    };
+                    ReceiptPhotos.Add(newItem);
+                    SelectedPhoto = newItem;
+
                     IsBusy = true;
-                    _uploadedReceiptFileName = await _expenseService.UploadReceiptAsync(photo);
+                    var uploadedFileName = await _expenseService.UploadReceiptAsync(photo);
+                    newItem.UploadedFileName = uploadedFileName;
                     IsBusy = false;
                 }
             }
@@ -474,19 +494,57 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
     {
         try
         {
-            FileResult photo = await MediaPicker.Default.PickPhotoAsync();
-            if (photo != null)
+            var options = new PickOptions
             {
-                ReceiptImageSource = ImageSource.FromFile(photo.FullPath);
-                IsBusy = true;
-                _uploadedReceiptFileName = await _expenseService.UploadReceiptAsync(photo);
-                IsBusy = false;
+                PickerTitle = "Wybierz zdjęcia paragonów",
+                FileTypes = FilePickerFileType.Images
+            };
+
+            var photos = await FilePicker.Default.PickMultipleAsync(options);
+            if (photos == null || !photos.Any()) return;
+
+            ReceiptPhotoItem? lastItem = null;
+
+            foreach (var photo in photos)
+            {
+                using var stream = await photo!.OpenReadAsync();
+                using var ms = new MemoryStream();
+                await stream.CopyToAsync(ms);
+                var bytes = ms.ToArray();
+
+                var newItem = new ReceiptPhotoItem
+                {
+                    ImageSource = ImageSource.FromStream(() => new MemoryStream(bytes)),
+                    UploadedFileName = "" // tymczasowo puste
+                };
+                ReceiptPhotos.Add(newItem);
+                lastItem = newItem;
             }
+
+            if (lastItem != null)
+                SelectedPhoto = lastItem;
+
+            // Upload w tle
+            IsBusy = true;
+            foreach (var photo in photos)
+            {
+                var matchingItem = ReceiptPhotos.LastOrDefault(p => string.IsNullOrEmpty(p.UploadedFileName));
+                if (matchingItem != null)
+                {
+                    try
+                    {
+                        var uploadedFileName = await _expenseService.UploadReceiptAsync(new FileResult(photo!.FullPath));
+                        matchingItem.UploadedFileName = uploadedFileName;
+                    }
+                    catch { /* kontynuuj upload pozostałych */ }
+                }
+            }
+            IsBusy = false;
         }
         catch (Exception ex)
         {
             IsBusy = false;
-            await ShowAlertAsync("Błąd", "Galeria niedostępna: " + ex.Message, "OK");
+            await ShowAlertAsync("Błąd", "Błąd przesyłania zdjęcia: " + ex.Message, "OK");
         }
     }
 
@@ -538,7 +596,7 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
                     PayerId = payerId,
                     Name = $"Rozliczenie z paragonu - " + DateTime.Now.ToString("dd.MM.yyyy"),
                     PurchasedAt = DateTime.UtcNow,
-                    ReciptImageUrl = _uploadedReceiptFileName,
+                    ReceiptImageUrls = ReceiptPhotos.Select(p => p.UploadedFileName).ToList(),
                     Items = new List<ExpenseItemDto>()
                 };
 
@@ -620,4 +678,47 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
     {
         await Shell.Current.GoToAsync("..");
     }
+
+    [RelayCommand]
+    private void RemovePhoto(ReceiptPhotoItem photo)
+    {
+        if (photo != null && ReceiptPhotos.Contains(photo))
+        {
+            ReceiptPhotos.Remove(photo);
+            if (SelectedPhoto == photo)
+            {
+                SelectedPhoto = ReceiptPhotos.FirstOrDefault();
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void SwipeLeft()
+    {
+        if (ReceiptPhotos.Count <= 1 || SelectedPhoto == null) return;
+        int currentIndex = ReceiptPhotos.IndexOf(SelectedPhoto);
+        if (currentIndex < ReceiptPhotos.Count - 1)
+        {
+            SelectedPhoto = ReceiptPhotos[currentIndex + 1];
+        }
+    }
+
+    [RelayCommand]
+    private void SwipeRight()
+    {
+        if (ReceiptPhotos.Count <= 1 || SelectedPhoto == null) return;
+        int currentIndex = ReceiptPhotos.IndexOf(SelectedPhoto);
+        if (currentIndex > 0)
+        {
+            SelectedPhoto = ReceiptPhotos[currentIndex - 1];
+        }
+    }
+}
+
+public partial class ReceiptPhotoItem : ObservableObject
+{
+    [ObservableProperty]
+    public partial ImageSource? ImageSource { get; set; } = null!;
+
+    public string UploadedFileName { get; set; } = string.Empty;
 }

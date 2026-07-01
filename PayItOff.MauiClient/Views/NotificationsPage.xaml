@@ -20,13 +20,20 @@
                 <Grid Padding="{OnIdiom Phone='15', Default='40'}" RowDefinitions="Auto, Auto, *" RowSpacing="30">
 
 
-                    <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" IsVisible="{OnIdiom Phone=True, Default=False}" Margin="0,10,0,0">
-                        <HorizontalStackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
-                        </HorizontalStackLayout.GestureRecognizers>
-                        <Image Source="phone_menu_icon.png" WidthRequest="28" HeightRequest="28" VerticalOptions="Center"/>
-                        <Label Text="Menu" TextColor="{StaticResource TextMain}" FontAttributes="Bold" VerticalOptions="Center" Margin="5,0,0,0" FontSize="18"/>
-                    </HorizontalStackLayout>
+                    <Grid Grid.Row="0" ColumnDefinitions="Auto, *" IsVisible="{OnIdiom Phone=True, Default=False}" Margin="{OnPlatform iOS='0,40,0,0', Android='0,25,0,0', Default='0,10,0,0'}">
+                        <HorizontalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                            <Image Source="payitoff_logo_img.png" WidthRequest="32" HeightRequest="32" VerticalOptions="Center" />
+                            <Label Text="PayItOff" FontSize="20" FontAttributes="Bold" TextColor="White" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout Grid.Column="1" HorizontalOptions="End" Spacing="10" VerticalOptions="Center" BackgroundColor="Transparent">
+                            <HorizontalStackLayout.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
+                            </HorizontalStackLayout.GestureRecognizers>
+                            <Label Text="MENU" TextColor="White" FontSize="14" FontAttributes="Bold" VerticalOptions="Center" />
+                            <Image Source="phone_menu_icon.png" WidthRequest="28" HeightRequest="28" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                    </Grid>
 
 
                     <BoxView Grid.Row="1" HeightRequest="1" Color="{StaticResource Border}" VerticalOptions="Start" Margin="-40,10,-40,0" IsVisible="{OnIdiom Phone=False, Default=True}" Opacity="0.5"/>
@@ -35,39 +42,40 @@
 
 
                     <VerticalStackLayout Grid.Row="2" Spacing="20">
-                        <Grid ColumnDefinitions="Auto, Auto, Auto, *, Auto, Auto" ColumnSpacing="10" Margin="0,0,0,10">
-                            <Border Grid.Column="0" StrokeShape="RoundRectangle 20" BackgroundColor="{Binding FilterAllColor}" Padding="20,10" StrokeThickness="0">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding ToggleFilterCommand}" CommandParameter="All" />
-                                </Border.GestureRecognizers>
-                                <Label Text="{Binding TotalCount, StringFormat='Wszystkie {0}'}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" FontSize="14" />
-                            </Border>
-                            <Border Grid.Column="1" StrokeShape="RoundRectangle 20" BackgroundColor="{Binding FilterUnreadColor}" Padding="20,10" StrokeThickness="0">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding ToggleFilterCommand}" CommandParameter="Unread" />
-                                </Border.GestureRecognizers>
-                                <Label Text="{Binding UnreadCount, StringFormat='Nieprzeczytane {0}'}" TextColor="{StaticResource TextSubtle}" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" FontSize="14" />
-                            </Border>
-                            <Border Grid.Column="2" StrokeShape="RoundRectangle 20" BackgroundColor="{Binding FilterActionColor}" Padding="20,10" StrokeThickness="0">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding ToggleFilterCommand}" CommandParameter="ActionRequired" />
-                                </Border.GestureRecognizers>
-                                <Label Text="{Binding ActionRequiredCount, StringFormat='Wymaga akcji {0}'}" TextColor="{StaticResource TextSubtle}" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" FontSize="14" />
-                            </Border>
-
-                            <Border Grid.Column="4" StrokeShape="RoundRectangle 20" StrokeThickness="1" Stroke="#303846" BackgroundColor="Transparent" Padding="15,8" HorizontalOptions="End">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding MarkAllAsReadCommand}" />
-                                </Border.GestureRecognizers>
-                                <Label Text="Oznacz wszystkie jako przeczytane" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" VerticalOptions="Center" FontSize="14" />
-                            </Border>
-                            <Border Grid.Column="5" StrokeShape="RoundRectangle 20" StrokeThickness="1" Stroke="{StaticResource StatusRed}" BackgroundColor="Transparent" Padding="15,8" HorizontalOptions="End">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding DeleteAllNotificationsCommand}" />
-                                </Border.GestureRecognizers>
-                                <Label Text="Usuń wszystkie powiadomienia" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" FontSize="14" />
-                            </Border>
-                        </Grid>
+                        <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never" Margin="0,0,0,10">
+                            <HorizontalStackLayout Spacing="10">
+                                <Border StrokeShape="RoundRectangle 20" BackgroundColor="{Binding FilterAllColor}" Padding="{OnIdiom Phone='12,8', Default='20,10'}" StrokeThickness="0">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ToggleFilterCommand}" CommandParameter="All" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="{Binding TotalCount, StringFormat='Wszystkie {0}'}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" FontSize="{OnIdiom Phone=12, Default=14}" />
+                                </Border>
+                                <Border StrokeShape="RoundRectangle 20" BackgroundColor="{Binding FilterUnreadColor}" Padding="{OnIdiom Phone='12,8', Default='20,10'}" StrokeThickness="0">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ToggleFilterCommand}" CommandParameter="Unread" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="{Binding UnreadCount, StringFormat='Nieprzeczytane {0}'}" TextColor="{StaticResource TextSubtle}" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" FontSize="{OnIdiom Phone=12, Default=14}" />
+                                </Border>
+                                <Border StrokeShape="RoundRectangle 20" BackgroundColor="{Binding FilterActionColor}" Padding="{OnIdiom Phone='12,8', Default='20,10'}" StrokeThickness="0">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ToggleFilterCommand}" CommandParameter="ActionRequired" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="{Binding ActionRequiredCount, StringFormat='Wymaga akcji {0}'}" TextColor="{StaticResource TextSubtle}" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" FontSize="{OnIdiom Phone=12, Default=14}" />
+                                </Border>
+                                <Border StrokeShape="RoundRectangle 20" StrokeThickness="1" Stroke="#303846" BackgroundColor="Transparent" Padding="{OnIdiom Phone='12,8', Default='15,8'}">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding MarkAllAsReadCommand}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="Oznacz wszystkie jako przeczytane" TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" VerticalOptions="Center" FontSize="{OnIdiom Phone=12, Default=14}" />
+                                </Border>
+                                <Border StrokeShape="RoundRectangle 20" StrokeThickness="1" Stroke="{StaticResource StatusRed}" BackgroundColor="Transparent" Padding="{OnIdiom Phone='12,8', Default='15,8'}">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding DeleteAllNotificationsCommand}" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="Usuń wszystkie powiadomienia" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" FontSize="{OnIdiom Phone=12, Default=14}" />
+                                </Border>
+                            </HorizontalStackLayout>
+                        </ScrollView>
 
                             <CollectionView ItemsSource="{Binding Notifications}">
                                 <CollectionView.EmptyView>
@@ -83,29 +91,29 @@
                                             </ContentView.GestureRecognizers>
 
                                             <Border BackgroundColor="{Binding BackgroundColor}" Padding="0" StrokeShape="RoundRectangle 12" StrokeThickness="0">
-                                                <Grid ColumnDefinitions="Auto, 60, *, Auto, Auto" ColumnSpacing="15">
+                                                <Grid ColumnDefinitions="{OnIdiom Phone='Auto, 40, *', Default='Auto, 60, *, Auto, Auto'}" RowDefinitions="{OnIdiom Phone='Auto, Auto, Auto', Default='*'}" ColumnSpacing="{OnIdiom Phone=10, Default=15}">
 
-                                                    <BoxView Grid.Column="0" WidthRequest="6" Color="{Binding LeftBarColor}" VerticalOptions="FillAndExpand" />
+                                                    <BoxView Grid.RowSpan="{OnIdiom Phone=3, Default=1}" Grid.Column="0" WidthRequest="6" Color="{Binding LeftBarColor}" VerticalOptions="Fill" />
 
-                                                    <Image Grid.Column="1" Source="{Binding IconSource}" WidthRequest="26" HeightRequest="26" VerticalOptions="Center" HorizontalOptions="Center" />
+                                                    <Image Grid.Row="{OnIdiom Phone=0, Default=0}" Grid.RowSpan="{OnIdiom Phone=2, Default=1}" Grid.Column="1" Source="{Binding IconSource}" WidthRequest="{OnIdiom Phone=20, Default=26}" HeightRequest="{OnIdiom Phone=20, Default=26}" VerticalOptions="{OnIdiom Phone=Start, Default=Center}" HorizontalOptions="Center" Margin="{OnIdiom Phone='0,15,0,0', Default='0'}" />
 
-                                                    <Label Grid.Column="2" Text="{Binding DisplayText}" TextColor="{Binding TextColor}" FontAttributes="Bold" FontSize="14" VerticalOptions="Center" LineBreakMode="WordWrap" Margin="0,15" />
+                                                    <Label Grid.Row="0" Grid.Column="2" Text="{Binding DisplayText}" TextColor="{Binding TextColor}" FontAttributes="Bold" FontSize="{OnIdiom Phone=13, Default=14}" VerticalOptions="Center" LineBreakMode="WordWrap" Margin="{OnIdiom Phone='0,15,10,0', Default='0,15'}" />
 
-                                                    <Label Grid.Column="3" Text="{Binding TimeDisplay}" TextColor="{StaticResource TextSubtle}" FontSize="12" VerticalOptions="Center" Margin="0,0,15,0" />
+                                                    <Label Grid.Row="{OnIdiom Phone=1, Default=0}" Grid.Column="{OnIdiom Phone=2, Default=3}" Text="{Binding TimeDisplay}" TextColor="{StaticResource TextSubtle}" FontSize="12" VerticalOptions="{OnIdiom Phone=Start, Default=Center}" Margin="{OnIdiom Phone='0,5,10,5', Default='0,0,15,0'}" />
 
-                                                    <HorizontalStackLayout Grid.Column="4" Spacing="10" VerticalOptions="Center" Margin="0,0,15,0">
+                                                    <HorizontalStackLayout Grid.Row="{OnIdiom Phone=2, Default=0}" Grid.Column="{OnIdiom Phone=2, Default=4}" Spacing="10" VerticalOptions="{OnIdiom Phone=Start, Default=Center}" Margin="{OnIdiom Phone='0,5,10,15', Default='0,0,15,0'}">
 
                                                         <Border IsVisible="{Binding IsActionRequired}" StrokeShape="RoundRectangle 5" StrokeThickness="1" Stroke="{StaticResource StatusGreen}" BackgroundColor="Transparent" WidthRequest="32" HeightRequest="32" Padding="6">
                                                             <Border.GestureRecognizers>
                                                                 <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.AcceptActionCommand}" CommandParameter="{Binding .}" />
                                                             </Border.GestureRecognizers>
-                                                            <Image Source="check_mark_icon.png" Aspect="AspectFit" />
+                                                            <Image Source="check_mark_icon.png" WidthRequest="16" HeightRequest="16" HorizontalOptions="Center" VerticalOptions="Center"/>
                                                         </Border>
                                                         <Border IsVisible="{Binding IsActionRequired}" StrokeShape="RoundRectangle 5" StrokeThickness="1" Stroke="{StaticResource StatusRed}" BackgroundColor="Transparent" WidthRequest="32" HeightRequest="32" Padding="6">
                                                             <Border.GestureRecognizers>
-                                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeclineActionCommand}" CommandParameter="{Binding .}" />
+                                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RejectActionCommand}" CommandParameter="{Binding .}" />
                                                             </Border.GestureRecognizers>
-                                                            <Image Source="x_icon.png" Aspect="AspectFit" />
+                                                            <Image Source="x_icon.png" WidthRequest="12" HeightRequest="12" HorizontalOptions="Center" VerticalOptions="Center"/>
                                                         </Border>
 
                                                         <Border StrokeShape="RoundRectangle 5" StrokeThickness="1" Stroke="#404040" BackgroundColor="Transparent" WidthRequest="32" HeightRequest="32" Padding="6">
@@ -130,40 +138,11 @@
         </Grid>
 
 
-        <Grid IsVisible="{Binding IsMenuVisible}" BackgroundColor="#CC121212" ZIndex="100">
+        <Grid Grid.ColumnSpan="{OnIdiom Phone=1, Default=2}" IsVisible="{Binding IsMenuVisible}" BackgroundColor="#CC121212" ZIndex="100">
             <Grid.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
             </Grid.GestureRecognizers>
-            <Border HorizontalOptions="End" VerticalOptions="Start" Margin="0,60,20,0" WidthRequest="220" BackgroundColor="{StaticResource SurfaceDark}" StrokeShape="RoundRectangle 15" StrokeThickness="0" Padding="15">
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="PayItOff!" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource TextMain}" Margin="0,0,0,10"/>
-
-                    <HorizontalStackLayout Spacing="15" Padding="15,12">
-                        <HorizontalStackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding NavigateCommand}" CommandParameter="//MainPage" />
-                        </HorizontalStackLayout.GestureRecognizers>
-                        <Image Source="home_icon.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
-                        <Label Text="Menu Główne" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
-                    </HorizontalStackLayout>
-
-                    <HorizontalStackLayout Spacing="15" Padding="15,12">
-                        <HorizontalStackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding NavigateCommand}" CommandParameter="//GroupsPage" />
-                        </HorizontalStackLayout.GestureRecognizers>
-                        <Image Source="groups_icon.png" WidthRequest="24" HeightRequest="24" Opacity="0.7"/>
-                        <Label Text="Twoje Grupy" TextColor="{StaticResource TextSubtle}" VerticalOptions="Center" FontSize="16"/>
-                    </HorizontalStackLayout>
-
-                    <BoxView HeightRequest="1" Color="{StaticResource Border}" Margin="0,10" Opacity="0.5"/>
-                    <HorizontalStackLayout Spacing="15" Padding="15,12">
-                        <HorizontalStackLayout.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding LogoutCommand}" />
-                        </HorizontalStackLayout.GestureRecognizers>
-                        <Image Source="logout_icon.png" WidthRequest="24" HeightRequest="24" VerticalOptions="Center"/>
-                        <Label Text="Wyloguj się" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" VerticalOptions="Center" FontSize="16"/>
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
-            </Border>
+            <controls:SidebarMenu HorizontalOptions="Start" ActiveTab="Notifications" WidthRequest="300"/>
         </Grid>
 
         <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#CC121212" ZIndex="450">
@@ -174,14 +153,14 @@
         </Grid>
 
         <Grid IsVisible="{Binding IsCustomAlertVisible}" Style="{StaticResource PopupOverlayStyle}" ZIndex="500">
-            <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400">
+            <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400">
                 <VerticalStackLayout Spacing="15">
                     <Label Text="{Binding CustomAlertTitle}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
                     <Label Text="{Binding CustomAlertMessage}" FontSize="14" TextColor="{StaticResource TextSubtle}" LineBreakMode="WordWrap" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
 
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,15,0,0">
-                        <Button Grid.Column="0" Text="{Binding CustomAlertCancelText}" Command="{Binding CloseAlertCommand}" CommandParameter="False" Style="{StaticResource SecondaryButtonStyle}" IsVisible="{Binding IsCustomAlertCancelVisible}"/>
-                        <Button Grid.Column="{Binding AlertAcceptColumn}" Grid.ColumnSpan="{Binding AlertAcceptColumnSpan}" Text="{Binding CustomAlertAcceptText}" Command="{Binding CloseAlertCommand}" CommandParameter="True" Style="{StaticResource PrimaryButtonStyle}" />
+                        <controls:AppButton Grid.Column="0" Text="{Binding CustomAlertCancelText}" Command="{Binding CloseAlertCommand}" CommandParameter="False" ButtonBackgroundColor="{StaticResource SurfaceDark}" ButtonTextColor="{StaticResource TextMain}" IsVisible="{Binding IsCustomAlertCancelVisible}"/>
+                        <controls:AppButton Grid.Column="{Binding AlertAcceptColumn}" Grid.ColumnSpan="{Binding AlertAcceptColumnSpan}" Text="{Binding CustomAlertAcceptText}" Command="{Binding CloseAlertCommand}" CommandParameter="True" ButtonBackgroundColor="{StaticResource PrimaryViolet}" ButtonTextColor="{StaticResource TextMain}" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
@@ -191,7 +170,7 @@
             <Grid.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding CloseSummaryPopupCommand}" />
             </Grid.GestureRecognizers>
-            <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="480" MaximumHeightRequest="600">
+            <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="480" MaximumHeightRequest="600">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer />
                 </Border.GestureRecognizers>
@@ -206,7 +185,7 @@
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding SummaryLines}" Spacing="8">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="x:String">
-                                    <Border BackgroundColor="{StaticResource SurfaceDark}" StrokeShape="RoundRectangle 10"
+                                    <Border StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource SurfaceDark}"
                                             StrokeThickness="1" Stroke="{StaticResource Border}" Padding="14,12">
                                         <Label Text="{Binding .}" FontSize="13" TextColor="{StaticResource TextMain}"
                                                LineBreakMode="WordWrap"/>
@@ -216,11 +195,14 @@
                         </VerticalStackLayout>
                     </ScrollView>
 
-                    <Button Grid.Row="3" Text="Zamknij" Command="{Binding CloseSummaryPopupCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}" HorizontalOptions="Fill" Margin="0,20,0,0"/>
+                    <controls:AppButton Grid.Row="3" Text="Zamknij" Command="{Binding CloseSummaryPopupCommand}"
+                            ButtonBackgroundColor="{StaticResource SurfaceDark}" ButtonTextColor="{StaticResource TextMain}" HorizontalOptions="Fill" Margin="0,20,0,0"/>
                 </Grid>
             </Border>
         </Grid>
 
     </Grid>
 </ContentPage>
+
+
+

@@ -13,6 +13,6 @@ public interface ISettlementRepository
         int userId1,
         int userId2,
         IReadOnlyCollection<int> groupIds);
-        
+
     Task<List<int>> GetPendingSettlementIdsAsync(int senderId, int receiverId);
 }

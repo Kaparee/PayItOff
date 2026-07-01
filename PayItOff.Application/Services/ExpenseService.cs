@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using PayItOff.Application.Helpers;
-using PayItOff.Application.Helpers;
 using PayItOff.Application.Interfaces;
 using PayItOff.Domain.DomainServices;
 using PayItOff.Domain.Entities;
@@ -62,7 +61,17 @@ namespace PayItOff.Application.Services
                     if (!usersDict.ContainsKey(subDto.PayerId)) { throw new UserNotFoundException(); }
                     var payer = usersDict[subDto.PayerId];
 
-                    var expense = Expense.Create(group, creator, payer, subDto.Name, subDto.ReciptImageUrl, subDto.PurchasedAt);
+                    var expense = Expense.Create(group, creator, payer, subDto.Name, subDto.PurchasedAt);
+                    if (subDto.ReceiptImageUrls != null && subDto.ReceiptImageUrls.Any())
+                    {
+                        foreach (var photoUrl in subDto.ReceiptImageUrls)
+                        {
+                            if (!string.IsNullOrWhiteSpace(photoUrl))
+                            {
+                                expense.AddPhoto(ExpensePhoto.Create(expense.Id, photoUrl));
+                            }
+                        }
+                    }
 
                     foreach (var gDTO in subDto.Groups)
                     {
@@ -143,6 +152,135 @@ namespace PayItOff.Application.Services
             }
         }
 
+        public async Task DeleteExpenseAsync(int userId, int expenseId)
+        {
+            var expense = await _expenseRepository.GetExpenseWithSplitsAsync(expenseId);
+            if (expense == null) throw new ExpenseNotFoundException();
+
+            var group = await _groupRepository.GetGroupInfoByIdAsync(expense.GroupId);
+            if (group == null) throw new GroupNotFoundException();
+
+            var member = await _groupMemberRepository.GetMemberAsync(expense.GroupId, userId);
+            if (member == null || (member.Role != GroupMemberRole.Owner && member.Role != GroupMemberRole.Admin))
+            {
+                throw new InvalidUserRoleException();
+            }
+
+            var debtsToRevert = expense.CalculateDebts();
+            var payer = await _userRepository.GetUserByIdAsync(expense.PayerId);
+            if (payer == null) throw new UserNotFoundException();
+
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+
+                foreach (var debt in debtsToRevert)
+                {
+                    var debtor = await _userRepository.GetUserByIdAsync(debt.Key);
+                    if (debtor != null)
+                    {
+                        await _groupDebtRepository.ApplyDebtChangeAsync(group, payer, debtor, debt.Value);
+                    }
+                }
+
+
+                await _expenseRepository.DeleteAsync(expense);
+
+
+                var participantIds = expense.Items.SelectMany(i => i.Splits.Select(s => s.UserId)).Distinct().Where(id => id != userId);
+                foreach (var participantId in participantIds)
+                {
+                    await _notificationService.CreateNotificationAsync(participantId, userId, NotificationType.Deleting, $"Wydatek '{expense.Name}' został usunięty z grupy '{group.Name}'.", expense.GroupId, EntityType.Groups);
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitAsync();
+            }
+            catch
+            {
+                await _unitOfWork.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task DeleteExpenseItemAsync(int userId, int expenseId, int itemId)
+        {
+            var expense = await _expenseRepository.GetExpenseWithSplitsAsync(expenseId);
+            if (expense == null) throw new ExpenseNotFoundException();
+
+            var group = await _groupRepository.GetGroupInfoByIdAsync(expense.GroupId);
+            if (group == null) throw new GroupNotFoundException();
+
+            var member = await _groupMemberRepository.GetMemberAsync(expense.GroupId, userId);
+            if (member == null || (member.Role != GroupMemberRole.Owner && member.Role != GroupMemberRole.Admin))
+            {
+                throw new InvalidUserRoleException();
+            }
+
+            var item = expense.Items.FirstOrDefault(i => i.Id == itemId)
+                ?? expense.Groups.SelectMany(g => g.Items).FirstOrDefault(i => i.Id == itemId);
+            if (item == null) throw new Exception("Nie znaleziono pozycji na paragonie");
+
+            var payer = await _userRepository.GetUserByIdAsync(expense.PayerId);
+            if (payer == null) throw new UserNotFoundException();
+
+
+            var debtsToRevert = new Dictionary<int, decimal>();
+            foreach (var split in item.Splits)
+            {
+                if (split.UserId != payer.Id)
+                {
+                    if (debtsToRevert.ContainsKey(split.UserId)) debtsToRevert[split.UserId] += split.OwedAmount;
+                    else debtsToRevert[split.UserId] = split.OwedAmount;
+                }
+            }
+
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+
+                foreach (var debt in debtsToRevert)
+                {
+                    var debtor = await _userRepository.GetUserByIdAsync(debt.Key);
+                    if (debtor != null)
+                    {
+                        await _groupDebtRepository.ApplyDebtChangeAsync(group, payer, debtor, debt.Value);
+                    }
+                }
+
+
+                await _expenseRepository.DeleteExpenseItemAsync(item);
+
+
+                decimal newTotal = expense.Items.Where(i => i.Id != itemId && i.ExpenseGroupId == null).Sum(i => i.TotalPrice)
+                                 + expense.Groups.Sum(g => g.Items.Where(i => i.Id != itemId).Sum(i => i.TotalPrice));
+                expense.GetType().GetProperty("TotalAmount")?.SetValue(expense, newTotal);
+                expense.GetType().GetProperty("UpdatedAt")?.SetValue(expense, DateTime.UtcNow);
+
+                if (expense.TotalAmount == 0)
+                {
+                    expense.Delete();
+                }
+
+                await _expenseRepository.UpdateAsync(expense);
+
+
+                var participantIds = item.Splits.Select(s => s.UserId).Distinct().Where(id => id != userId);
+                foreach (var participantId in participantIds)
+                {
+                    await _notificationService.CreateNotificationAsync(participantId, userId, NotificationType.Deleting, $"Pozycja '{item.Name}' z wydatku '{expense.Name}' została usunięta z grupy '{group.Name}'.", expense.GroupId, EntityType.Groups);
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitAsync();
+            }
+            catch
+            {
+                await _unitOfWork.RollbackAsync();
+                throw;
+            }
+        }
+
         private void AggregateDebt(Dictionary<(int, int), decimal> dict, int debtorId, int creditorId, decimal amount)
         {
             var key = (debtorId, creditorId);
@@ -171,7 +309,7 @@ namespace PayItOff.Application.Services
                 TotalAmount = expense.TotalAmount,
                 Date = expense.PurchasedAt,
                 PayerName = $"{expense.Payer.Name} {expense.Payer.Surname}",
-                PayerAvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, expense.Payer.AvatarUrl),
+                PayerAvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, expense.Payer.AvatarUrl),
                 PayerPhoneNumber = expense.Payer.PhoneNumber,
                 PayerIBAN = expense.Payer.IBAN
             };
@@ -187,7 +325,7 @@ namespace PayItOff.Application.Services
                     {
                         UserId = split.UserId,
                         FullName = $"{split.User.Name} {split.User.Surname}",
-                        AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, split.User.AvatarUrl),
+                        AvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, split.User.AvatarUrl),
                         OwedAmount = 0
                     };
                 }
@@ -218,6 +356,9 @@ namespace PayItOff.Application.Services
 
             response.Category = string.Join(", ", categories);
             response.Participants = userSplits.Values.ToList();
+            response.ReceiptPhotos = expense.Photos
+                .Select(p => UrlHelper.BuildFileUrl(baseUrl!, p.PhotoUrl))
+                .ToList();
 
             return response;
         }
@@ -247,7 +388,7 @@ namespace PayItOff.Application.Services
                 TotalAmount = item.TotalPrice,
                 Date = expense.PurchasedAt,
                 PayerName = $"{expense.Payer.Name} {expense.Payer.Surname}",
-                PayerAvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, expense.Payer.AvatarUrl),
+                PayerAvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, expense.Payer.AvatarUrl),
                 PayerPhoneNumber = expense.Payer.PhoneNumber,
                 PayerIBAN = expense.Payer.IBAN,
                 Category = item.Category
@@ -263,7 +404,7 @@ namespace PayItOff.Application.Services
                     {
                         UserId = split.UserId,
                         FullName = $"{split.User.Name} {split.User.Surname}",
-                        AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, split.User.AvatarUrl),
+                        AvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, split.User.AvatarUrl),
                         OwedAmount = 0
                     };
                 }
@@ -271,6 +412,9 @@ namespace PayItOff.Application.Services
             }
 
             response.Participants = userSplits.Values.ToList();
+            response.ReceiptPhotos = expense.Photos
+                .Select(p => UrlHelper.BuildFileUrl(baseUrl!, p.PhotoUrl))
+                .ToList();
 
             return response;
         }
@@ -308,7 +452,7 @@ namespace PayItOff.Application.Services
             {
                 var group = await _groupRepository.GetGroupInfoByIdAsync(expense.GroupId);
                 if (group == null) throw new GroupNotFoundException();
-                
+
                 var allUserIds = item.Splits.Select(s => s.UserId).Concat(new[] { expense.PayerId }).Distinct().ToList();
                 if (request.Splits != null && request.Splits.Any())
                 {
@@ -325,19 +469,19 @@ namespace PayItOff.Application.Services
                         var debtor = usersDict[split.UserId];
                         await _groupDebtRepository.ApplyDebtChangeAsync(group, debtor, payer, -split.OwedAmount);
                     }
-                    
+
                     item.ClearSplits();
-                    
+
                     foreach (var newSplit in request.Splits)
                     {
                         var newSplitEntity = ExpenseSplit.Create(item, usersDict[newSplit.UserId], newSplit.Amount);
                         item.AddSplit(newSplitEntity);
-                        
+
                         if (newSplit.UserId == payer.Id) continue;
                         var debtor = usersDict[newSplit.UserId];
                         await _groupDebtRepository.ApplyDebtChangeAsync(group, debtor, payer, newSplit.Amount);
                     }
-                    
+
                     item.UpdateUnitPrice(request.TotalPrice / item.Quantity);
                     if (parentGroup != null)
                     {
@@ -360,7 +504,7 @@ namespace PayItOff.Application.Services
                 {
                     string notificationBody = $"Użytkownik zaktualizował wydatek \"{oldName}\" w grupie {group.Name}.";
                     if (oldName != request.Name) notificationBody += $" Nowa nazwa to \"{request.Name}\".";
-                    
+
                     await _notificationService.CreateNotificationAsync(id, userId, NotificationType.Normal, notificationBody, expense.Id, EntityType.Expenses);
                 }
             }

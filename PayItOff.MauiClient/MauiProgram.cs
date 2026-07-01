@@ -12,8 +12,9 @@ namespace PayItOff.MauiClient
             builder.UseMauiApp<App>();
 
             string baseUrl = DeviceInfo.Platform == DevicePlatform.Android
-                ? "http://10.0.2.2:5180/api/"
-                : "http://localhost:5180/api/";
+                ? "http://10.0.2.2:8080/api/"
+                : "http://localhost:8080/api/";
+
 
 
             builder.Services.AddTransient<AuthHandler>();
@@ -28,6 +29,7 @@ namespace PayItOff.MauiClient
 
             // Services
             builder.Services.AddSingleton<RegisterService>();
+            builder.Services.AddSingleton<AppUpdateService>();
             builder.Services.AddScoped<AuthService>();
             builder.Services.AddScoped<SettlementService>();
             builder.Services.AddScoped<GroupService>();
@@ -72,8 +74,11 @@ namespace PayItOff.MauiClient
 
                 h.PlatformView.GotFocus += (s, e) =>
                 {
-                    h.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
-                    h.PlatformView.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                    if (s is Microsoft.UI.Xaml.Controls.TextBox textBox)
+                    {
+                        textBox.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+                        textBox.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                    }
                 };
 #endif
             });
@@ -87,8 +92,14 @@ namespace PayItOff.MauiClient
 
                 h.PlatformView.GotFocus += (s, e) =>
                 {
-                    h.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
-                    h.PlatformView.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                    if (s is Microsoft.UI.Xaml.Controls.AutoSuggestBox searchBox)
+                    {
+                        // MAUI SearchBar na Windowsie tłumaczy się do AutoSuggestBox, 
+                        // który zarządza wyglądem wewnątrz swojego szablonu.
+                        // Ale możemy próbować usunąć obramowanie głównego kontenera:
+                        searchBox.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+                        searchBox.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                    }
                 };
 #endif
             });

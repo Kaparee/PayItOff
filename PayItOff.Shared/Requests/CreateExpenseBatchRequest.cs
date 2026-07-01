@@ -1,4 +1,4 @@
-﻿namespace PayItOff.Shared.Requests
+namespace PayItOff.Shared.Requests
 {
     public class CreateExpenseBatchRequest
     {
@@ -10,7 +10,7 @@
     {
         public required int PayerId { get; set; }
         public required string Name { get; set; }
-        public string? ReciptImageUrl { get; set; }
+        public List<string> ReceiptImageUrls { get; set; } = [];
         public required DateTime PurchasedAt { get; set; }
         public List<ExpenseGroupDto> Groups { get; set; } = [];
         public List<ExpenseItemDto> Items { get; set; } = [];

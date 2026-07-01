@@ -18,13 +18,28 @@
                                   ActiveTab="Groups"
                                   IsVisible="{OnIdiom Phone=False, Default=True}" />
 
-            
-            <Grid Grid.Column="1" RowDefinitions="80, Auto, *" Padding="40,0,40,40">
+            <Grid Grid.Column="1" RowDefinitions="Auto, 80, Auto, *" Padding="{OnIdiom Phone='15', Default='40,0,40,40'}">
+
+                <!-- MENU NA TELEFON -->
+                <Grid Grid.Row="0" ColumnDefinitions="Auto, *" IsVisible="{OnIdiom Phone=True, Default=False}" Margin="{OnPlatform iOS='0,40,0,0', Android='0,25,0,0', Default='0,10,0,0'}">
+                    <HorizontalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                        <Image Source="payitoff_logo_img.png" WidthRequest="32" HeightRequest="32" VerticalOptions="Center" />
+                        <Label Text="PayItOff" FontSize="20" FontAttributes="Bold" TextColor="White" VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Grid.Column="1" HorizontalOptions="End" Spacing="10" VerticalOptions="Center" BackgroundColor="Transparent">
+                        <HorizontalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
+                        </HorizontalStackLayout.GestureRecognizers>
+                        <Label Text="MENU" TextColor="White" FontSize="14" FontAttributes="Bold" VerticalOptions="Center" />
+                        <Image Source="phone_menu_icon.png" WidthRequest="28" HeightRequest="28" VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </Grid>
 
                 
-                <Border Grid.Row="0" HorizontalOptions="End" VerticalOptions="Center"
+                <Border Grid.Row="1" HorizontalOptions="End" VerticalOptions="Center"
                         StrokeShape="RoundRectangle 20" BackgroundColor="Transparent"
-                        Stroke="#444" StrokeThickness="1" WidthRequest="320" HeightRequest="40" Padding="15,0">
+                        Stroke="#444" StrokeThickness="1" WidthRequest="{OnIdiom Phone='350', Default='320'}" HeightRequest="40" Padding="15,0">
                     <SearchBar Placeholder="Wpisz szukaną grupę..."
                                PlaceholderColor="#666" TextColor="White" FontSize="14"
                                VerticalOptions="Center" BackgroundColor="Transparent"
@@ -32,11 +47,10 @@
                                Margin="-10,0,0,0"/>
                 </Border>
 
-                
-                <BoxView Grid.Row="1" HeightRequest="1" Color="{StaticResource Border}" Opacity="0.5" Margin="-40,0"/>
+                <BoxView Grid.Row="2" HeightRequest="1" Color="{StaticResource Border}" Opacity="0.5" Margin="{OnIdiom Phone='-15,0', Default='-40,0'}"/>
 
                 
-                <ScrollView Grid.Row="2" VerticalScrollBarVisibility="Never" Padding="0,30,0,0">
+                <ScrollView Grid.Row="3" VerticalScrollBarVisibility="Never" Padding="0,30,0,0">
                     <VerticalStackLayout Spacing="20">
 
                         <CollectionView ItemsSource="{Binding Groups}">
@@ -53,45 +67,44 @@
                                                     CommandParameter="{Binding .}" />
                                             </Border.GestureRecognizers>
 
-                                            <Grid ColumnDefinitions="60, *, Auto" ColumnSpacing="20">
+                                            <Grid ColumnDefinitions="{OnIdiom Phone='50, *, Auto', Default='60, *, Auto'}" ColumnSpacing="{OnIdiom Phone=10, Default=20}">
                                                 
-                                                <Border Grid.Column="0" HeightRequest="60" WidthRequest="60"
-                                                        StrokeShape="RoundRectangle 30" StrokeThickness="0" BackgroundColor="#1E232D">
+                                                <Border Grid.Column="0" HeightRequest="{OnIdiom Phone=50, Default=60}" WidthRequest="{OnIdiom Phone=50, Default=60}"
+                                                        StrokeShape="{OnIdiom Phone='RoundRectangle 25', Default='RoundRectangle 30'}" StrokeThickness="0" BackgroundColor="#1E232D">
                                                     <Grid>
                                                         
-                                                        <Path Aspect="Uniform" WidthRequest="26" HeightRequest="26" HorizontalOptions="Center" VerticalOptions="Center" Fill="#444"
-                                                              Data="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                                        <Image Source="default_group_avatar.png" Aspect="AspectFill" IsVisible="{Binding AvatarUrl, Converter={StaticResource InverseStringNullOrEmptyConverter}}" />
 
                                                         <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
                                                     </Grid>
                                                 </Border>
 
                                                 
-                                                <Label Grid.Column="1" Text="{Binding Name}" TextColor="White"
-                                                       FontAttributes="Bold" FontSize="20" VerticalOptions="Center"/>
+                                                <Label Grid.Column="1" Text="{Binding Name}" TextColor="White" LineBreakMode="TailTruncation"
+                                                       FontAttributes="Bold" FontSize="{OnIdiom Phone=16, Default=20}" VerticalOptions="Center"/>
 
                                                 
-                                                <Grid Grid.Column="2" ColumnDefinitions="95, 95, 115" ColumnSpacing="10" VerticalOptions="Center" Margin="0,0,30,0">
-                                                    <VerticalStackLayout Grid.Column="0">
+                                                <HorizontalStackLayout Grid.Column="2" Spacing="10" VerticalOptions="Center" Margin="{OnIdiom Phone='0,0,25,0', Default='0,0,30,0'}">
+                                                    <VerticalStackLayout IsVisible="{OnIdiom Phone=False, Default=True}" WidthRequest="95">
                                                         <Label Text="Przychód" TextColor="{StaticResource TextSubtle}" FontSize="12" HorizontalOptions="Center"/>
-                                                        <Label Text="{Binding Income, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusGreen}" FontAttributes="Bold" FontSize="16" HorizontalOptions="Center"/>
+                                                        <Label Text="{Binding Income, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusGreen}" FontAttributes="Bold" FontSize="16" HorizontalOptions="Center" LineBreakMode="TailTruncation"/>
                                                     </VerticalStackLayout>
 
-                                                    <VerticalStackLayout Grid.Column="1">
+                                                    <VerticalStackLayout IsVisible="{OnIdiom Phone=False, Default=True}" WidthRequest="95">
                                                         <Label Text="Wydatek" TextColor="{StaticResource TextSubtle}" FontSize="12" HorizontalOptions="Center"/>
-                                                        <Label Text="{Binding Expense, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" FontSize="16" HorizontalOptions="Center"/>
+                                                        <Label Text="{Binding Expense, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" FontSize="16" HorizontalOptions="Center" LineBreakMode="TailTruncation"/>
                                                     </VerticalStackLayout>
 
-                                                    <VerticalStackLayout Grid.Column="2">
-                                                        <Label Text="Suma" TextColor="{StaticResource TextSubtle}" FontSize="12" HorizontalOptions="End"/>
-                                                        <Label Text="{Binding Balance, StringFormat='{0:N2} zł'}" TextColor="White" FontAttributes="Bold" FontSize="18" HorizontalOptions="End"/>
+                                                    <VerticalStackLayout WidthRequest="{OnIdiom Phone=85, Default=115}">
+                                                        <Label Text="Suma" TextColor="{StaticResource TextSubtle}" FontSize="{OnIdiom Phone=11, Default=12}" HorizontalOptions="End"/>
+                                                        <Label Text="{Binding Balance, StringFormat='{0:N2} zł'}" TextColor="White" FontAttributes="Bold" FontSize="{OnIdiom Phone=16, Default=18}" HorizontalOptions="End" LineBreakMode="TailTruncation"/>
                                                     </VerticalStackLayout>
-                                                </Grid>
+                                                </HorizontalStackLayout>
                                             </Grid>
                                         </Border>
 
                                         
-                                        <Border HorizontalOptions="End" VerticalOptions="Start"
+                                        <Border StrokeShape="RoundRectangle 10" HorizontalOptions="End" VerticalOptions="Start"
                                                 Margin="0,15,15,0" HeightRequest="30" WidthRequest="30"
                                                 BackgroundColor="Transparent" StrokeThickness="0">
                                             <Border.GestureRecognizers>
@@ -113,7 +126,8 @@
                         </CollectionView>
 
                         
-                        <Border StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="0"
+                        <Border IsVisible="{OnIdiom Phone=False, Default=True}" 
+                                StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="0"
                                 StrokeThickness="0" HeightRequest="70" Margin="0,10,0,0">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding ShowCreatePopupCommand}"/>
@@ -126,26 +140,47 @@
 
                     </VerticalStackLayout>
                 </ScrollView>
+
+                <!-- Floating Action Button for Phone -->
+                <Border Grid.Row="3" 
+                        IsVisible="{OnIdiom Phone=True, Default=False}" 
+                        HorizontalOptions="End" 
+                        VerticalOptions="End" 
+                        Margin="0,0,5,20" 
+                        WidthRequest="60" 
+                        HeightRequest="60" 
+                        StrokeShape="RoundRectangle 30" 
+                        BackgroundColor="#7F00FF" 
+                        StrokeThickness="0"
+                        ZIndex="10">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="0,4" Radius="10" Opacity="0.5"/>
+                    </Border.Shadow>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ShowCreatePopupCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Image Source="plus_icon.png" WidthRequest="24" HeightRequest="24" HorizontalOptions="Center" VerticalOptions="Center"/>
+                </Border>
             </Grid>
         </Grid>
 
         
         <Grid IsVisible="{Binding IsCreatePopupVisible}" Style="{StaticResource PopupOverlayStyle}">
-            <Border Style="{StaticResource PopupContainerStyle}" WidthRequest="420">
+            <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PopupContainerStyle}" WidthRequest="{OnIdiom Phone=340, Default=420}">
                 <VerticalStackLayout Spacing="30">
                     <Label Text="Nowa Grupa" FontSize="26" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
 
                     
                     <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
-                        <Border Stroke="#7F00FF" StrokeThickness="2" HeightRequest="120" WidthRequest="120" HorizontalOptions="Center">
+                        <Border StrokeShape="RoundRectangle 10" Stroke="#7F00FF" StrokeThickness="2" HeightRequest="120" WidthRequest="120" HorizontalOptions="Center">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding PickPhotoCommand}" />
                             </Border.GestureRecognizers>
                             <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="60" />
+                                <RoundRectangle />
                             </Border.StrokeShape>
                             <Grid>
-                                <BoxView Color="#2B2B3D" CornerRadius="60" />
+                                <BoxView Color="#2B2B3D" />
                                 <Image Source="camera_icon.png" WidthRequest="40" HeightRequest="40" HorizontalOptions="Center" VerticalOptions="Center" />
                                 <Image Source="{Binding SelectedAvatarSource}" Aspect="AspectFill" />
                             </Grid>
@@ -162,23 +197,31 @@
 
                     
                     <Grid ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,10,0,0">
-                        <Button Grid.Column="0" Text="Anuluj" Command="{Binding ClosePopupCommand}" Style="{StaticResource SecondaryButtonStyle}" />
-                        <Button Grid.Column="1" Text="Utwórz" Command="{Binding ConfirmCreateGroupCommand}" Style="{StaticResource SuccessButtonStyle}" />
+                        <controls:AppButton Grid.Column="0" Text="Anuluj" Command="{Binding ClosePopupCommand}" ButtonBackgroundColor="{StaticResource SurfaceDark}" ButtonTextColor="{StaticResource TextMain}" />
+                        <controls:AppButton Grid.Column="1" Text="Utwórz" Command="{Binding ConfirmCreateGroupCommand}" ButtonBackgroundColor="{StaticResource StatusGreen}" ButtonTextColor="{StaticResource TextMain}" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
         </Grid>
 
+        <!-- Mobile Menu Overlay -->
+        <Grid IsVisible="{Binding IsMenuVisible}" BackgroundColor="#CC121212" ZIndex="100">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ToggleMenuCommand}" />
+            </Grid.GestureRecognizers>
+            <controls:SidebarMenu HorizontalOptions="Start" ActiveTab="Groups" WidthRequest="300"/>
+        </Grid>
+
         <!-- Custom Alert Popup -->
         <Grid IsVisible="{Binding IsCustomAlertVisible}" Style="{StaticResource PopupOverlayStyle}" ZIndex="500">
-            <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400">
+            <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400">
                 <VerticalStackLayout Spacing="15">
                     <Label Text="{Binding CustomAlertTitle}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
                     <Label Text="{Binding CustomAlertMessage}" FontSize="14" TextColor="{StaticResource TextSubtle}" LineBreakMode="WordWrap" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
 
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,15,0,0">
-                        <Button Grid.Column="0" Text="{Binding CustomAlertCancelText}" Command="{Binding CloseAlertCommand}" CommandParameter="False" Style="{StaticResource SecondaryButtonStyle}" IsVisible="{Binding IsCustomAlertCancelVisible}"/>
-                        <Button Grid.Column="{Binding AlertAcceptColumn}" Grid.ColumnSpan="{Binding AlertAcceptColumnSpan}" Text="{Binding CustomAlertAcceptText}" Command="{Binding CloseAlertCommand}" CommandParameter="True" Style="{StaticResource PrimaryButtonStyle}" />
+                        <controls:AppButton Grid.Column="0" Text="{Binding CustomAlertCancelText}" Command="{Binding CloseAlertCommand}" CommandParameter="False" ButtonBackgroundColor="{StaticResource SurfaceDark}" ButtonTextColor="{StaticResource TextMain}" IsVisible="{Binding IsCustomAlertCancelVisible}"/>
+                        <controls:AppButton Grid.Column="{Binding AlertAcceptColumn}" Grid.ColumnSpan="{Binding AlertAcceptColumnSpan}" Text="{Binding CustomAlertAcceptText}" Command="{Binding CloseAlertCommand}" CommandParameter="True" ButtonBackgroundColor="{StaticResource PrimaryViolet}" ButtonTextColor="{StaticResource TextMain}" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
@@ -186,3 +229,5 @@
 
     </Grid>
 </ContentPage>
+
+

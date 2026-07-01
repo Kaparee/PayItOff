@@ -23,6 +23,13 @@ public class AuthService
             var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
             await SecureStorage.Default.SetAsync("jwt_token", result!.Token);
+
+            var userId = PayItOff.MauiClient.Helpers.JwtHelper.GetClaimValue(result.Token, "nameid");
+            if (!string.IsNullOrEmpty(userId))
+            {
+                await SecureStorage.Default.SetAsync("user_id", userId);
+            }
+
             return true;
         }
         else

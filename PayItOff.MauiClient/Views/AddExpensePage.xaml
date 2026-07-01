@@ -4,13 +4,16 @@
              xmlns:viewmodels="clr-namespace:PayItOff.MauiClient.ViewModels"
              xmlns:models="clr-namespace:PayItOff.MauiClient.Models"
              xmlns:converters="clr-namespace:PayItOff.MauiClient.Converters"
+             xmlns:controls="clr-namespace:PayItOff.MauiClient.Controls"
              x:Class="PayItOff.MauiClient.Views.AddExpensePage"
+             x:DataType="viewmodels:AddExpenseViewModel"
              Title=""
              Shell.NavBarIsVisible="False"
-             BackgroundColor="{StaticResource BackgroundDark}">
+             BackgroundColor="{StaticResource BgDark}">
              
     <ContentPage.Resources>
         <converters:DecimalConverter x:Key="DecimalConverter" />
+        <converters:InverseBoolConverter x:Key="InverseBool" />
     </ContentPage.Resources>
 
     <Grid>
@@ -32,17 +35,30 @@
         </Grid>
 
         <!-- Główna zawartość -->
-        <Grid Grid.Row="1" ColumnDefinitions="600, *, 350">
+        <ScrollView x:Name="MainScrollView" Grid.Row="1" VerticalScrollBarVisibility="Never">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="{OnIdiom Phone='0', Default='*'}" />
+                    <ColumnDefinition Width="{OnIdiom Phone='0', Default='400'}" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="{OnIdiom Phone='Auto', Default='*'}" />
+                    <RowDefinition Height="{OnIdiom Phone='Auto', Default='0'}" />
+                    <RowDefinition Height="{OnIdiom Phone='Auto', Default='0'}" />
+                </Grid.RowDefinitions>
 
-            <!-- LEWA KOLUMNA: pozycje i kategorie -->
-            <Grid Grid.Column="0" RowDefinitions="Auto, *, Auto" Padding="20" BackgroundColor="#2A303C">
+                <!-- LEWA KOLUMNA: pozycje i kategorie -->
+                <Grid Grid.Column="0" Grid.Row="{OnIdiom Phone='1', Default='0'}"
+                      RowDefinitions="Auto, *, Auto" Padding="{OnIdiom Phone='10', Default='20'}" BackgroundColor="#2A303C">
 
-                <Frame Grid.Row="0" BackgroundColor="#1A1F27" BorderColor="Transparent" CornerRadius="10" Padding="15,5">
+                <Border StrokeShape="RoundRectangle 10" Grid.Row="0" BackgroundColor="#1A1F27" Stroke="Transparent" Padding="15,10" MinimumHeightRequest="50">
                     <Entry Placeholder="Wpisz tutaj nazwę produktu..."
                            Text="{Binding NewItemName}"
                            ReturnCommand="{Binding AddNewItemCommand}"
-                           TextColor="White" PlaceholderColor="#888"/>
-                </Frame>
+                           TextColor="White" PlaceholderColor="#888"
+                           VerticalTextAlignment="Center"/>
+                </Border>
 
                 <ScrollView Grid.Row="1" Margin="0,20,0,0">
                     <VerticalStackLayout Spacing="20">
@@ -54,20 +70,20 @@
                                 <Label Grid.Column="3" Text="Cena/szt." FontSize="10" TextColor="#AAA" HorizontalOptions="Center"/>
                             </Grid>
                             
-                            <Border BackgroundColor="Transparent" StrokeThickness="0">
+                            <Border StrokeShape="RoundRectangle 10" BackgroundColor="Transparent" StrokeThickness="0">
                                 <Border.GestureRecognizers>
                                     <DropGestureRecognizer AllowDrop="True" Drop="OnUncategorizedDrop" DragOver="OnDragOver" DragLeave="OnDragLeave"/>
                                 </Border.GestureRecognizers>
                                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding BufferItems}" Spacing="5" MinimumHeightRequest="40">
                                     <BindableLayout.ItemTemplate>
                                         <DataTemplate x:DataType="models:ReceiptItem">
-                                            <Frame BackgroundColor="#353D4A" CornerRadius="8" BorderColor="{Binding GroupColor}" Padding="10,6" Margin="0">
-                                                <Frame.GestureRecognizers>
+                                            <Border StrokeShape="RoundRectangle 10" BackgroundColor="#353D4A" Stroke="{Binding GroupColor}" StrokeThickness="2" Padding="10,10" Margin="0">
+                                                <Border.GestureRecognizers>
                                                     <DragGestureRecognizer CanDrag="True" DragStarting="OnItemDragStarting"/>
                                                     <DropGestureRecognizer AllowDrop="True" Drop="OnItemDrop" DragOver="OnDragOver" DragLeave="OnDragLeave"/>
-                                                </Frame.GestureRecognizers>
+                                                </Border.GestureRecognizers>
                                                 <Grid ColumnDefinitions="2*, 3*, 1.2*, 1.2*, 35, 35" ColumnSpacing="5">
-                                                    <Entry Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" FontSize="13" BackgroundColor="Transparent"/>
+                                                    <Entry Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" FontSize="13" BackgroundColor="Transparent" HeightRequest="36" VerticalTextAlignment="Center"/>
                                                     
                                                     <Picker Grid.Column="1" ItemsSource="{Binding BindingContext.GroupMembers, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
                                                             SelectedIndexChanged="OnPayerSelectedIndexChanged"
@@ -78,10 +94,10 @@
                                                     
                                                     <Entry Grid.Column="3" Text="{Binding UnitPriceInput}" Keyboard="Text" TextColor="White" FontSize="12" HeightRequest="36" VerticalOptions="Center" HorizontalTextAlignment="Center"/>
 
-                                                    <Button Grid.Column="4" Text="✓" Command="{Binding BindingContext.ConfirmItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="{StaticResource StatusGreen}" TextColor="White" FontSize="13" FontAttributes="Bold" WidthRequest="32" HeightRequest="32" CornerRadius="8" Padding="0" VerticalOptions="Center" HorizontalOptions="End"/>
-                                                    <Button Grid.Column="5" Text="✗" Command="{Binding BindingContext.DeleteCategorizedItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="{StaticResource StatusRed}" TextColor="White" FontSize="13" FontAttributes="Bold" WidthRequest="32" HeightRequest="32" CornerRadius="8" Padding="0" VerticalOptions="Center" HorizontalOptions="End"/>
+                                                    <controls:AppButton Grid.Column="4" Text="✓" Command="{Binding BindingContext.ConfirmItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" ButtonBackgroundColor="{StaticResource StatusGreen}" ButtonTextColor="White" ButtonFontSize="13" ButtonFontAttributes="Bold" WidthRequest="32" HeightRequest="32" ButtonHeight="32" ButtonPadding="0" VerticalOptions="Center" HorizontalOptions="End"/>
+                                                    <controls:AppButton Grid.Column="5" Text="✗" Command="{Binding BindingContext.DeleteCategorizedItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" ButtonBackgroundColor="{StaticResource StatusRed}" ButtonTextColor="White" ButtonFontSize="13" ButtonFontAttributes="Bold" WidthRequest="32" HeightRequest="32" ButtonHeight="32" ButtonPadding="0" VerticalOptions="Center" HorizontalOptions="End"/>
                                                 </Grid>
-                                            </Frame>
+                                            </Border>
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>
                                 </VerticalStackLayout>
@@ -91,18 +107,18 @@
                         <!-- BEZ KATEGORII -->
                         <VerticalStackLayout Spacing="5" Margin="0,0,0,20">
                             <Label Text="Bez Kategorii" FontSize="16" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
-                            <Border BackgroundColor="Transparent" StrokeThickness="0" Padding="5,10,5,20">
+                            <Border StrokeShape="RoundRectangle 10" BackgroundColor="Transparent" StrokeThickness="0" Padding="5,10,5,20">
                                 <Border.GestureRecognizers>
                                     <DropGestureRecognizer AllowDrop="True" Drop="OnUncategorizedDrop" DragOver="OnDragOver" DragLeave="OnDragLeave"/>
                                 </Border.GestureRecognizers>
                                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding UncategorizedItems}" Spacing="5" MinimumHeightRequest="40">
                                     <BindableLayout.ItemTemplate>
                                         <DataTemplate x:DataType="models:ReceiptItem">
-                                            <Frame BackgroundColor="#353D4A" CornerRadius="8" BorderColor="{Binding GroupColor}" Padding="10,5">
-                                                <Frame.GestureRecognizers>
+                                            <Border StrokeShape="RoundRectangle 10" BackgroundColor="#353D4A" Stroke="{Binding GroupColor}" StrokeThickness="2" Padding="10,5">
+                                                <Border.GestureRecognizers>
                                                     <DragGestureRecognizer CanDrag="True" DragStarting="OnItemDragStarting"/>
                                                     <DropGestureRecognizer AllowDrop="True" Drop="OnItemDrop" DragOver="OnDragOver" DragLeave="OnDragLeave"/>
-                                                </Frame.GestureRecognizers>
+                                                </Border.GestureRecognizers>
                                                 <Grid ColumnDefinitions="*, Auto, Auto, Auto, Auto">
                                                     <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" FontSize="12"/>
                                                     <Label Grid.Column="1" Text="{Binding PayerDisplayName}" FontSize="10" Margin="5,0" VerticalOptions="Center">
@@ -120,7 +136,7 @@
                                                     <ImageButton Grid.Column="3" Source="edit_icon.png" Command="{Binding BindingContext.EditCategorizedItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="Transparent" Padding="7" WidthRequest="30" HeightRequest="30"/>
                                                     <ImageButton Grid.Column="4" Source="x_icon.png" Command="{Binding BindingContext.DeleteCategorizedItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="Transparent" Padding="7" WidthRequest="30" HeightRequest="30"/>
                                                 </Grid>
-                                            </Frame>
+                                            </Border>
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>
                                 </VerticalStackLayout>
@@ -138,18 +154,18 @@
                                         </Label.GestureRecognizers>
                                     </Label>
 
-                                    <Border BackgroundColor="Transparent" StrokeThickness="0" Padding="5,10,5,20">
+                                    <Border StrokeShape="RoundRectangle 10" BackgroundColor="Transparent" StrokeThickness="0" Padding="5,10,5,20">
                                         <Border.GestureRecognizers>
                                             <DropGestureRecognizer AllowDrop="True" Drop="OnCategoryDrop" DragOver="OnDragOver" DragLeave="OnDragLeave"/>
                                         </Border.GestureRecognizers>
                                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding Items}" Spacing="5" MinimumHeightRequest="40">
                                             <BindableLayout.ItemTemplate>
                                                 <DataTemplate x:DataType="models:ReceiptItem">
-                                                    <Frame BackgroundColor="#353D4A" CornerRadius="8" BorderColor="{Binding GroupColor}" Padding="10,5">
-                                                        <Frame.GestureRecognizers>
+                                                    <Border StrokeShape="RoundRectangle 10" BackgroundColor="#353D4A" Stroke="{Binding GroupColor}" StrokeThickness="2" Padding="10,5">
+                                                        <Border.GestureRecognizers>
                                                             <DragGestureRecognizer CanDrag="True" DragStarting="OnItemDragStarting"/>
                                                             <DropGestureRecognizer AllowDrop="True" Drop="OnItemDrop" DragOver="OnDragOver" DragLeave="OnDragLeave"/>
-                                                        </Frame.GestureRecognizers>
+                                                        </Border.GestureRecognizers>
                                                         <Grid ColumnDefinitions="*, Auto, Auto, Auto, Auto">
                                                             <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" FontSize="12"/>
                                                             <Label Grid.Column="1" Text="{Binding PayerDisplayName}" FontSize="10" Margin="5,0" VerticalOptions="Center">
@@ -167,7 +183,7 @@
                                                             <ImageButton Grid.Column="3" Source="edit_icon.png" Command="{Binding BindingContext.EditCategorizedItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="Transparent" Padding="7" WidthRequest="30" HeightRequest="30"/>
                                                             <ImageButton Grid.Column="4" Source="x_icon.png" Command="{Binding BindingContext.DeleteCategorizedItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="Transparent" Padding="7" WidthRequest="30" HeightRequest="30"/>
                                                         </Grid>
-                                                    </Frame>
+                                                    </Border>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>
                                         </VerticalStackLayout>
@@ -179,58 +195,119 @@
                     </VerticalStackLayout>
                 </ScrollView>
 
-                <Button Grid.Row="2" Text="Dodaj nową kategorie" Command="{Binding ShowAddCategoryPopupCommand}" BackgroundColor="Transparent" TextColor="#AAA" FontAttributes="Bold"/>
+                <controls:AppButton Grid.Row="2" Text="Dodaj nową kategorie" Command="{Binding ShowAddCategoryPopupCommand}" ButtonBackgroundColor="Transparent" ButtonTextColor="#AAA" ButtonFontAttributes="Bold"/>
             </Grid>
 
             <!-- ŚRODKOWA KOLUMNA: aparat i zdjęcie -->
-            <Grid Grid.Column="1" BackgroundColor="{StaticResource BackgroundDark}" RowDefinitions="*, Auto">
+            <Grid Grid.Column="{OnIdiom Phone='0', Default='1'}" Grid.Row="0"
+                  BackgroundColor="{StaticResource BgDark}" RowDefinitions="*, Auto, Auto" VerticalOptions="Fill">
                 <Grid Grid.Row="0">
-                    <Label Text="Miejsce na podgląd paragonu" TextColor="#555" HorizontalOptions="Center" VerticalOptions="Center" IsVisible="False">
-                        <Label.Triggers>
-                            <DataTrigger TargetType="Label" Binding="{Binding ReceiptImageSource}" Value="{x:Null}">
-                                <Setter Property="IsVisible" Value="True" />
-                            </DataTrigger>
-                        </Label.Triggers>
-                    </Label>
-                    <Image Source="{Binding ReceiptImageSource}" Aspect="AspectFit" Margin="20"/>
+                    <Label Text="Dodaj zdjęcie paragonu" TextColor="{StaticResource TextSubtle}" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" 
+                           IsVisible="{Binding IsReceiptPhotosEmpty}" />
+                    
+                    <!-- MAIN IMAGE WITH SWIPE GESTURES -->
+                    <Grid IsVisible="{Binding IsReceiptPhotosEmpty, Converter={StaticResource InverseBool}}">
+                        <Image Source="{Binding SelectedPhotoImageSource}" Aspect="AspectFit" Margin="10" HeightRequest="{OnIdiom Phone=350, Default=720}">
+                            <Image.GestureRecognizers>
+                                <SwipeGestureRecognizer Direction="Left" Command="{Binding SwipeLeftCommand}" />
+                                <SwipeGestureRecognizer Direction="Right" Command="{Binding SwipeRightCommand}" />
+                            </Image.GestureRecognizers>
+                        </Image>
+                        
+                        <ImageButton Source="x_icon.png" 
+                                     Command="{Binding RemovePhotoCommand}" 
+                                     CommandParameter="{Binding SelectedPhoto}" 
+                                     BackgroundColor="Red" 
+                                    
+                                     Padding="5" 
+                                     WidthRequest="30" 
+                                     HeightRequest="30"
+                                     HorizontalOptions="End"
+                                     VerticalOptions="Start"
+                                     Margin="20"/>
+                    </Grid>
                 </Grid>
 
-                <HorizontalStackLayout Grid.Row="1" Spacing="40" HorizontalOptions="Center" Margin="0,0,0,40">
+                <!-- THUMBNAILS -->
+                <CollectionView Grid.Row="1"
+                                ItemsSource="{Binding ReceiptPhotos}"
+                                SelectedItem="{Binding SelectedPhoto, Mode=TwoWay}"
+                                SelectionMode="Single"
+                                HeightRequest="70"
+                                Margin="0,5,0,10"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center"
+                                HorizontalScrollBarVisibility="Never"
+                                IsVisible="{Binding IsReceiptPhotosEmpty, Converter={StaticResource InverseBool}}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10" />
+                    </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="viewmodels:ReceiptPhotoItem">
+                                <Border WidthRequest="50" HeightRequest="50" StrokeShape="RoundRectangle 8" StrokeThickness="2" Stroke="Transparent" BackgroundColor="#1E232D">
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroupList>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Normal">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="Opacity" Value="0.5" />
+                                                        <Setter Property="Stroke" Value="Transparent" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                                <VisualState x:Name="Selected">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="Opacity" Value="1.0" />
+                                                        <Setter Property="Stroke" Value="{StaticResource Primary}" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateGroupList>
+                                    </VisualStateManager.VisualStateGroups>
+                                    <Image Source="{Binding ImageSource}" Aspect="AspectFit" />
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                <HorizontalStackLayout Grid.Row="2" Spacing="25" HorizontalOptions="Center" Margin="0,0,0,15">
                     <ImageButton Source="json_icon.png" Command="{Binding UploadJsonCommand}" WidthRequest="50" HeightRequest="50"/>
                     <ImageButton Source="camera_icon.png" Command="{Binding TakePhotoCommand}" WidthRequest="60" HeightRequest="60"/>
                     <ImageButton Source="gallery_icon.png" Command="{Binding PickGalleryCommand}" WidthRequest="50" HeightRequest="50"/>
                 </HorizontalStackLayout>
             </Grid>
 
-            <!-- PRAWA KOLUMNA: osoby i sumy -->
-            <Grid Grid.Column="2" RowDefinitions="Auto, *, Auto" Padding="20" BackgroundColor="#2A303C">
+            <!-- PRAWA KOLUMNA: wybrane osoby z grupy -->
+            <Grid Grid.Column="{OnIdiom Phone='0', Default='2'}" Grid.Row="{OnIdiom Phone='2', Default='0'}"
+                  RowDefinitions="Auto, *, Auto" Padding="{OnIdiom Phone='10', Default='20'}" BackgroundColor="#2A303C">
 
                 <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,10">
                     <Label Grid.Column="0" Text="Uczestnicy rozliczenia" TextColor="White" FontAttributes="Bold" FontSize="16" VerticalOptions="Center"/>
-                    <ImageButton Grid.Column="1" Source="add_friend_to_group_icon.png" Command="{Binding ShowMissingMembersPopupCommand}" BackgroundColor="#1E232D" CornerRadius="20" WidthRequest="40" HeightRequest="40" Padding="10"/>
+                    <ImageButton Grid.Column="1" Source="add_friend_to_group_icon.png" Command="{Binding ShowMissingMembersPopupCommand}" BackgroundColor="#1E232D" WidthRequest="40" HeightRequest="40" Padding="10"/>
                 </Grid>
 
                 <ScrollView Grid.Row="1">
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding GroupMembers}" Spacing="15">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="models:DisplayGroupMember">
-                                <Frame BackgroundColor="#1E232D" BorderColor="Transparent" CornerRadius="10" Padding="15">
-                                    <Frame.GestureRecognizers>
+                                <Border StrokeShape="RoundRectangle 10" BackgroundColor="#1E232D" Stroke="Transparent" Padding="15">
+                                    <Border.GestureRecognizers>
                                         <DragGestureRecognizer CanDrag="True" DragStarting="OnMemberDragStarting"/>
                                         <DropGestureRecognizer AllowDrop="True" Drop="OnMemberDrop" DragOver="OnDragOver" DragLeave="OnDragLeave"/>
-                                    </Frame.GestureRecognizers>
+                                    </Border.GestureRecognizers>
 
                                     <VerticalStackLayout>
                                         <!-- Nagłówek: imię -->
                                         <Grid ColumnDefinitions="Auto, *, Auto, Auto" Margin="0,0,0,10">
-                                            <Image Grid.Column="0" Source="{Binding AvatarUrl}" WidthRequest="30" HeightRequest="30">
-                                                <Image.Clip>
+                                            <Grid Grid.Column="0" WidthRequest="30" HeightRequest="30">
+                                                <Grid.Clip>
                                                     <EllipseGeometry Center="15,15" RadiusX="15" RadiusY="15"/>
-                                                </Image.Clip>
-                                            </Image>
+                                                </Grid.Clip>
+                                                <Image Source="default_user_avatar.png" Aspect="AspectFill" IsVisible="{Binding AvatarUrl, Converter={StaticResource InverseStringNullOrEmptyConverter}}" />
+                                                <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
+                                            </Grid>
                                             <Label Grid.Column="1" Text="{Binding FullName}" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" Margin="10,0,0,0"/>
                                             <Label Grid.Column="2" Text="{Binding TotalOwed, StringFormat='{0:N2} zł'}" FontAttributes="Bold" TextColor="{StaticResource StatusRed}" VerticalOptions="Center" Margin="0,0,10,0"/>
-                                            <Button Grid.Column="3" Text="✕" Command="{Binding BindingContext.RemoveMemberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="Transparent" TextColor="#EF4444" FontSize="16" WidthRequest="30" Padding="0"/>
+                                            <controls:AppButton Grid.Column="3" Text="X" Command="{Binding BindingContext.RemoveMemberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" ButtonBackgroundColor="Transparent" ButtonTextColor="#EF4444" ButtonFontSize="16" WidthRequest="30" ButtonPadding="0"/>
                                         </Grid>
 
                                         <BoxView HeightRequest="1" Color="#333" Margin="0,5,0,10"/>
@@ -257,15 +334,16 @@
                                             </BindableLayout.ItemTemplate>
                                         </VerticalStackLayout>
                                     </VerticalStackLayout>
-                                </Frame>
+                                </Border>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
                 </ScrollView>
 
-                <Button Grid.Row="2" Text="Zatwierdź" Command="{Binding SubmitExpenseCommand}" Style="{StaticResource SuccessButtonStyle}" Margin="0,20,0,0"/>
+                <controls:AppButton Grid.Row="2" Text="Zatwierdź" Command="{Binding SubmitExpenseCommand}" ButtonBackgroundColor="{StaticResource StatusGreen}" ButtonTextColor="{StaticResource TextMain}" Margin="0,20,0,0"/>
             </Grid>
-        </Grid>
+            </Grid>
+        </ScrollView>
     </Grid>
 
         <!-- Popup: nowa kategoria -->
@@ -273,7 +351,7 @@
             <Grid.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding CloseAddCategoryPopupCommand}" />
             </Grid.GestureRecognizers>
-            <Border Style="{StaticResource PopupContainerStyle}" WidthRequest="350">
+            <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PopupContainerStyle}" WidthRequest="350">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer />
                 </Border.GestureRecognizers>
@@ -282,8 +360,8 @@
                     <Entry Placeholder="Nazwa Kategorii" Text="{Binding NewCategoryName}" PlaceholderColor="#888" TextColor="White" BackgroundColor="#2A303C" />
 
                     <Grid ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,10,0,0">
-                        <Button Grid.Column="0" Text="Anuluj" Command="{Binding CloseAddCategoryPopupCommand}" Style="{StaticResource SecondaryButtonStyle}" />
-                        <Button Grid.Column="1" Text="Utwórz" Command="{Binding AddNewCategoryCommand}" Style="{StaticResource SuccessButtonStyle}" />
+                        <controls:AppButton Grid.Column="0" Text="Anuluj" Command="{Binding CloseAddCategoryPopupCommand}" ButtonBackgroundColor="{StaticResource SurfaceDark}" ButtonTextColor="{StaticResource TextMain}" />
+                        <controls:AppButton Grid.Column="1" Text="Utwórz" Command="{Binding AddNewCategoryCommand}" ButtonBackgroundColor="{StaticResource StatusGreen}" ButtonTextColor="{StaticResource TextMain}" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
@@ -294,7 +372,7 @@
             <Grid.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding CancelAddGroupCommand}" />
             </Grid.GestureRecognizers>
-            <Border Style="{StaticResource PopupContainerStyle}" WidthRequest="350">
+            <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PopupContainerStyle}" WidthRequest="350">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer />
                 </Border.GestureRecognizers>
@@ -303,8 +381,8 @@
                     <Entry Placeholder="Nazwa dla złączonych przedmiotów" Text="{Binding NewGroupName}" PlaceholderColor="#888" TextColor="White" BackgroundColor="#2A303C" />
 
                     <Grid ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,10,0,0">
-                        <Button Grid.Column="0" Text="Anuluj" Command="{Binding CancelAddGroupCommand}" Style="{StaticResource SecondaryButtonStyle}" />
-                        <Button Grid.Column="1" Text="Zatwierdź" Command="{Binding ConfirmAddGroupCommand}" Style="{StaticResource SuccessButtonStyle}" />
+                        <controls:AppButton Grid.Column="0" Text="Anuluj" Command="{Binding CancelAddGroupCommand}" ButtonBackgroundColor="{StaticResource SurfaceDark}" ButtonTextColor="{StaticResource TextMain}" />
+                        <controls:AppButton Grid.Column="1" Text="Zatwierdź" Command="{Binding ConfirmAddGroupCommand}" ButtonBackgroundColor="{StaticResource StatusGreen}" ButtonTextColor="{StaticResource TextMain}" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
@@ -315,7 +393,7 @@
             <Grid.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding CloseMissingMembersPopupCommand}" />
             </Grid.GestureRecognizers>
-            <Border Style="{StaticResource PopupContainerStyle}" WidthRequest="400" MaximumHeightRequest="500">
+            <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PopupContainerStyle}" WidthRequest="{OnIdiom Phone=340, Default=400}" MaximumHeightRequest="500">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer />
                 </Border.GestureRecognizers>
@@ -323,38 +401,42 @@
                     <Label Grid.Row="0" Text="Przywróć Użytkowników" FontSize="22" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,20"/>
 
                     <ScrollView Grid.Row="1">
-                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding MissingGroupMembers}" Spacing="10">
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding MissingGroupMembers}" Spacing="10" Padding="0,0,15,0">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="models:DisplayGroupMember">
-                                    <Grid ColumnDefinitions="Auto, *, Auto" BackgroundColor="#2A303C" Padding="15" HeightRequest="60">
-                                        <Image Grid.Column="0" Source="{Binding AvatarUrl}" WidthRequest="30" HeightRequest="30">
-                                            <Image.Clip>
-                                                <EllipseGeometry Center="15,15" RadiusX="15" RadiusY="15"/>
-                                            </Image.Clip>
-                                        </Image>
-                                        <Label Grid.Column="1" Text="{Binding FullName}" TextColor="White" VerticalOptions="Center" Margin="10,0,0,0"/>
-                                        <Button Grid.Column="2" Text="Dodaj" Command="{Binding BindingContext.RestoreMemberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" Style="{StaticResource SuccessButtonStyle}" HeightRequest="40" Padding="10,0" VerticalOptions="Center"/>
-                                    </Grid>
+                                    <Border BackgroundColor="#2A303C" Padding="15" HeightRequest="60" StrokeShape="RoundRectangle 10" Stroke="Transparent">
+                                        <Grid ColumnDefinitions="Auto, *, Auto">
+                                            <Grid Grid.Column="0" WidthRequest="30" HeightRequest="30">
+                                                <Grid.Clip>
+                                                    <EllipseGeometry Center="15,15" RadiusX="15" RadiusY="15"/>
+                                                </Grid.Clip>
+                                                <Image Source="default_user_avatar.png" Aspect="AspectFill" IsVisible="{Binding AvatarUrl, Converter={StaticResource InverseStringNullOrEmptyConverter}}" />
+                                                <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
+                                            </Grid>
+                                            <Label Grid.Column="1" Text="{Binding FullName}" TextColor="White" VerticalOptions="Center" Margin="10,0,0,0"/>
+                                            <controls:AppButton Grid.Column="2" Text="Dodaj" Command="{Binding BindingContext.RestoreMemberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" ButtonBackgroundColor="{StaticResource StatusGreen}" ButtonTextColor="{StaticResource TextMain}" ButtonHeight="40" ButtonPadding="10,0" VerticalOptions="Center"/>
+                                        </Grid>
+                                    </Border>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
                     </ScrollView>
 
-                    <Button Grid.Row="2" Text="Zamknij" Command="{Binding CloseMissingMembersPopupCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,20,0,0"/>
+                    <controls:AppButton Grid.Row="2" Text="Zamknij" Command="{Binding CloseMissingMembersPopupCommand}" ButtonBackgroundColor="{StaticResource SurfaceDark}" ButtonTextColor="{StaticResource TextMain}" Margin="0,20,0,0"/>
                 </Grid>
             </Border>
         </Grid>
 
         <!-- CUSTOM ALERT POPUP -->
         <Grid IsVisible="{Binding IsCustomAlertVisible}" Style="{StaticResource PopupOverlayStyle}" ZIndex="500">
-            <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400">
+            <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400">
                 <VerticalStackLayout Spacing="15">
                     <Label Text="{Binding CustomAlertTitle}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
                     <Label Text="{Binding CustomAlertMessage}" FontSize="14" TextColor="{StaticResource TextSubtle}" LineBreakMode="WordWrap" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
 
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,15,0,0">
-                        <Button Grid.Column="0" Text="{Binding CustomAlertCancelText}" Command="{Binding CloseAlertCommand}" CommandParameter="False" Style="{StaticResource SecondaryButtonStyle}" IsVisible="{Binding IsCustomAlertCancelVisible}"/>
-                        <Button Grid.Column="{Binding AlertAcceptColumn}" Grid.ColumnSpan="{Binding AlertAcceptColumnSpan}" Text="{Binding CustomAlertAcceptText}" Command="{Binding CloseAlertCommand}" CommandParameter="True" Style="{StaticResource PrimaryButtonStyle}" />
+                        <controls:AppButton Grid.Column="0" Text="{Binding CustomAlertCancelText}" Command="{Binding CloseAlertCommand}" CommandParameter="False" ButtonBackgroundColor="{StaticResource SurfaceDark}" ButtonTextColor="{StaticResource TextMain}" IsVisible="{Binding IsCustomAlertCancelVisible}"/>
+                        <controls:AppButton Grid.Column="{Binding AlertAcceptColumn}" Grid.ColumnSpan="{Binding AlertAcceptColumnSpan}" Text="{Binding CustomAlertAcceptText}" Command="{Binding CloseAlertCommand}" CommandParameter="True" ButtonBackgroundColor="{StaticResource PrimaryViolet}" ButtonTextColor="{StaticResource TextMain}" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
@@ -363,3 +445,8 @@
     </Grid>
 
 </ContentPage>
+
+
+
+
+

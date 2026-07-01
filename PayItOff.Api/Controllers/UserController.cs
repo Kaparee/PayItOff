@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PayItOff.Application.Interfaces;
 using PayItOff.Shared.Requests;
@@ -51,11 +51,7 @@ public class UserController : ControllerBase
         return Ok(result);
     }
 
-    //"email": "jakub@plocica.com",
-    //"password": "JakubPlocica123!",
-    //"nickname": "JakubPlocica",
-    //"name": "Jakub",
-    //"surname": "Płocica"
+
     [HttpPost("avatar")]
     public async Task<IActionResult> UpdateAvatar(IFormFile? avatar = null)
     {

@@ -1,4 +1,4 @@
-﻿using PayItOff.Shared.Requests;
+using PayItOff.Shared.Requests;
 
 namespace PayItOff.MauiClient.Services;
 
@@ -42,6 +42,17 @@ public class RegisterService
         }
 
         var errorContent = await response.Content.ReadAsStringAsync();
+
+        try
+        {
+            var json = System.Text.Json.JsonDocument.Parse(errorContent);
+            if (json.RootElement.TryGetProperty("Error", out var errorMsg))
+            {
+                throw new Exception(errorMsg.GetString());
+            }
+        }
+        catch (System.Text.Json.JsonException) { }
+
         throw new Exception($"Błąd serwera: {errorContent}");
     }
 }

@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Configuration;
-using Org.BouncyCastle.Asn1.Ocsp;
 using PayItOff.Application.Helpers;
 using PayItOff.Application.Interfaces;
 using PayItOff.Domain.Entities;
@@ -47,6 +46,8 @@ public class GroupMemberService : IGroupMemberService
 
             var existingMember = await _groupMemberRepository.GetMemberAsync(request.GroupId, request.UserId);
 
+            int notificationEntityId;
+
             if (existingMember is not null)
             {
                 if (existingMember.Status == GroupMemberStatus.Accepted || existingMember.Status == GroupMemberStatus.Pending)
@@ -56,6 +57,8 @@ public class GroupMemberService : IGroupMemberService
 
                 existingMember.ReInvite(request.Role);
                 await _groupMemberRepository.UpdateAsync(existingMember);
+                await _unitOfWork.SaveChangesAsync();
+                notificationEntityId = existingMember.Id;
             }
             else
             {
@@ -66,9 +69,10 @@ public class GroupMemberService : IGroupMemberService
                 );
                 await _groupMemberRepository.AddAsync(invite);
                 await _unitOfWork.SaveChangesAsync();
-
-                await _notificationService.CreateNotificationAsync(request.UserId, userId, NotificationType.NeedAction, $"Użytkownik {inviter.FullName} zaprosił Cię do grupy: '{group.Name}'", invite.Id, EntityType.GroupMembers);
+                notificationEntityId = invite.Id;
             }
+
+            await _notificationService.CreateNotificationAsync(request.UserId, userId, NotificationType.NeedAction, $"Użytkownik {inviter.FullName} zaprosił Cię do grupy: '{group.Name}'", notificationEntityId, EntityType.GroupMembers);
 
             group!.UpdateTimestamp();
             await _groupRepository.UpdateAsync(group);
@@ -98,9 +102,9 @@ public class GroupMemberService : IGroupMemberService
         }
 
         await _groupMemberRepository.UpdateAsync(invitation);
-        
+
         await _notificationService.ResolveActionNotificationAsync(userId, invitationId, EntityType.GroupMembers, true);
-        
+
         await _unitOfWork.SaveChangesAsync();
     }
     public async Task DeclineInviteAsync(int userId, int invitationId)
@@ -128,13 +132,19 @@ public class GroupMemberService : IGroupMemberService
         if (targetUser is null || targetUser.Status != GroupMemberStatus.Accepted) { throw new GroupMemberNotFoundException(); }
 
         var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId);
-        if(group == null) { throw new GroupNotFoundException(); }
+        if (group == null) { throw new GroupNotFoundException(); }
 
         if (actor.Role == GroupMemberRole.Member) { throw new InvalidUserRoleException(); }
         if (actor.Role == GroupMemberRole.Admin && targetUser!.Role == GroupMemberRole.Owner) { throw new InvalidUserRoleException(); }
         if (userId == request.TargetUserId) { throw new InvalidUserRoleException(); }
 
         if (actor.Role == GroupMemberRole.Admin && request.NewRole == GroupMemberRole.Owner) { throw new InvalidUserRoleException(); }
+
+        if (request.NewRole == GroupMemberRole.Owner && actor.Role == GroupMemberRole.Owner)
+        {
+            actor.UpdateRole(GroupMemberRole.Admin);
+            await _groupMemberRepository.UpdateAsync(actor);
+        }
 
         targetUser!.UpdateRole(request.NewRole);
         targetUser.Group?.UpdateTimestamp();
@@ -208,12 +218,14 @@ public class GroupMemberService : IGroupMemberService
     {
         var invitations = await _groupMemberRepository.GetPendingInvitationsByUserIdAsync(userId);
 
+        var baseUrl = _configuration["AppUrls:BackendUrl"];
+
         return invitations.Select(x => new GroupPendingInvitationResponse
         {
             InvitationId = x.Id,
             GroupId = x.GroupId,
             GroupName = x.Group!.Name,
-            GroupAvatarUrl = x.Group.AvatarUrl ?? string.Empty,
+            GroupAvatarUrl = UrlHelper.BuildGroupAvatarUrl(baseUrl!, x.Group.AvatarUrl),
             Role = x.Role,
             InvitedAt = x.InvitedAt
         }).ToList();
@@ -229,7 +241,7 @@ public class GroupMemberService : IGroupMemberService
         {
             UserId = x.UserId,
             GroupMemberId = x.Id,
-            AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, x.User!.AvatarUrl),
+            AvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, x.User!.AvatarUrl),
             Name = x.User.Name,
             Surname = x.User.Surname,
             Email = x.User.Email,

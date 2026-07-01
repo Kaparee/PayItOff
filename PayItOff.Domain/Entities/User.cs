@@ -39,15 +39,16 @@ namespace PayItOff.Domain.Entities
             Nickname = nickname;
             Name = name;
             Surname = surname;
-            AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? "default-user-avatar.png" : avatarUrl;
+            AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? "default_user_avatar.png" : avatarUrl;
             NotificationsSettings = notificationsSettings ?? new NotificationsSettings();
-            VerificationToken = Guid.NewGuid().ToString();
+            VerificationToken = null;
             PhoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? null : phoneNumber;
             IBAN = string.IsNullOrWhiteSpace(iban) ? null : iban.Replace(" ", "").ToUpper();
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
             IsActive = true;
-            IsVerified = false;
+            IsVerified = true;
+            VerifiedAt = DateTime.UtcNow;
         }
         public static User Register(string email, string passHash, string nickname, string name, string surname, string? avatarUrl, string? phoneNumber, string? iban)
         {
@@ -91,7 +92,7 @@ namespace PayItOff.Domain.Entities
 
         public void UpdateAvatar(string avatarUrl)
         {
-            AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? "default-user-avatar.png" : avatarUrl;
+            AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? "default_user_avatar.png" : avatarUrl;
 
             UpdatedAt = DateTime.UtcNow;
         }
@@ -148,6 +149,13 @@ namespace PayItOff.Domain.Entities
             Email = NewEmailPending;
             NewEmailPending = null;
             EmailChangeToken = null;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void ChangeEmailDirectly(string newEmail)
+        {
+            if (string.IsNullOrWhiteSpace(newEmail)) { throw new ArgumentException("Invalid new Email."); }
+            Email = newEmail;
             UpdatedAt = DateTime.UtcNow;
         }
     }

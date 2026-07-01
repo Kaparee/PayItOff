@@ -1,4 +1,6 @@
 using FluentValidation;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -14,19 +16,17 @@ using PayItOff.Infrastructure.Repositories;
 using PayItOff.Infrastructure.Services;
 using PayItOff.Shared.Requests;
 using System.Text;
-using Hangfire;
-using Hangfire.PostgreSql;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-// Rejestracja PayItOffDbContext i Interceptorów
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<PayItOff.Infrastructure.Persistence.Interceptors.AuditLogInterceptor>();
 
@@ -36,7 +36,7 @@ builder.Services.AddDbContext<PayItOffDbContext>((sp, options) =>
            .AddInterceptors(sp.GetRequiredService<PayItOff.Infrastructure.Persistence.Interceptors.AuditLogInterceptor>());
 });
 
-// KONFIGURACJA JWT
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -75,7 +75,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Repositories
+
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();
@@ -88,7 +88,7 @@ builder.Services.AddScoped<ISettlementRepository, SettlementRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 
-// Services
+
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IJWTService, JWTService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -101,7 +101,7 @@ builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ISettlementService, SettlementService>();
 
-// Validators
+
 builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
 builder.Services.AddScoped<IValidator<CreateGroupRequest>, CreateGroupRequestValidator>();
 
@@ -112,12 +112,12 @@ builder.Services.AddHangfire(configuration => configuration
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
     .UsePostgreSqlStorage(c => c.UseNpgsqlConnection(connectionString)));
-    
+
 builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

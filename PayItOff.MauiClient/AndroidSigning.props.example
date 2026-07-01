@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!-- Skopiuj jako AndroidSigning.props i uzupelnij hasla (plik jest w .gitignore) -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <AndroidKeyStore>true</AndroidKeyStore>
+    <AndroidSigningKeyStore>$(MSBuildThisFileDirectory)..\payitoff-release.keystore</AndroidSigningKeyStore>
+    <AndroidSigningKeyAlias>payitoff</AndroidSigningKeyAlias>
+    <AndroidSigningKeyPass>TWOJE_HASLO_KLUCZA</AndroidSigningKeyPass>
+    <AndroidSigningStorePass>TWOJE_HASLO_KEYSTORE</AndroidSigningStorePass>
+  </PropertyGroup>
+</Project>

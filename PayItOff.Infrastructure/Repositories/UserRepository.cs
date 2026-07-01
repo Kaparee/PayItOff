@@ -98,7 +98,7 @@ public class UserRepository : IUserRepository
         var users = await _context.Users
             .Where(x => x.DeletedAt == null)
             .ToListAsync();
-            
+
         return users.Where(x => x.NotificationsSettings != null && x.NotificationsSettings.DailySummary).ToList();
     }
 }

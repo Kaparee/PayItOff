@@ -1,9 +1,9 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using PayItOff.Domain.Entities;
 using PayItOff.Domain.Enums;
+using System.Text.Json;
 
 namespace PayItOff.Infrastructure.Persistence.Interceptors;
 
@@ -59,7 +59,7 @@ public class AuditLogInterceptor : SaveChangesInterceptor
             {
                 newValues = GetEntityValues(entry, false);
             }
-            
+
             var entityIdProperty = entry.Properties.FirstOrDefault(p => p.Metadata.Name == "Id");
             int entityId = 0;
             if (entityIdProperty != null && entityIdProperty.CurrentValue is int idVal)
@@ -115,7 +115,7 @@ public class AuditLogInterceptor : SaveChangesInterceptor
         foreach (var property in entry.Properties)
         {
             if (property.Metadata.IsPrimaryKey()) continue;
-            
+
             if (getOld)
             {
                 if (entry.State == EntityState.Modified && !property.IsModified)

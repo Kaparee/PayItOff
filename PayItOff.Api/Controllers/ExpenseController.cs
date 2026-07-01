@@ -49,6 +49,24 @@ public class ExpenseController : ControllerBase
         return Ok(response);
     }
 
+    [HttpDelete("{id}")]
+    [EndpointSummary("Usunięcie wydatku")]
+    [EndpointDescription("Endpoint do usuwania wydatku (tylko dla Owner/Admin).")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _expenseService.DeleteExpenseAsync(GetUserId(), id);
+        return NoContent();
+    }
+
+    [HttpDelete("{expenseId}/item/{itemId}")]
+    [EndpointSummary("Usunięcie pozycji z wydatku")]
+    [EndpointDescription("Endpoint do usuwania pojedynczej pozycji na paragonie (tylko dla Owner/Admin).")]
+    public async Task<IActionResult> DeleteExpenseItem(int expenseId, int itemId)
+    {
+        await _expenseService.DeleteExpenseItemAsync(GetUserId(), expenseId, itemId);
+        return NoContent();
+    }
+
     [HttpGet("{expenseId}/item/{itemId}")]
     [EndpointSummary("Szczegóły konkretnej pozycji z wydatku")]
     [EndpointDescription("Endpoint zwracający detale konkretnej pozycji z wydatku (produktu z paragonu) wraz z informacją o jej podziale.")]

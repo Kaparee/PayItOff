@@ -51,15 +51,15 @@ public class FriendRepository : IFriendRepository
 
                 SharedGroups = _context.Groups
                     .Where(g => g.DeletedAt == null)
-                    .Where(g => _context.GroupMembers.Any(gm => gm.GroupId == g.Id && gm.UserId == userId))
-                    .Where(g => _context.GroupMembers.Any(gm => gm.GroupId == g.Id && gm.UserId == (x.InviterId == userId ? x.ReceiverId : x.InviterId)))
+                    .Where(g => _context.GroupMembers.Any(gm => gm.GroupId == g.Id && gm.UserId == userId && gm.Status == PayItOff.Domain.Enums.GroupMemberStatus.Accepted))
+                    .Where(g => _context.GroupMembers.Any(gm => gm.GroupId == g.Id && gm.UserId == (x.InviterId == userId ? x.ReceiverId : x.InviterId) && gm.Status == PayItOff.Domain.Enums.GroupMemberStatus.Accepted))
                     .OrderByDescending(g => g.CreatedAt)
                     .Select(g => new { GroupId = g.Id, Name = g.Name, AvatarUrl = g.AvatarUrl })
                     .ToList()
             })
             .ToListAsync();
 
-        return rawData.ConvertAll(x => (x.FriendEntity, x.InviteId, x.Balance, x.Income, x.Expense, x.SharedGroups.Select(g => (g.GroupId, g.Name, g.AvatarUrl)).ToList()));
+        return rawData.ConvertAll(x => (x.FriendEntity, x.InviteId, x.Balance, x.Income, x.Expense, x.SharedGroups.Select(g => (g.GroupId, g.Name, (string?)g.AvatarUrl)).ToList()));
     }
 
     public async Task<bool> IsFriendInviteExistAsync(int userId, int targetUserId)

@@ -23,9 +23,9 @@ public class NotificationDisplayItem
     public string DisplayText => IsDailySummary
         ? "Kliknij, aby zobaczyć podsumowanie powiadomień"
         : Body;
-    
+
     public double Opacity => IsRead ? 0.6 : 1.0;
-    
+
     public string BackgroundColor => IsRead ? "#121826" : "#1E232D";
     public string TextColor => IsRead ? "#9CA3AF" : "#F3F4F6";
 
@@ -53,7 +53,7 @@ public class NotificationDisplayItem
             if (NotificationType == NotificationType.DailySummary)
                 return "calendar_icon.png";
 
-            if (EntityType == EntityType.Friends) 
+            if (EntityType == EntityType.Friends)
             {
                 if (NotificationType == NotificationType.Deleting || Body.Contains("odrzucone") || Body.Contains("Odrzucono") || Body.Contains("odrzucił") || Body.Contains("usunięte"))
                     return "friend_remove_icon.png";
@@ -61,17 +61,17 @@ public class NotificationDisplayItem
                     return "friends_icon_green.png";
                 return "friends_icon.png";
             }
-            if (EntityType == EntityType.Expenses) 
+            if (EntityType == EntityType.Expenses)
                 return "new_expense_icon.png";
-            if (EntityType == EntityType.Settlements || EntityType == EntityType.NetSettlements) 
+            if (EntityType == EntityType.Settlements || EntityType == EntityType.NetSettlements)
                 return "new_settlement_icon.png";
-            if (EntityType == EntityType.GroupDebts) 
+            if (EntityType == EntityType.GroupDebts)
                 return "wallet_icon.png";
             if (EntityType == EntityType.Groups || EntityType == EntityType.GroupMembers)
             {
-                if (Body.Contains("wyrzucony") || Body.Contains("usunął z grupy")) 
+                if (Body.Contains("wyrzucony") || Body.Contains("usunął z grupy"))
                     return "red_leave_icon.png";
-                if (Body.Contains("opuścił") || Body.Contains("usunął")) 
+                if (Body.Contains("opuścił") || Body.Contains("usunął"))
                     return "leave_icon.png";
                 return "groups_icon.png";
             }

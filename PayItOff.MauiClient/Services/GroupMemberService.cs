@@ -1,6 +1,6 @@
-using System.Net.Http.Json;
 using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
+using System.Net.Http.Json;
 
 namespace PayItOff.MauiClient.Services;
 
@@ -42,7 +42,7 @@ public class GroupMemberService
         var response = await _httpClient.PostAsJsonAsync("GroupMember/invite", request);
         if (response.IsSuccessStatusCode)
             return (true, string.Empty);
-            
+
         var error = await response.Content.ReadAsStringAsync();
         return (false, string.IsNullOrWhiteSpace(error) ? "Nie udało się wysłać zaproszenia." : error);
     }

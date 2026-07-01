@@ -13,6 +13,7 @@ namespace PayItOff.Infrastructure.Persistence
         public DbSet<Expense> Expenses { get; set; }
         public DbSet<ExpenseItem> ExpenseItems { get; set; }
         public DbSet<ExpenseGroup> ExpenseGroups { get; set; }
+        public DbSet<ExpensePhoto> ExpensePhotos { get; set; }
         public DbSet<ExpenseSplit> ExpenseSplits { get; set; }
         public DbSet<GroupDebt> GroupDebts { get; set; }
         public DbSet<Settlement> Settlements { get; set; }
@@ -42,6 +43,7 @@ namespace PayItOff.Infrastructure.Persistence
 
                 builder.HasIndex(u => u.Email).IsUnique();
                 builder.HasIndex(u => u.Nickname).IsUnique();
+                builder.HasIndex(u => u.PhoneNumber).IsUnique();
 
                 builder.Property(u => u.Email).HasMaxLength(255).IsRequired();
                 builder.Property(u => u.Nickname).HasMaxLength(50).IsRequired();
@@ -64,6 +66,11 @@ namespace PayItOff.Infrastructure.Persistence
                        .WithOne(g => g.Expense)
                        .HasForeignKey(g => g.ExpenseId)
                        .OnDelete(DeleteBehavior.Restrict);
+
+                builder.HasMany(e => e.Photos)
+                       .WithOne(p => p.Expense)
+                       .HasForeignKey(p => p.ExpenseId)
+                       .OnDelete(DeleteBehavior.Cascade);
 
                 builder.HasOne(e => e.Creator)
                        .WithMany()

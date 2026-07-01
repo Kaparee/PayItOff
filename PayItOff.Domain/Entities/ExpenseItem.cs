@@ -3,12 +3,12 @@ namespace PayItOff.Domain.Entities
     public class ExpenseItem
     {
         public int Id { get; private set; }
-        public Expense Expense { get; private set; }
+        public Expense Expense { get; private set; } = null!;
         public ExpenseGroup? ExpenseGroup { get; private set; }
         public int ExpenseId { get; private set; }
         public int? ExpenseGroupId { get; private set; }
-        public string Name { get; private set; }
-        public string Category { get; private set; }
+        public string Name { get; private set; } = string.Empty;
+        public string Category { get; private set; } = string.Empty;
         public decimal Quantity { get; private set; }
         public decimal UnitPrice { get; private set; }
         public decimal TotalPrice { get; private set; }

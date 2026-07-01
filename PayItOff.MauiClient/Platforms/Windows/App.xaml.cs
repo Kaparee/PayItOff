@@ -1,4 +1,4 @@
-﻿// To learn more about WinUI, the WinUI project structure,
+// To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace PayItOff.MauiClient.WinUI
@@ -14,6 +14,37 @@ namespace PayItOff.MauiClient.WinUI
         /// </summary>
         public App()
         {
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+                try
+                {
+                    var ex = e.ExceptionObject as Exception;
+                    var path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "maui_crash.txt");
+                    System.IO.File.AppendAllText(path, $"[{DateTime.Now}] UNHANDLED EXCEPTION: {ex}\n");
+                }
+                catch { }
+            };
+
+            Microsoft.UI.Xaml.Application.Current.UnhandledException += (s, e) =>
+            {
+                try
+                {
+                    var path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "maui_crash.txt");
+                    System.IO.File.AppendAllText(path, $"[{DateTime.Now}] WINUI EXCEPTION: {e.Exception}\n{e.Message}\n");
+                }
+                catch { }
+            };
+
+            TaskScheduler.UnobservedTaskException += (s, e) =>
+            {
+                try
+                {
+                    var path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "maui_crash.txt");
+                    System.IO.File.AppendAllText(path, $"[{DateTime.Now}] TASK EXCEPTION: {e.Exception}\n");
+                }
+                catch { }
+            };
+
             this.InitializeComponent();
         }
 

@@ -3,9 +3,9 @@ namespace PayItOff.Domain.Entities
     public class ExpenseSplit
     {
         public int Id { get; private set; }
-        public ExpenseItem ExpenseItem { get; private set; }
+        public ExpenseItem ExpenseItem { get; private set; } = null!;
         public int ExpenseItemId { get; private set; }
-        public User User { get; private set; }
+        public User User { get; private set; } = null!;
         public int UserId { get; private set; }
         public decimal OwedAmount { get; private set; }
 

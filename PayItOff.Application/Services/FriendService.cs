@@ -38,7 +38,7 @@ public class FriendService : IFriendService
         {
             FriendId = data.Friend!.Id,
             InviteId = data.InviteId,
-            AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, data.Friend!.AvatarUrl),
+            AvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, data.Friend!.AvatarUrl),
             Name = data.Friend.Name,
             Surname = data.Friend.Surname,
             Nickname = data.Friend.Nickname,
@@ -51,7 +51,7 @@ public class FriendService : IFriendService
                 {
                     GroupId = group.GroupId,
                     Name = group.Name,
-                    AvatarUrl = AvatarUrlHelper.BuildGroupAvatarUrl(baseUrl!, group.AvatarUrl)
+                    AvatarUrl = UrlHelper.BuildGroupAvatarUrl(baseUrl!, group.AvatarUrl)
                 })
                 .ToList()
         }).ToList();
@@ -80,7 +80,8 @@ public class FriendService : IFriendService
         }
         else if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
         {
-            friend = await _userRepository.GetUserByPhoneNumberAsync(request.PhoneNumber.Trim());
+            var formattedPhone = PhoneNumberHelper.FormatPhoneNumber(request.PhoneNumber);
+            friend = await _userRepository.GetUserByPhoneNumberAsync(formattedPhone!);
         }
 
         if (friend is null) { throw new UserNotFoundException(); }
@@ -197,7 +198,7 @@ public class FriendService : IFriendService
         if (user == null) { throw new UserNotFoundException(); }
 
         var otherUser = await _userRepository.GetUserByIdAsync(otherId);
-        if(otherUser == null) { throw new UserNotFoundException(); }
+        if (otherUser == null) { throw new UserNotFoundException(); }
 
         if (otherUser.NotificationsSettings.NotifyOnFriendRemoved == true)
         {
@@ -223,7 +224,7 @@ public class FriendService : IFriendService
             {
                 InvitationId = x.Id,
                 FriendId = targetUser.Id,
-                AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, targetUser.AvatarUrl),
+                AvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, targetUser.AvatarUrl),
                 Name = targetUser.Name,
                 Surname = targetUser.Surname,
                 Nickname = targetUser.Nickname,
@@ -247,7 +248,8 @@ public class FriendService : IFriendService
         }
         else if (!string.IsNullOrWhiteSpace(phoneNumber))
         {
-            friend = await _userRepository.GetUserByPhoneNumberAsync(phoneNumber.Trim());
+            var formattedPhone = PhoneNumberHelper.FormatPhoneNumber(phoneNumber);
+            friend = await _userRepository.GetUserByPhoneNumberAsync(formattedPhone!);
         }
 
         if (friend is null) return null;
@@ -256,7 +258,7 @@ public class FriendService : IFriendService
         return new SearchUserResponse
         {
             Id = friend.Id,
-            AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, friend.AvatarUrl),
+            AvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, friend.AvatarUrl),
             Name = friend.Name,
             Surname = friend.Surname,
             Nickname = friend.Nickname

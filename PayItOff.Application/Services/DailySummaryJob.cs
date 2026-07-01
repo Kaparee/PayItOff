@@ -31,7 +31,7 @@ public class DailySummaryJob : IDailySummaryJob
             {
                 var sb = new StringBuilder();
                 sb.AppendLine("Podsumowanie z dzisiaj:");
-                
+
                 foreach (var notif in hiddenNotifications)
                 {
                     sb.AppendLine($"- {notif.Body}");
@@ -40,7 +40,7 @@ public class DailySummaryJob : IDailySummaryJob
                 }
 
                 var summaryNotification = Notification.Create(user.Id, user.Id, NotificationType.DailySummary, sb.ToString(), user.Id, EntityType.Users);
-                
+
                 await _notificationRepository.AddAsync(summaryNotification);
             }
         }

@@ -42,6 +42,16 @@ public class UserService : IUserService
         var existingUser = await _userRepository.GetUserByEmailAsync(request.Email);
         if (existingUser != null) throw new UserAlreadyExistsException("Email", request.Email);
 
+        var existingNickname = await _userRepository.GetUserByNicknameAsync(request.Nickname);
+        if (existingNickname != null) throw new UserAlreadyExistsException("Nickname", request.Nickname);
+
+        if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+        {
+            request.PhoneNumber = PhoneNumberHelper.FormatPhoneNumber(request.PhoneNumber)!;
+            var existingPhone = await _userRepository.GetUserByPhoneNumberAsync(request.PhoneNumber);
+            if (existingPhone != null) throw new UserAlreadyExistsException("PhoneNumber", request.PhoneNumber);
+        }
+
         string passwordHash = _passwordHasher.Hash(request.Password);
 
         var savedFileName = await _fileService.SaveAvatarAsync(avatar);
@@ -61,14 +71,12 @@ public class UserService : IUserService
         try
         {
             await _userRepository.AddAsync(user);
-
-            var backendUrl = _configuration["AppUrls:BackendUrl"];
-            await _emailService.SendEmailAsync(user.Email, "Witaj w PayItOff!", $"<h1>Cześć {user.Nickname}!</h1><p>Dzięki za rejestrację.<br/>Aby zweryfikować konto, kliknij tutaj -> <a href=\"{backendUrl}/api/User/verify?verificationToken={user.VerificationToken}\">Link</a></p>");
             await _unitOfWork.CommitAsync();
         }
         catch
         {
-            throw new Exception("Serwis pocztowy chwilowo niedostępny. Spróbuj ponownie później.");
+            await _unitOfWork.RollbackAsync();
+            throw;
         }
     }
 
@@ -106,7 +114,7 @@ public class UserService : IUserService
         return new UserInformationResponse
         {
             Id = user.Id,
-            AvatarUrl = AvatarUrlHelper.BuildUserAvatarUrl(baseUrl!, user.AvatarUrl),
+            AvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, user.AvatarUrl),
             Name = user.Name,
             Surname = user.Surname,
             Email = user.Email,
@@ -151,6 +159,22 @@ public class UserService : IUserService
         var user = await _userRepository.GetUserByIdAsync(userId);
         if (user is null) { throw new UserNotFoundException(); }
 
+        if (request.Nickname != user.Nickname)
+        {
+            var existingNickname = await _userRepository.GetUserByNicknameAsync(request.Nickname);
+            if (existingNickname != null) throw new UserAlreadyExistsException("Nickname", request.Nickname);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+        {
+            request.PhoneNumber = PhoneNumberHelper.FormatPhoneNumber(request.PhoneNumber)!;
+            if (request.PhoneNumber != user.PhoneNumber)
+            {
+                var existingPhone = await _userRepository.GetUserByPhoneNumberAsync(request.PhoneNumber);
+                if (existingPhone != null) throw new UserAlreadyExistsException("PhoneNumber", request.PhoneNumber);
+            }
+        }
+
         user.UpdateInfo(request.Nickname, request.Name, request.Surname, request.PhoneNumber, request.IBAN);
 
         await _userRepository.UpdateAsync(user);
@@ -165,7 +189,7 @@ public class UserService : IUserService
         var savedFileName = await _fileService.SaveAvatarAsync(avatar);
         if (savedFileName != null)
         {
-            if (user!.AvatarUrl != null && user.AvatarUrl != "default-user-avatar.png")
+            if (user!.AvatarUrl != null && user.AvatarUrl != "default_user_avatar.png")
             {
                 _fileService.DeleteFile(user.AvatarUrl);
             }
@@ -199,7 +223,6 @@ public class UserService : IUserService
             user.ModifyPassword(passHash);
             await _userRepository.UpdateAsync(user);
 
-            await _emailService.SendEmailAsync(user.Email, $"Zmieniono hasło użytkownika {user.Nickname} - PayItOff", "<h1>Twoje hasło zostało pomyślnie zmienione!</h1>");
             await _unitOfWork.CommitAsync();
         }
         catch
@@ -220,8 +243,6 @@ public class UserService : IUserService
             user.GeneratePasswordResetToken();
             await _userRepository.UpdateAsync(user);
 
-            var backendUrl = _configuration["AppUrls:BackendUrl"];
-            await _emailService.SendEmailAsync(user.Email, $"Reset hasła - PayItOff", $"<h1>Aby zmienić hasło, kliknij poniższy link<br><a href=\"{backendUrl}/api/User/confirm-password-reset?token={user.PasswordResetToken}\">RESETUJ HASŁO</a></h1>");
             await _unitOfWork.CommitAsync();
         }
         catch
@@ -248,7 +269,6 @@ public class UserService : IUserService
             user.ResetPassword(user.PasswordResetToken!, passwordHash);
             await _userRepository.UpdateAsync(user);
 
-            await _emailService.SendEmailAsync(user.Email, $"Zmieniono hasło użytkownika {user.Nickname} - PayItOff", "<h1>Twoje hasło zostało pomyślnie zmienione!</h1>");
             await _unitOfWork.CommitAsync();
         }
         catch
@@ -271,11 +291,9 @@ public class UserService : IUserService
         await _unitOfWork.BeginTransactionAsync();
         try
         {
-            user.GenerateEmailChangeToken(newEmail);
+            user.ChangeEmailDirectly(newEmail);
             await _userRepository.UpdateAsync(user);
 
-            var backendUrl = _configuration["AppUrls:BackendUrl"];
-            await _emailService.SendEmailAsync(newEmail, "Potwierdz swój nowy adres email - PayItOff", $"<h1>Witaj {user.Name} {user.Surname}</h1><br>Aby potwierdzić zmianę maila, kliknij poniższy link:<br> <a href=\"{backendUrl}/api/User/confirm-email-change?token={user.EmailChangeToken}\">Zmień adres email</a>");
             await _unitOfWork.CommitAsync();
         }
         catch
@@ -300,7 +318,6 @@ public class UserService : IUserService
             user.EmailChange(token);
             await _userRepository.UpdateAsync(user);
 
-            await _emailService.SendEmailAsync(user.Email, "Email zmienione - PayItOff", "<h1>Twój Email został zmieniony</h1>");
             await _unitOfWork.CommitAsync();
         }
         catch
@@ -318,7 +335,7 @@ public class UserService : IUserService
         await _unitOfWork.BeginTransactionAsync();
         try
         {
-            if (user!.AvatarUrl != null && user.AvatarUrl != "default-user-avatar.png")
+            if (user!.AvatarUrl != null && user.AvatarUrl != "default_user_avatar.png")
             {
                 _fileService.DeleteFile(user.AvatarUrl);
             }
@@ -326,7 +343,6 @@ public class UserService : IUserService
             user.Delete();
             await _userRepository.UpdateAsync(user);
 
-            await _emailService.SendEmailAsync(user.Email, "Konto usunięte - PayItOff", "<h1>Twoje konto zostało usunięte</h1>");
             await _unitOfWork.CommitAsync();
         }
         catch

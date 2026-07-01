@@ -106,9 +106,11 @@ public partial class NotificationsViewModel : PopupViewModelBase
 
             var data = await _notificationService.GetAllNotifications(type1, type2);
 
-            Notifications = new ObservableCollection<NotificationDisplayItem>(
-                (data ?? new List<PayItOff.Shared.Responses.NotificationResponse>()).Select(NotificationDisplayItem.FromResponse)
-            );
+            Notifications.Clear();
+            if (data != null)
+            {
+                foreach (var n in data) Notifications.Add(NotificationDisplayItem.FromResponse(n));
+            }
         }
         catch (Exception ex)
         {
@@ -124,7 +126,7 @@ public partial class NotificationsViewModel : PopupViewModelBase
     public async Task HandleNotificationTappedAsync(NotificationDisplayItem item)
     {
         if (item == null) return;
-        
+
         if (item.IsDailySummary)
         {
             SummaryPopupContent = item.Body;

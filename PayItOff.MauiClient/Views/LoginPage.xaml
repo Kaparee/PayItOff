@@ -1,6 +1,7 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:PayItOff.MauiClient.Controls"
              xmlns:viewmodels="clr-namespace:PayItOff.MauiClient.ViewModels"
              x:Class="PayItOff.MauiClient.Views.LoginPage"
              x:DataType="viewmodels:LoginViewModel"
@@ -23,6 +24,7 @@
         
         <VerticalStackLayout Spacing="25" Padding="{OnIdiom Phone='20', Default='30'}" VerticalOptions="Center" MaximumWidthRequest="450">
 
+            <Image Source="payitoff_logo_img.png" HeightRequest="150" WidthRequest="150" HorizontalOptions="Center" Margin="0,0,0,0" />
             <Label Text="PayItOff!" Style="{StaticResource Headline}" Margin="0,0,0,20" HorizontalOptions="Center" />
 
             <VerticalStackLayout Spacing="8">
@@ -30,7 +32,7 @@
                 <Label Text="Adres E-Mail lub Nazwa Użytkownika"
                        TextColor="{StaticResource TextSubtle}"
                        Margin="15, 0, 0, 0" />
-                <Border Style="{StaticResource BaseEntryBorderStyle}">
+                <Border StrokeShape="RoundRectangle 10" Style="{StaticResource BaseEntryBorderStyle}">
                     
                     <Entry Text="{Binding EmailOrNickname}"
                            Placeholder="Wpisz email lub nickname..."
@@ -43,7 +45,7 @@
             <VerticalStackLayout Spacing="8">
                 
                 <Label Text="Hasło" TextColor="{StaticResource TextSubtle}" Margin="15, 0, 0, 0" />
-                <Border Style="{StaticResource PasswordEntryBorderStyle}">
+                <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PasswordEntryBorderStyle}">
                     <Grid ColumnDefinitions="*, Auto">
 
                         <Entry Grid.Column="0"
@@ -69,39 +71,41 @@
 
 
             
-            <Button Text="Zaloguj się"
+            <controls:AppButton Text="Zaloguj się"
                     Command="{Binding LoginCommand}"
                     Margin="0,10,0,0" />
 
-            <Button Text="Nie masz konta? Zarejestruj się"
-                    Style="{StaticResource GhostButtonStyle}"
-                    Command="{Binding GoToRegisterCommand}"
-                    TextColor="{StaticResource BrandViolet}" />
+            <controls:AppButton Text="Nie masz konta? Zarejestruj się"
+                    ButtonBackgroundColor="Transparent" ButtonTextColor="{StaticResource BrandViolet}"
+                    Command="{Binding GoToRegisterCommand}" />
 
-            <Button Text="Zaloguj się jako Jakub Płocica"
-                    Command="{Binding LoginAsJakubCommand}"
-                    Margin="0,10,0,0" />
 
-            <Button Text="Wykonaj pełny seeder (dużo danych)"
-                    Command="{Binding SeedHeavyDataCommand}"
-                    Margin="0,6,0,0" />
+
         </VerticalStackLayout>
         </ScrollView>
         
-        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#80000000" ZIndex="999">
-            <ActivityIndicator IsRunning="{Binding IsBusy}" Color="#7C3AED" HorizontalOptions="Center" VerticalOptions="Center"/>
+        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#B3000000" ZIndex="999">
+            <Border HorizontalOptions="Center" VerticalOptions="Center" BackgroundColor="{StaticResource BgDark}" Padding="30" StrokeShape="RoundRectangle 20" StrokeThickness="0">
+                <VerticalStackLayout Spacing="15" HorizontalOptions="Center" VerticalOptions="Center">
+                    <ActivityIndicator IsRunning="{Binding IsBusy}" Color="{StaticResource BrandViolet}" HorizontalOptions="Center" />
+                    <Label Text="Ładowanie..." TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Border>
         </Grid>
 
         <!-- Custom Alert Popup -->
         <Grid IsVisible="{Binding IsCustomAlertVisible}" Style="{StaticResource PopupOverlayStyle}" ZIndex="500">
-            <Border Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400">
+            <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400">
                 <VerticalStackLayout Spacing="15">
                     <Label Text="{Binding CustomAlertTitle}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
-                    <Label Text="{Binding CustomAlertMessage}" FontSize="14" TextColor="{StaticResource TextSubtle}" LineBreakMode="WordWrap" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                    
+                    <ScrollView MaximumHeightRequest="250">
+                        <Label Text="{Binding CustomAlertMessage}" TextType="Html" FontSize="14" TextColor="{StaticResource TextSubtle}" LineBreakMode="WordWrap" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                    </ScrollView>
 
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,15,0,0">
-                        <Button Grid.Column="0" Text="{Binding CustomAlertCancelText}" Command="{Binding CloseAlertCommand}" CommandParameter="False" Style="{StaticResource SecondaryButtonStyle}" IsVisible="{Binding IsCustomAlertCancelVisible}"/>
-                        <Button Grid.Column="{Binding AlertAcceptColumn}" Grid.ColumnSpan="{Binding AlertAcceptColumnSpan}" Text="{Binding CustomAlertAcceptText}" Command="{Binding CloseAlertCommand}" CommandParameter="True" Style="{StaticResource PrimaryButtonStyle}" />
+                        <controls:AppButton Grid.Column="0" Text="{Binding CustomAlertCancelText}" Command="{Binding CloseAlertCommand}" CommandParameter="False" ButtonBackgroundColor="{StaticResource SurfaceDark}" ButtonTextColor="{StaticResource TextMain}" IsVisible="{Binding IsCustomAlertCancelVisible}"/>
+                        <controls:AppButton Grid.Column="{Binding AlertAcceptColumn}" Grid.ColumnSpan="{Binding AlertAcceptColumnSpan}" Text="{Binding CustomAlertAcceptText}" Command="{Binding CloseAlertCommand}" CommandParameter="True" ButtonBackgroundColor="{StaticResource PrimaryViolet}" ButtonTextColor="{StaticResource TextMain}" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
@@ -109,3 +113,5 @@
 
     </Grid>
 </ContentPage>
+
+

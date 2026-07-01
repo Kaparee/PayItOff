@@ -398,3 +398,20 @@ src/Core/AndroidNative/build/reports/
 *.synctex.gz
 img.zip
 
+PublishOutput/
+Releases/*.nupkg
+Releases/*.exe
+Releases/RELEASES
+Releases/releases*.json
+AndroidReleases/
+*.keystore
+PayItOff.MauiClient/AndroidSigning.props
+payitoff-keystore-password.txt
+
+# Pliki publikacji Azure/FTP
+Properties/PublishProfiles/
+PayItOff.Api/Properties/PublishProfiles/
+
+# Instalatory aplikacji
+*.msix
+**/wwwroot/install/

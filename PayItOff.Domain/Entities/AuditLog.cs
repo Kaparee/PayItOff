@@ -7,7 +7,7 @@ namespace PayItOff.Domain.Entities
         public int Id { get; private set; }
         public EntityType EntityType { get; private set; }
         public int EntityId { get; private set; }
-        public User User { get; private set; }
+        public User User { get; private set; } = null!;
         public int UserId { get; private set; }
         public AuditLogAction Action { get; private set; }
         public string? OldValues { get; private set; }

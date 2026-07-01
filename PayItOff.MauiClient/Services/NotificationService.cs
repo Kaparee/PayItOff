@@ -1,6 +1,4 @@
 using PayItOff.Shared.Responses;
-using PayItOff.Shared.Requests;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -28,7 +26,7 @@ public class NotificationService
             : [];
     }
 
-    public async Task<List<NotificationResponse>> GetAllNotifications(string type1 = null, string type2 = null)
+    public async Task<List<NotificationResponse>> GetAllNotifications(string? type1 = null, string? type2 = null)
     {
         var query = "Notification/get-all-notifications";
         if (!string.IsNullOrEmpty(type1) && !string.IsNullOrEmpty(type2)) query += $"?type1={type1}&type2={type2}";
