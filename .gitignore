@@ -415,3 +415,6 @@ PayItOff.Api/Properties/PublishProfiles/
 # Instalatory aplikacji
 *.msix
 **/wwwroot/install/
+
+# Seeder testowy
+PayItOff.Api/Controllers/SeederController.cs

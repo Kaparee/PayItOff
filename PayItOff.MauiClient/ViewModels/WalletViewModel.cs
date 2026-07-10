@@ -462,7 +462,7 @@ public partial class WalletViewModel : PopupViewModelBase
     }
 
     [RelayCommand]
-    private async Task RejectSettlement(WalletPersonUiModel item)
+    private async Task DeclineSettlement(WalletPersonUiModel item)
     {
         if (item == null || !item.IsSettlement) return;
 
@@ -537,8 +537,6 @@ public partial class WalletViewModel : PopupViewModelBase
     private void CloseTransactionDetailsPopup()
     {
         IsTransactionDetailsPopupVisible = false;
-        // Do not set details to null here to prevent MAUI BindableLayout 0-height collapsing bug
-        // which forces ScrollViews to jump on Windows when the popup is reopened.
     }
 
     [RelayCommand]
@@ -754,7 +752,6 @@ public partial class WalletViewModel : PopupViewModelBase
         await Shell.Current.GoToAsync("//MainPage");
     }
 
-    // ===== PHOTO VIEWER =====
     [ObservableProperty]
     public partial bool IsPhotoViewerVisible { get; set; }
 

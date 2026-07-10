@@ -293,12 +293,8 @@ namespace PayItOff.Application.Services
             var expense = await _expenseRepository.GetExpenseWithSplitsAsync(expenseId);
             if (expense == null) throw new ExpenseNotFoundException();
 
-            var isAuthorized = expense.PayerId == userId
-                || expense.CreatorId == userId
-                || expense.Items.Any(i => i.Splits.Any(s => s.UserId == userId))
-                || expense.Groups.Any(g => g.Items.Any(i => i.Splits.Any(s => s.UserId == userId)));
-
-            if (!isAuthorized) throw new InvalidUserRoleException();
+            var groupMember = await _groupMemberRepository.GetMemberAsync(expense.GroupId, userId);
+            if (groupMember == null) { throw new InvalidUserRoleException(); }
 
             var baseUrl = _configuration["AppUrls:BackendUrl"];
 
@@ -334,7 +330,7 @@ namespace PayItOff.Application.Services
 
             foreach (var item in expense.Items)
             {
-                if (item.ExpenseGroupId != null) continue; // Skip group items as they are processed below
+                if (item.ExpenseGroupId != null) continue;
                 categories.Add(item.Category);
                 foreach (var split in item.Splits)
                 {
@@ -372,11 +368,8 @@ namespace PayItOff.Application.Services
                        ?? expense.Groups.SelectMany(g => g.Items).FirstOrDefault(i => i.Id == itemId);
             if (item == null) throw new ExpenseNotFoundException();
 
-            var isAuthorized = expense.PayerId == userId
-                || expense.CreatorId == userId
-                || item.Splits.Any(s => s.UserId == userId);
-
-            if (!isAuthorized) throw new InvalidUserRoleException();
+            var groupMember = await _groupMemberRepository.GetMemberAsync(expense.GroupId, userId);
+            if (groupMember == null) { throw new InvalidUserRoleException(); }
 
             var baseUrl = _configuration["AppUrls:BackendUrl"];
 

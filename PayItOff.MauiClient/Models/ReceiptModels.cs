@@ -146,22 +146,25 @@ public partial class ReceiptItem : ObservableObject
     {
         if (AssignedMembers.Count == 0) return;
 
-        decimal share = Math.Round(TotalPrice / AssignedMembers.Count, 2);
-        decimal totalAllocated = 0;
+        int count = AssignedMembers.Count;
+        decimal baseAmount = Math.Floor((TotalPrice / count) * 100) / 100;
+        decimal totalAllocated = baseAmount * count;
+        decimal remainder = TotalPrice - totalAllocated;
+        int penniesToDistribute = (int)Math.Round(remainder * 100);
 
         foreach (var m in AssignedMembers)
         {
-            m.OwedAmount = share;
+            m.OwedAmount = baseAmount;
             m.IsRemainderRecipient = false;
-            totalAllocated += share;
         }
 
-        decimal remainder = TotalPrice - totalAllocated;
-        if (remainder != 0 && AssignedMembers.Count > 0)
+        var distributionList = new List<ReceiptMemberShare> { AssignedMembers[0] };
+        distributionList.AddRange(AssignedMembers.Skip(1).OrderBy(m => m.MemberId));
+
+        for (int i = 0; i < penniesToDistribute && i < count; i++)
         {
-            var firstMember = AssignedMembers.First();
-            firstMember.OwedAmount += remainder;
-            firstMember.IsRemainderRecipient = true;
+            distributionList[i].OwedAmount += 0.01m;
+            if (i == 0) distributionList[i].IsRemainderRecipient = true;
         }
     }
 }

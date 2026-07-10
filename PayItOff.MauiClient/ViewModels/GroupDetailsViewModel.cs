@@ -448,11 +448,16 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         {
             foreach (var friend in friendsTask.Result)
             {
-                if (!FilteredMembers.Any(m => m.UserId == friend.FriendId))
+                var result = await _groupMemberService.IsUserAlreadyInvitedAsync(GroupId, friend.FriendId);
+                if (result == false && !FilteredMembers.Any(m => m.UserId == friend.FriendId))
                 {
                     friend.AvatarUrl = friend.AvatarUrl;
                     FriendsList.Add(friend);
+                } else
+                {
+                    continue;
                 }
+
             }
         }
 

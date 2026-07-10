@@ -10,13 +10,25 @@ namespace PayItOff.MauiClient.ViewModels;
 public partial class GroupsViewModel : PopupViewModelBase
 {
     private readonly GroupService _groupService;
+    private readonly GroupMemberService _groupMemberService;
     private List<GroupInfoResponse> _allGroups = new();
+
+    private List<GroupPendingInvitationResponse> _allInvitations = new();
 
     [ObservableProperty]
     public partial ObservableCollection<GroupInfoResponse> Groups { get; set; }
 
     [ObservableProperty]
+    public partial ObservableCollection<GroupPendingInvitationResponse> Invites { get; set; }
+
+    [ObservableProperty]
     public partial bool IsCreatePopupVisible { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsInviteListPopupVisible { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsInviteListButtonVisible { get; set; }
 
     [ObservableProperty]
     public partial string NewGroupName { get; set; }
@@ -30,10 +42,12 @@ public partial class GroupsViewModel : PopupViewModelBase
     private Stream? _tempAvatarStream;
     private string? _tempFileName;
 
-    public GroupsViewModel(GroupService groupService)
+    public GroupsViewModel(GroupService groupService, GroupMemberService groupMemberService)
     {
         _groupService = groupService;
+        _groupMemberService = groupMemberService;
         Groups = new ObservableCollection<GroupInfoResponse>();
+        Invites = new ObservableCollection<GroupPendingInvitationResponse>();
         IsCustomAlertSupported = true;
 
         _ = LoadGroupsAsync();
@@ -90,6 +104,85 @@ public partial class GroupsViewModel : PopupViewModelBase
                 Groups.Add(group);
             }
         }
+
+        _ = IsInvitePending();
+    }
+
+    private async Task IsInvitePending()
+    {
+        var invites = await _groupMemberService.GetPendingInvitationsAsync();
+
+        if(invites != null && invites.Count() > 0)
+        {
+            IsInviteListButtonVisible = true;
+        } else
+        {
+            IsInviteListButtonVisible = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ShowInvitationPopup()
+    {
+        var invites = await _groupMemberService.GetPendingInvitationsAsync();
+
+        _allInvitations = invites!;
+
+        Invites.Clear();
+        if (invites != null && invites.Count() > 0)
+        {
+            foreach (var invite in invites)
+            {
+                Invites.Add(new GroupPendingInvitationResponse
+                {
+                    InvitationId = invite.InvitationId,
+                    GroupId = invite.GroupId,
+                    GroupName = invite.GroupName,
+                    GroupAvatarUrl = invite.GroupAvatarUrl,
+                    Role = invite.Role,
+                    InvitedAt = invite.InvitedAt
+                });
+            }
+        }
+        IsInviteListPopupVisible = true;
+    }
+
+    [RelayCommand]
+    public async Task AcceptInviteAsync(GroupPendingInvitationResponse invite)
+    {
+        await _groupMemberService.AcceptInviteAsync(invite.InvitationId);
+
+        Invites.Remove(invite);
+
+        if (Invites.Count == 0)
+        {
+            CloseInvitationPopup();
+            IsInviteListButtonVisible = false;
+        }
+
+        await LoadGroupsAsync();
+    }
+
+    [RelayCommand]
+    public async Task DeclineInviteAsync(GroupPendingInvitationResponse invite)
+    {
+        await _groupMemberService.DeclineInviteAsync(invite.InvitationId);
+
+        Invites.Remove(invite);
+
+        if (Invites.Count == 0)
+        {
+            CloseInvitationPopup();
+            IsInviteListButtonVisible = false;
+        }
+
+        await LoadGroupsAsync();
+    }
+
+    [RelayCommand]
+    private void CloseInvitationPopup()
+    {
+        IsInviteListPopupVisible = false;
     }
 
     [RelayCommand]

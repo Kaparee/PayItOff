@@ -152,12 +152,16 @@
                             HorizontalOptions="Center" VerticalOptions="Center" />
 
                     <!-- Przycisk zaproszenia (po prawej) -->
-                    <Border StrokeShape="RoundRectangle 10" Grid.Column="{OnIdiom Phone=1, Default=2}" BackgroundColor="Transparent" StrokeThickness="0" HeightRequest="45" WidthRequest="45"
+                            <Border StrokeShape="RoundRectangle 10" Grid.Column="{OnIdiom Phone=1, Default=2}" BackgroundColor="Transparent" StrokeThickness="0" HeightRequest="45" Padding="15,0"
                             HorizontalOptions="End" VerticalOptions="Center" ToolTipProperties.Text="Dodaj znajomego">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ShowInvitePopupCommand}" />
                         </Border.GestureRecognizers>
-                        <Image Source="friends_icon_green.png" WidthRequest="{OnIdiom Phone=22, Default=28}" HeightRequest="{OnIdiom Phone=22, Default=28}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10" HorizontalOptions="Center" VerticalOptions="Center">
+                                    <Label Grid.Column="0" Text="Dodaj Znajomego!" TextColor="{StaticResource StatusGreen}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
+                                    <Image Grid.Column="1" Source="friends_icon_green.png" WidthRequest="{OnIdiom Phone=22, Default=28}" HeightRequest="{OnIdiom Phone=22, Default=28}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Grid>
+
                     </Border>
                 </Grid>
 

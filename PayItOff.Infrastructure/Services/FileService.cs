@@ -19,9 +19,9 @@ public class FileService : IFileService
             throw new Exception("Niedozwolony format pliku. Obsługiwane to: JPG, PNG, WEBP.");
         }
 
-        if (avatar.Length > 5 * 1024 * 1024)
+        if (avatar.Length > 10 * 1024 * 1024)
         {
-            throw new Exception("Plik jest za duży. Maksymalny rozmiar to 5 MB.");
+            throw new Exception("Plik jest za duży. Maksymalny rozmiar to 10 MB.");
         }
 
         var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "avatars");

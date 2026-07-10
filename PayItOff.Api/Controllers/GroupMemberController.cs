@@ -31,6 +31,13 @@ public class GroupMemberController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("{groupId}/is-user-already-invited/{userId}")]
+    public async Task<IActionResult> IsUserAlreadyInvited([FromRoute] int groupId, [FromRoute] int userId)
+    {
+        var result = await _groupMemberService.IsInviteAlreadyExistsAsync(groupId, userId);
+        return Ok(result);
+    }
+
     [HttpPost("invite")]
     public async Task<IActionResult> Invite([FromBody] GroupInviteUserRequest request)
     {

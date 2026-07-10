@@ -111,7 +111,7 @@
                                                         </Border>
                                                         <Border IsVisible="{Binding IsActionRequired}" StrokeShape="RoundRectangle 5" StrokeThickness="1" Stroke="{StaticResource StatusRed}" BackgroundColor="Transparent" WidthRequest="32" HeightRequest="32" Padding="6">
                                                             <Border.GestureRecognizers>
-                                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RejectActionCommand}" CommandParameter="{Binding .}" />
+                                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeclineActionCommand}" CommandParameter="{Binding .}" />
                                                             </Border.GestureRecognizers>
                                                             <Image Source="x_icon.png" WidthRequest="12" HeightRequest="12" HorizontalOptions="Center" VerticalOptions="Center"/>
                                                         </Border>

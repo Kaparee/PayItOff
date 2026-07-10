@@ -74,4 +74,11 @@ public class GroupMemberRepository : IGroupMemberRepository
             .Where(x => x.GroupId == groupId && x.Status == GroupMemberStatus.Accepted)
             .ToListAsync();
     }
+
+    public async Task<bool> IsInviteAlreadyExistsAsync(int groupId, int userId)
+    {
+        return await _context.GroupMembers
+            .Where(x => x.GroupId == groupId && x.UserId == userId && x.Status == GroupMemberStatus.Pending)
+            .AnyAsync();
+    }
 }

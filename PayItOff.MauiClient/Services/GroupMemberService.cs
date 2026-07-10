@@ -76,4 +76,14 @@ public class GroupMemberService
         var response = await _httpClient.DeleteAsync($"GroupMember/{groupId}/kick/{targetUserId}");
         return response.IsSuccessStatusCode;
     }
+
+    public async Task<bool> IsUserAlreadyInvitedAsync(int groupId, int targetUserId)
+    {
+        var response = await _httpClient.GetAsync($"GroupMember/{groupId}/is-user-already-invited/{targetUserId}");
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<bool>();
+        }
+        return false;
+    }
 }

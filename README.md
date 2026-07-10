@@ -14,6 +14,10 @@
 
 ---
 
+## HOTFIX
+
+- [x] **Naprawa zdjęć:** Możliwość usunięcia dodanego zdjęcia w rejestracji - ustawianie na default 
+
 ## Roadmapa
 
 Poniżej przedstawiono planowane kierunki rozwoju projektu w kolejnych wersjach.

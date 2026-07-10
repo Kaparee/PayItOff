@@ -608,7 +608,6 @@ public class FriendDisplayModel
                 int remaining = groups.Count - 2;
                 items.Add(new SharedGroupDisplayItem { IsMoreIndicator = true, MoreText = $"+{remaining}" });
             }
-            // Przypisz ZIndex malejąco, żeby lewy avatar był na wierzchu
             for (int i = 0; i < items.Count; i++)
                 items[i].ZIndex = items.Count - i;
             return items;

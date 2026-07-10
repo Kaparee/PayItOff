@@ -136,6 +136,16 @@ public partial class RegisterViewModel : PopupViewModelBase
         }
     }
 
+
+    [RelayCommand]
+    private void CancelAvatar()
+    {
+        SelectedAvatarFile = null;
+        AvatarPreviewSource = "default_avatar.png";
+        IsAvatarPlaceholderVisible = true;
+        IsAvatarImageVisible = false;
+    }
+
     [RelayCommand]
     private void TogglePasswordVisibility()
     {

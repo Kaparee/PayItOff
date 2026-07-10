@@ -10,10 +10,10 @@
              x:Name="thisPage">
 
     <Grid>
-        
+
         <Grid ColumnDefinitions="{OnIdiom Phone='0, *', Default='360, *'}">
 
-            
+
             <controls:SidebarMenu Grid.Column="0"
                                   ActiveTab="Groups"
                                   IsVisible="{OnIdiom Phone=False, Default=True}" />
@@ -36,7 +36,7 @@
                     </HorizontalStackLayout>
                 </Grid>
 
-                
+
                 <Border Grid.Row="1" HorizontalOptions="End" VerticalOptions="Center"
                         StrokeShape="RoundRectangle 20" BackgroundColor="Transparent"
                         Stroke="#444" StrokeThickness="1" WidthRequest="{OnIdiom Phone='350', Default='320'}" HeightRequest="40" Padding="15,0">
@@ -49,7 +49,7 @@
 
                 <BoxView Grid.Row="2" HeightRequest="1" Color="{StaticResource Border}" Opacity="0.5" Margin="{OnIdiom Phone='-15,0', Default='-40,0'}"/>
 
-                
+
                 <ScrollView Grid.Row="3" VerticalScrollBarVisibility="Never" Padding="0,30,0,0">
                     <VerticalStackLayout Spacing="20">
 
@@ -57,7 +57,7 @@
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="models:GroupInfoResponse">
                                     <Grid Padding="0,0,0,20">
-                                        
+
                                         <Border StrokeShape="RoundRectangle 15"
                                                 BackgroundColor="{StaticResource SurfaceDark}"
                                                 Padding="20" StrokeThickness="0">
@@ -68,22 +68,22 @@
                                             </Border.GestureRecognizers>
 
                                             <Grid ColumnDefinitions="{OnIdiom Phone='50, *, Auto', Default='60, *, Auto'}" ColumnSpacing="{OnIdiom Phone=10, Default=20}">
-                                                
+
                                                 <Border Grid.Column="0" HeightRequest="{OnIdiom Phone=50, Default=60}" WidthRequest="{OnIdiom Phone=50, Default=60}"
                                                         StrokeShape="{OnIdiom Phone='RoundRectangle 25', Default='RoundRectangle 30'}" StrokeThickness="0" BackgroundColor="#1E232D">
                                                     <Grid>
-                                                        
+
                                                         <Image Source="default_group_avatar.png" Aspect="AspectFill" IsVisible="{Binding AvatarUrl, Converter={StaticResource InverseStringNullOrEmptyConverter}}" />
 
                                                         <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
                                                     </Grid>
                                                 </Border>
 
-                                                
+
                                                 <Label Grid.Column="1" Text="{Binding Name}" TextColor="White" LineBreakMode="TailTruncation"
                                                        FontAttributes="Bold" FontSize="{OnIdiom Phone=16, Default=20}" VerticalOptions="Center"/>
 
-                                                
+
                                                 <HorizontalStackLayout Grid.Column="2" Spacing="10" VerticalOptions="Center" Margin="{OnIdiom Phone='0,0,25,0', Default='0,0,30,0'}">
                                                     <VerticalStackLayout IsVisible="{OnIdiom Phone=False, Default=True}" WidthRequest="95">
                                                         <Label Text="Przychód" TextColor="{StaticResource TextSubtle}" FontSize="12" HorizontalOptions="Center"/>
@@ -103,7 +103,7 @@
                                             </Grid>
                                         </Border>
 
-                                        
+
                                         <Border StrokeShape="RoundRectangle 10" HorizontalOptions="End" VerticalOptions="Start"
                                                 Margin="0,15,15,0" HeightRequest="30" WidthRequest="30"
                                                 BackgroundColor="Transparent" StrokeThickness="0">
@@ -111,7 +111,7 @@
                                                 <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GroupsViewModel}}, Path=ToggleFavoriteCommand}"
                                                                       CommandParameter="{Binding .}" />
                                             </Border.GestureRecognizers>
-                                            
+
                                             <Image WidthRequest="22" HeightRequest="22" HorizontalOptions="Center" VerticalOptions="Center" Source="star_icon_default.png">
                                                 <Image.Triggers>
                                                     <DataTrigger TargetType="Image" Binding="{Binding IsFavorite}" Value="True">
@@ -125,8 +125,8 @@
                             </CollectionView.ItemTemplate>
                         </CollectionView>
 
-                        
-                        <Border IsVisible="{OnIdiom Phone=False, Default=True}" 
+
+                        <Border IsVisible="{OnIdiom Phone=False, Default=True}"
                                 StrokeShape="RoundRectangle 15" BackgroundColor="{StaticResource SurfaceDark}" Padding="0"
                                 StrokeThickness="0" HeightRequest="70" Margin="0,10,0,0">
                             <Border.GestureRecognizers>
@@ -141,16 +141,40 @@
                     </VerticalStackLayout>
                 </ScrollView>
 
-                <!-- Floating Action Button for Phone -->
-                <Border Grid.Row="3" 
-                        IsVisible="{OnIdiom Phone=True, Default=False}" 
-                        HorizontalOptions="End" 
-                        VerticalOptions="End" 
-                        Margin="0,0,5,20" 
-                        WidthRequest="60" 
-                        HeightRequest="60" 
-                        StrokeShape="RoundRectangle 30" 
-                        BackgroundColor="#7F00FF" 
+
+                <Border Grid.Row="1"
+                        IsVisible="{Binding IsInviteListButtonVisible}"
+                        HorizontalOptions="Start"
+                        VerticalOptions="Center"
+                        Margin="0"
+                        WidthRequest="160"
+                        HeightRequest="60"
+                        StrokeShape="RoundRectangle 30"
+                        BackgroundColor= "Transparent"
+                        Stroke="{StaticResource StatusGreen}"
+                        StrokeThickness="1"
+                        ZIndex="10">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="0,4" Radius="10" Opacity="0.5"/>
+                    </Border.Shadow>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ShowInvitationPopupCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10" HorizontalOptions="Center" VerticalOptions="Center">
+                        <Image Grid.Column="0" Source="add_friend_to_group_icon.png" WidthRequest="{OnIdiom Phone=22, Default=28}" HeightRequest="{OnIdiom Phone=22, Default=28}" VerticalOptions="Center"/>
+                        <Label Grid.Column="1" Text="Nowe zaproszenia!" TextColor="{StaticResource StatusGreen}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="3"
+                        IsVisible="{OnIdiom Phone=True, Default=False}"
+                        HorizontalOptions="End"
+                        VerticalOptions="End"
+                        Margin="0,0,5,20"
+                        WidthRequest="60"
+                        HeightRequest="60"
+                        StrokeShape="RoundRectangle 30"
+                        BackgroundColor="#7F00FF"
                         StrokeThickness="0"
                         ZIndex="10">
                     <Border.Shadow>
@@ -164,13 +188,13 @@
             </Grid>
         </Grid>
 
-        
+
         <Grid IsVisible="{Binding IsCreatePopupVisible}" Style="{StaticResource PopupOverlayStyle}">
             <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PopupContainerStyle}" WidthRequest="{OnIdiom Phone=340, Default=420}">
                 <VerticalStackLayout Spacing="30">
                     <Label Text="Nowa Grupa" FontSize="26" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
 
-                    
+
                     <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
                         <Border StrokeShape="RoundRectangle 10" Stroke="#7F00FF" StrokeThickness="2" HeightRequest="120" WidthRequest="120" HorizontalOptions="Center">
                             <Border.GestureRecognizers>
@@ -195,10 +219,59 @@
                         </Border>
                     </VerticalStackLayout>
 
-                    
+
                     <Grid ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,10,0,0">
                         <controls:AppButton Grid.Column="0" Text="Anuluj" Command="{Binding ClosePopupCommand}" ButtonBackgroundColor="{StaticResource SurfaceDark}" ButtonTextColor="{StaticResource TextMain}" />
                         <controls:AppButton Grid.Column="1" Text="Utwórz" Command="{Binding ConfirmCreateGroupCommand}" ButtonBackgroundColor="{StaticResource StatusGreen}" ButtonTextColor="{StaticResource TextMain}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <Grid IsVisible="{Binding IsInviteListPopupVisible}" Style="{StaticResource PopupOverlayStyle}">
+            <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PopupContainerStyle}" WidthRequest="{OnIdiom Phone=340, Default=420}">
+                <VerticalStackLayout Spacing="30">
+                    <Label Text="Twoje Zaproszenia" FontSize="26" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
+
+                    <CollectionView ItemsSource="{Binding Invites}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:GroupPendingInvitationResponse">
+                                <Grid Padding="0,0,0,20">
+                                    <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="15" Padding="0,5">
+                                        <Border Grid.Column="0" HeightRequest="40" WidthRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="#1E232D">
+                                            <Grid>
+                                                <Image Source="default_group_avatar.png" Aspect="AspectFill" IsVisible="{Binding GroupAvatarUrl, Converter={StaticResource InverseStringNullOrEmptyConverter}}" />
+                                                <Image Source="{Binding GroupAvatarUrl}" Aspect="AspectFill" />
+                                            </Grid>
+                                        </Border>
+
+                                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                            <Label Text="{Binding GroupName}" TextColor="White" FontAttributes="Bold" FontSize="16" LineBreakMode="TailTruncation" />
+                                            <Label Text="{Binding Role, StringFormat='Rola: {0}'}" TextColor="{StaticResource TextSubtle}" FontSize="12" />
+                                        </VerticalStackLayout>
+
+                                        <Border Grid.Column="2" StrokeShape="RoundRectangle 5" StrokeThickness="1" Stroke="{StaticResource StatusGreen}" BackgroundColor="Transparent" WidthRequest="36" HeightRequest="36" Padding="8">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GroupsViewModel}}, Path=AcceptInviteCommand}" CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
+                                            <Image Source="check_mark_icon.png" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                        </Border>
+
+                                        <Border Grid.Column="3" StrokeShape="RoundRectangle 5" StrokeThickness="1" Stroke="{StaticResource StatusRed}" BackgroundColor="Transparent" WidthRequest="36" HeightRequest="36" Padding="8">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GroupsViewModel}}, Path=DeclineInviteCommand}" CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
+                                            <Image Source="x_icon.png" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                        </Border>
+                                    </Grid>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+
+                    <Grid ColumnDefinitions="*" ColumnSpacing="15" Margin="0,10,0,0">
+                        <controls:AppButton Grid.Column="0" Text="Zamknij" Command="{Binding CloseInvitationPopupCommand}" ButtonBackgroundColor="{StaticResource SurfaceDark}" ButtonTextColor="{StaticResource TextMain}" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>

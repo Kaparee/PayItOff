@@ -249,4 +249,9 @@ public class GroupMemberService : IGroupMemberService
             Role = x.Role
         }).ToList();
     }
+
+    public async Task<bool> IsInviteAlreadyExistsAsync(int groupId, int userId)
+    {
+        return await _groupMemberRepository.IsInviteAlreadyExistsAsync(groupId, userId);
+    }
 }
