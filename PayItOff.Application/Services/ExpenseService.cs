@@ -20,10 +20,20 @@ namespace PayItOff.Application.Services
         private readonly IGroupDebtRepository _groupDebtRepository;
         private readonly IFileService _fileService;
         private readonly INotificationService _notificationService;
-
         private readonly IGroupMemberRepository _groupMemberRepository;
+        private readonly IRealTimeNotificationService _realTimeNotificationService;
 
-        public ExpenseService(IConfiguration configuration, IUnitOfWork unitOfWork, IGroupRepository groupRepository, IUserRepository userRepository, IExpenseRepository expenseRepository, IGroupDebtRepository groupDebtRepository, IFileService fileService, INotificationService notificationService, IGroupMemberRepository groupMemberRepository)
+        public ExpenseService(
+            IConfiguration configuration,
+            IUnitOfWork unitOfWork,
+            IGroupRepository groupRepository,
+            IUserRepository userRepository,
+            IExpenseRepository expenseRepository,
+            IGroupDebtRepository groupDebtRepository,
+            IFileService fileService,
+            INotificationService notificationService,
+            IGroupMemberRepository groupMemberRepository,
+            IRealTimeNotificationService realTimeNotificationService)
         {
             _configuration = configuration;
             _unitOfWork = unitOfWork;
@@ -34,6 +44,7 @@ namespace PayItOff.Application.Services
             _fileService = fileService;
             _notificationService = notificationService;
             _groupMemberRepository = groupMemberRepository;
+            _realTimeNotificationService = realTimeNotificationService;
         }
 
         public async Task CreateExpenseBatch(int userId, CreateExpenseBatchRequest request)
@@ -142,8 +153,8 @@ namespace PayItOff.Application.Services
 
                 group.UpdateTimestamp();
                 await _groupRepository.UpdateAsync(group);
-                await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitAsync();
+                await _realTimeNotificationService.SendExpenseUpdateEventAsync(group.Id);
             }
             catch
             {
@@ -193,8 +204,8 @@ namespace PayItOff.Application.Services
                     await _notificationService.CreateNotificationAsync(participantId, userId, NotificationType.Deleting, $"Wydatek '{expense.Name}' został usunięty z grupy '{group.Name}'.", expense.GroupId, EntityType.Groups);
                 }
 
-                await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitAsync();
+                await _realTimeNotificationService.SendExpenseUpdateEventAsync(group.Id);
             }
             catch
             {
@@ -271,8 +282,8 @@ namespace PayItOff.Application.Services
                     await _notificationService.CreateNotificationAsync(participantId, userId, NotificationType.Deleting, $"Pozycja '{item.Name}' z wydatku '{expense.Name}' została usunięta z grupy '{group.Name}'.", expense.GroupId, EntityType.Groups);
                 }
 
-                await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitAsync();
+                await _realTimeNotificationService.SendExpenseUpdateEventAsync(group.Id);
             }
             catch
             {
@@ -486,8 +497,8 @@ namespace PayItOff.Application.Services
                 item.Edit(request.Name, request.Category);
 
                 await _expenseRepository.UpdateAsync(expense);
-                await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitAsync();
+                await _realTimeNotificationService.SendExpenseUpdateEventAsync(group.Id);
 
                 var affectedUserIds = oldSplits.Select(s => s.UserId).ToList();
                 if (request.Splits != null) affectedUserIds.AddRange(request.Splits.Select(s => s.UserId));

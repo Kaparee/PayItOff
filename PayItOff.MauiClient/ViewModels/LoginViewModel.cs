@@ -10,6 +10,7 @@ public partial class LoginViewModel : PopupViewModelBase
 {
     private readonly AuthService _authService;
     private readonly AppUpdateService _updateService;
+    private readonly SignalRService _signalRService;
     private static int _updateCheckStarted;
 
     [ObservableProperty]
@@ -29,10 +30,15 @@ public partial class LoginViewModel : PopupViewModelBase
     [ObservableProperty]
     public partial string PasswordIcon { get; set; } = "eye_closed.png";
 
-    public LoginViewModel(AuthService authService, AppUpdateService updateService)
+    public LoginViewModel(
+        AuthService authService,
+        AppUpdateService updateService,
+        SignalRService signalRService
+        )
     {
         _authService = authService;
         _updateService = updateService;
+        _signalRService = signalRService;
         IsCustomAlertSupported = true;
     }
 
@@ -100,6 +106,8 @@ public partial class LoginViewModel : PopupViewModelBase
             var request = new LoginRequest { EmailOrNickname = EmailOrNickname, Password = Password };
 
             await _authService.LoginAsync(request);
+
+            if (_signalRService.IsDisconnected) { await _signalRService.StartAsync(); }
 
             await Shell.Current.GoToAsync("//MainPage");
         }

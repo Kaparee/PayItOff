@@ -10,6 +10,8 @@ using System.Collections.ObjectModel;
 public partial class FriendsViewModel : BaseViewModel
 {
     private readonly FriendService _friendService;
+    private readonly SignalRService _signalRService;
+
     private readonly List<FriendDisplayModel> _allFriends = new();
 
     public ObservableCollection<FriendDisplayModel> Friends { get; } = new();
@@ -121,9 +123,20 @@ public partial class FriendsViewModel : BaseViewModel
         IsAlertPopupVisible = true;
     }
 
-    public FriendsViewModel(FriendService friendService)
+    public FriendsViewModel(FriendService friendService, SignalRService signalRService)
     {
         _friendService = friendService;
+        _signalRService = signalRService;
+    }
+
+    public void SubscribeToEvents()
+    {
+        _signalRService.OnFriendUpdateReceived += HandleFriendUpdate;
+    }
+
+    public void UnsubscribeFromEvents()
+    {
+        _signalRService.OnFriendUpdateReceived -= HandleFriendUpdate;
     }
 
     partial void OnSearchQueryChanged(string value)
@@ -203,6 +216,7 @@ public partial class FriendsViewModel : BaseViewModel
     {
         if (group == null) return;
         IsSharedGroupsPopupVisible = false;
+        _signalRService.OnFriendUpdateReceived -= HandleFriendUpdate;
         await Shell.Current.GoToAsync($"//GroupDetailsPage?groupId={group.GroupId}");
     }
 
@@ -433,6 +447,7 @@ public partial class FriendsViewModel : BaseViewModel
     [RelayCommand]
     private async Task NavigateToGroupsAsync()
     {
+        _signalRService.OnFriendUpdateReceived -= HandleFriendUpdate;
         await Shell.Current.GoToAsync("//GroupsPage");
     }
 
@@ -521,6 +536,14 @@ public partial class FriendsViewModel : BaseViewModel
     {
         TotalOwed = _allFriends.Where(f => f.Status == FriendshipStatus.Accepted).Sum(f => f.Expense);
         TotalOwedToMe = _allFriends.Where(f => f.Status == FriendshipStatus.Accepted).Sum(f => f.Income);
+    }
+
+    private void HandleFriendUpdate()
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await LoadFriendsAsync();
+        });
     }
 }
 

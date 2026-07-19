@@ -16,7 +16,13 @@ public partial class FriendsPage : ContentPage
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
-
+        _viewModel.SubscribeToEvents();
         _viewModel.LoadFriendsCommand.Execute(null);
+    }
+
+    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    {
+        base.OnNavigatedFrom(args);
+        _viewModel.UnsubscribeFromEvents();
     }
 }

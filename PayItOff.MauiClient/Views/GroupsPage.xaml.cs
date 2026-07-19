@@ -16,7 +16,18 @@ public partial class GroupsPage : ContentPage
 
         if (BindingContext is GroupsViewModel vm)
         {
+            vm.SubscribeToEvents();
             await vm.LoadGroupsAsync();
+        }
+    }
+
+    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    {
+        base.OnNavigatedFrom(args);
+        
+        if (BindingContext is GroupsViewModel vm)
+        {
+            vm.UnsubscribeFromEvents();
         }
     }
 }

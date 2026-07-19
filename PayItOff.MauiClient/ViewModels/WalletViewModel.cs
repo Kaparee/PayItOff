@@ -71,6 +71,8 @@ public partial class WalletViewModel : PopupViewModelBase
 {
     private readonly SettlementService _settlementService;
     private readonly ExpenseService _expenseService;
+    private readonly SignalRService _signalRService;
+
     private int _loadId = 0;
     private CancellationTokenSource? _searchCts;
     private List<WalletPersonUiModel> _allTransactions = new();
@@ -144,12 +146,23 @@ public partial class WalletViewModel : PopupViewModelBase
     [ObservableProperty][NotifyPropertyChangedFor(nameof(HasExpensePhotos))] public partial ExpenseDetailsResponse? SelectedExpenseDetails { get; set; }
 
 
-    public WalletViewModel(SettlementService settlementService, ExpenseService expenseService)
+    public WalletViewModel(SettlementService settlementService, ExpenseService expenseService, SignalRService signalRService)
     {
         _settlementService = settlementService;
         _expenseService = expenseService;
+        _signalRService = signalRService;
         FilterType = "All";
         IsCustomAlertSupported = true;
+    }
+
+    public void SubscribeToEvents()
+    {
+        _signalRService.OnSettlementUpdateReceived += HandleSettlementUpdate;
+    }
+
+    public void UnsubscribeFromEvents()
+    {
+        _signalRService.OnSettlementUpdateReceived -= HandleSettlementUpdate;
     }
 
     [RelayCommand]
@@ -826,5 +839,13 @@ public partial class WalletViewModel : PopupViewModelBase
             SelectedExpensePhotoUrl = url;
             OnPropertyChanged(nameof(PhotoViewerTitle));
         }
+    }
+
+    private void HandleSettlementUpdate()
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await LoadDataAsync();
+        });
     }
 }

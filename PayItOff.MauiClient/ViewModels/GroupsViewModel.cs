@@ -11,6 +11,7 @@ public partial class GroupsViewModel : PopupViewModelBase
 {
     private readonly GroupService _groupService;
     private readonly GroupMemberService _groupMemberService;
+    private readonly SignalRService _signalRService;
     private List<GroupInfoResponse> _allGroups = new();
 
     private List<GroupPendingInvitationResponse> _allInvitations = new();
@@ -42,15 +43,37 @@ public partial class GroupsViewModel : PopupViewModelBase
     private Stream? _tempAvatarStream;
     private string? _tempFileName;
 
-    public GroupsViewModel(GroupService groupService, GroupMemberService groupMemberService)
+    public GroupsViewModel(
+        GroupService groupService,
+        GroupMemberService groupMemberService,
+        SignalRService signalRService
+        )
     {
         _groupService = groupService;
         _groupMemberService = groupMemberService;
+        _signalRService = signalRService;
         Groups = new ObservableCollection<GroupInfoResponse>();
         Invites = new ObservableCollection<GroupPendingInvitationResponse>();
         IsCustomAlertSupported = true;
-
         _ = LoadGroupsAsync();
+    }
+
+    public void SubscribeToEvents()
+    {
+        _signalRService.OnInvitationReceived += HandleInvitationReceived;
+    }
+
+    public void UnsubscribeFromEvents()
+    {
+        _signalRService.OnInvitationReceived -= HandleInvitationReceived;
+    }
+
+    private void HandleInvitationReceived()
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await IsInvitePending();
+        });
     }
 
     partial void OnSearchQueryChanged(string value)

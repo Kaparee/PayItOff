@@ -27,6 +27,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     private readonly GroupMemberService _groupMemberService;
     private readonly FriendService _friendService;
     private readonly ExpenseService _expenseService;
+    private readonly SignalRService _signalRService;
 
     private List<GroupMemberBalanceDto> _loadedMembers = new();
     private List<ExpenseSummaryDto> _loadedExpenses = new();
@@ -110,6 +111,8 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     public ObservableCollection<GroupMemberBalanceDto> FilteredMembers { get; } = new();
     public ObservableCollection<TransactionGroup> TransactionSections { get; } = new();
 
+    private readonly HashSet<int> _onlineUsers = new();
+
 
     public bool IsAdminOrFounder => UserRole is "Owner" or "Admin";
     public bool IsOwner => UserRole == "Owner";
@@ -121,13 +124,38 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         _ => "Jesteś członkiem grupy."
     };
 
-    public GroupDetailsViewModel(GroupService groupService, GroupMemberService groupMemberService, FriendService friendService, ExpenseService expenseService)
+    public GroupDetailsViewModel(
+        GroupService groupService,
+        GroupMemberService groupMemberService,
+        FriendService friendService,
+        ExpenseService expenseService,
+        SignalRService signalRService
+        )
     {
         _groupService = groupService;
         _groupMemberService = groupMemberService;
         _friendService = friendService;
         _expenseService = expenseService;
+        _signalRService = signalRService;
         IsCustomAlertSupported = true;
+    }
+
+    public void SubscribeToEvents()
+    {
+        _signalRService.OnExpenseUpdateReceived += HandleExpenseUpdate;
+        _signalRService.OnUserKicked += HandleUserKicked;
+        _signalRService.OnSendGroupUpdateReceived += HandleGroupUpdate;
+        _signalRService.OnInitialPresenceReceived += HandleInitialPresence;
+        _signalRService.OnUserPresenceReceived += HandleUserPresence;
+    }
+
+    public void UnsubscribeFromEvents()
+    {
+        _signalRService.OnExpenseUpdateReceived -= HandleExpenseUpdate;
+        _signalRService.OnUserKicked -= HandleUserKicked;
+        _signalRService.OnSendGroupUpdateReceived -= HandleGroupUpdate;
+        _signalRService.OnInitialPresenceReceived -= HandleInitialPresence;
+        _signalRService.OnUserPresenceReceived -= HandleUserPresence;
     }
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
@@ -159,6 +187,8 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     [RelayCommand]
     private async Task GoBackAsync()
     {
+        await _signalRService.LeaveGroupAsync(GroupId);
+
         if (IsArchived)
         {
             await Shell.Current.GoToAsync("//ArchivePage");
@@ -599,7 +629,6 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
             await ShowAlertAsync("Sukces", "Pomyślnie zmieniono rolę użytkownika.", "OK");
             if (newRole == GroupMemberRole.Owner)
             {
-                // Current user is no longer owner, let's refresh everything
                 await LoadDataAsync();
             }
             else
@@ -642,6 +671,8 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     public async Task LoadDataAsync()
     {
         if (GroupId <= 0) return;
+
+        await _signalRService.JoinGroupAsync(GroupId);
 
         if (_currentUserId == 0)
         {
@@ -690,6 +721,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
             }
             _loadedExpenses = response.Expenses ?? new List<ExpenseSummaryDto>();
 
+            SyncOnlineStatus();
             ApplyMemberFilter();
             ApplyTransactionFilter();
         }
@@ -752,7 +784,6 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         }
     }
 
-    // ===== PHOTO VIEWER =====
     [ObservableProperty]
     public partial bool IsPhotoViewerVisible { get; set; }
 
@@ -826,6 +857,67 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
             SelectedPhotoIndex = idx;
             SelectedExpensePhotoUrl = url;
             OnPropertyChanged(nameof(PhotoViewerTitle));
+        }
+    }
+
+    private void HandleExpenseUpdate()
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await LoadDataAsync();
+        });
+    }
+
+    private void HandleUserKicked(int receivedGroupId)
+    {
+        if (receivedGroupId == GroupId)
+        {
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                await ShowAlertAsync("Uwaga", "Zostałeś usunięty z tej grupy przez administratora.", "OK");
+                await GoBackAsync();
+            });
+        }
+    }
+
+    private void HandleGroupUpdate()
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await LoadDataAsync();
+        });
+    }
+
+    private void HandleInitialPresence(int[] userIds)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            _onlineUsers.Clear();
+            foreach (var id in userIds) _onlineUsers.Add(id);
+            SyncOnlineStatus();
+            ApplyMemberFilter();
+        });
+    }
+
+    private void HandleUserPresence(int userId, bool isOnline)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            if (isOnline)
+                _onlineUsers.Add(userId);
+            else
+                _onlineUsers.Remove(userId);
+
+            SyncOnlineStatus();
+            ApplyMemberFilter();
+        });
+    }
+
+    private void SyncOnlineStatus()
+    {
+        foreach (var member in _loadedMembers)
+        {
+            member.IsOnline = _onlineUsers.Contains(member.UserId);
         }
     }
 }

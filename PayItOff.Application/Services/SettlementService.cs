@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using MimeKit;
 using PayItOff.Application.Helpers;
 using PayItOff.Application.Interfaces;
 using PayItOff.Domain.Entities;
@@ -23,6 +24,7 @@ public class SettlementService : ISettlementService
     private readonly IEmailService _emailService;
     private readonly IGroupMemberRepository _groupMemberRepository;
     private readonly INotificationService _notificationService;
+    private readonly IRealTimeNotificationService _realTimeNotificationService;
 
     public SettlementService(
         IConfiguration configuration,
@@ -35,7 +37,8 @@ public class SettlementService : ISettlementService
         INotificationRepository notificationRepository,
         IEmailService emailService,
         IGroupMemberRepository groupMemberRepository,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IRealTimeNotificationService realTimeNotificationService)
     {
         _configuration = configuration;
         _groupDebtRepository = groupDebtRepository;
@@ -48,6 +51,7 @@ public class SettlementService : ISettlementService
         _emailService = emailService;
         _groupMemberRepository = groupMemberRepository;
         _notificationService = notificationService;
+        _realTimeNotificationService = realTimeNotificationService;
     }
 
     public async Task<GlobalSettlementResponse> GetUserAllIncomesSummaryAsync(int userId)
@@ -273,6 +277,7 @@ public class SettlementService : ISettlementService
 
             await _notificationService.CreateNotificationAsync(receiver.Id, sender.Id, NotificationType.NeedAction, $"{sender.FullName} zadeklarował spłatę {request.Amount} zł w grupie {groupInfo.Name}", settlement.Id, EntityType.Settlements);
             await _unitOfWork.CommitAsync();
+            await _realTimeNotificationService.SendSettlementUpdateEventAsync(receiver.Id, sender.Id);
 
             return settlement.Id;
         }
@@ -289,7 +294,10 @@ public class SettlementService : ISettlementService
         try
         {
             var result = await AcceptSettlementInternalAsync(userId, settlementId);
+            var settlement = await _settlementRepository.GetSettlementByIdAsync(userId, settlementId)
+            ?? throw new SettlementOperationException("Nie znaleziono spłaty.");
             await _unitOfWork.CommitAsync();
+            await _realTimeNotificationService.SendSettlementUpdateEventAsync(settlement.SenderId, settlement.ReceiverId);
             return result;
         }
         catch
@@ -379,6 +387,7 @@ public class SettlementService : ISettlementService
             }
 
             await _unitOfWork.CommitAsync();
+            await _realTimeNotificationService.SendSettlementUpdateEventAsync(senderId, receiverId);
             return true;
         }
         catch

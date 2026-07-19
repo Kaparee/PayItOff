@@ -41,6 +41,7 @@ public class GroupMemberBalanceDto
     public decimal LinesTotal { get; set; }
     public List<MemberExpenseLineDto> Expenses { get; set; } = new();
     public decimal ExpensesTotal { get; set; }
+    public bool IsOnline { get; set; }
 }
 
 public class ExpenseSummaryDto

@@ -18,8 +18,16 @@ public class FriendService : IFriendService
     private readonly IConfiguration _configuration;
     private readonly INotificationService _notificationService;
     private readonly IEmailService _emailService;
+    private readonly IRealTimeNotificationService _realTimeNotificationService;
 
-    public FriendService(IFriendRepository friendRepository, IUserRepository userRepository, IUnitOfWork unitOfWork, IConfiguration configuration, INotificationService notificationService, IEmailService emailService)
+    public FriendService(
+        IFriendRepository friendRepository,
+        IUserRepository userRepository,
+        IUnitOfWork unitOfWork,
+        IConfiguration configuration,
+        INotificationService notificationService,
+        IEmailService emailService,
+        IRealTimeNotificationService realTimeNotificationService)
     {
         _friendRepository = friendRepository;
         _userRepository = userRepository;
@@ -27,6 +35,7 @@ public class FriendService : IFriendService
         _configuration = configuration;
         _notificationService = notificationService;
         _emailService = emailService;
+        _realTimeNotificationService = realTimeNotificationService;
     }
 
     public async Task<List<FriendListResponse>> GetUserFriendListAsync(int userId)
@@ -113,6 +122,8 @@ public class FriendService : IFriendService
 
         await _notificationService.CreateNotificationAsync(friend.Id, userId, NotificationType.NeedAction, $"{user.FullName} wysłał/wysłała Ci zaproszenie do znajomych.", entityId, EntityType.Friends);
 
+        await _realTimeNotificationService.SendFriendUpdateEventAsync(friend.Id);
+
         await _unitOfWork.SaveChangesAsync();
     }
 
@@ -144,6 +155,8 @@ public class FriendService : IFriendService
         await _notificationService.ResolveActionNotificationAsync(userId, invitation.Id, EntityType.Friends, true);
 
         await _unitOfWork.SaveChangesAsync();
+
+        await _realTimeNotificationService.SendFriendUpdateEventAsync(otherId);
     }
 
     public async Task DeclineInviteAsync(int userId, UpdateInviteRequest request)
@@ -173,6 +186,8 @@ public class FriendService : IFriendService
         await _notificationService.ResolveActionNotificationAsync(userId, invitation.Id, EntityType.Friends, false);
 
         await _unitOfWork.SaveChangesAsync();
+
+        await _realTimeNotificationService.SendFriendUpdateEventAsync(otherId);
     }
 
     public async Task RemoveFriendAsync(int userId, UpdateInviteRequest request)
@@ -206,6 +221,8 @@ public class FriendService : IFriendService
         }
 
         await _unitOfWork.SaveChangesAsync();
+
+        await _realTimeNotificationService.SendFriendUpdateEventAsync(otherId);
 
     }
 

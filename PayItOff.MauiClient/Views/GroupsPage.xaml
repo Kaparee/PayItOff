@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:PayItOff.MauiClient.Controls"
              xmlns:vm="clr-namespace:PayItOff.MauiClient.ViewModels"
-             xmlns:models="using:PayItOff.Shared.Responses"
+             xmlns:models="clr-namespace:PayItOff.Shared.Responses;assembly=PayItOff.Shared"
              x:Class="PayItOff.MauiClient.Views.GroupsPage"
              BackgroundColor="{StaticResource MainBackground}"
              Shell.NavBarIsVisible="False"
@@ -35,17 +35,6 @@
                         <Image Source="phone_menu_icon.png" WidthRequest="28" HeightRequest="28" VerticalOptions="Center"/>
                     </HorizontalStackLayout>
                 </Grid>
-
-
-                <Border Grid.Row="1" HorizontalOptions="End" VerticalOptions="Center"
-                        StrokeShape="RoundRectangle 20" BackgroundColor="Transparent"
-                        Stroke="#444" StrokeThickness="1" WidthRequest="{OnIdiom Phone='350', Default='320'}" HeightRequest="40" Padding="15,0">
-                    <SearchBar Placeholder="Wpisz szukaną grupę..."
-                               PlaceholderColor="#666" TextColor="White" FontSize="14"
-                               VerticalOptions="Center" BackgroundColor="Transparent"
-                               Text="{Binding SearchQuery}" CancelButtonColor="{StaticResource TextSubtle}"
-                               Margin="-10,0,0,0"/>
-                </Border>
 
                 <BoxView Grid.Row="2" HeightRequest="1" Color="{StaticResource Border}" Opacity="0.5" Margin="{OnIdiom Phone='-15,0', Default='-40,0'}"/>
 
@@ -142,29 +131,45 @@
                 </ScrollView>
 
 
-                <Border Grid.Row="1"
-                        IsVisible="{Binding IsInviteListButtonVisible}"
-                        HorizontalOptions="Start"
-                        VerticalOptions="Center"
-                        Margin="0"
-                        WidthRequest="160"
-                        HeightRequest="60"
-                        StrokeShape="RoundRectangle 30"
-                        BackgroundColor= "Transparent"
-                        Stroke="{StaticResource StatusGreen}"
-                        StrokeThickness="1"
-                        ZIndex="10">
-                    <Border.Shadow>
-                        <Shadow Brush="Black" Offset="0,4" Radius="10" Opacity="0.5"/>
-                    </Border.Shadow>
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding ShowInvitationPopupCommand}"/>
-                    </Border.GestureRecognizers>
-                    <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10" HorizontalOptions="Center" VerticalOptions="Center">
-                        <Image Grid.Column="0" Source="add_friend_to_group_icon.png" WidthRequest="{OnIdiom Phone=22, Default=28}" HeightRequest="{OnIdiom Phone=22, Default=28}" VerticalOptions="Center"/>
-                        <Label Grid.Column="1" Text="Nowe zaproszenia!" TextColor="{StaticResource StatusGreen}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
-                    </Grid>
-                </Border>
+                <Grid Grid.Row="1"
+                      ColumnDefinitions="{OnIdiom Phone='Auto, *', Default='Auto, Auto'}"
+                      ColumnSpacing="15"
+                      HorizontalOptions="{OnIdiom Phone='Fill', Default='End'}">
+                    <Border Grid.Column="0"
+                                IsVisible="{Binding IsInviteListButtonVisible}"
+                                HorizontalOptions="Start"
+                                VerticalOptions="Center"
+                                Margin="0"
+                                WidthRequest="180"
+                                HeightRequest="40"
+                                StrokeShape="RoundRectangle 30"
+                                BackgroundColor= "Transparent"
+                                Stroke="{StaticResource StatusGreen}"
+                                StrokeThickness="1"
+                                ZIndex="10">
+                        <Border.Shadow>
+                            <Shadow Brush="Black" Offset="0,4" Radius="10" Opacity="0.5"/>
+                        </Border.Shadow>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ShowInvitationPopupCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Image Grid.Column="0" Source="add_friend_to_group_icon.png" WidthRequest="{OnIdiom Phone=22, Default=28}" HeightRequest="{OnIdiom Phone=22, Default=28}" VerticalOptions="Center"/>
+                            <Label Grid.Column="1" Text="Nowe zaproszenia!" TextColor="{StaticResource StatusGreen}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
+                        </Grid>
+                    </Border>
+                    <Border Grid.Column="1" HorizontalOptions="Fill" VerticalOptions="Center"
+                        WidthRequest="{OnIdiom Phone='-1', Default='320'}"
+                        StrokeShape="RoundRectangle 20" BackgroundColor="Transparent"
+                        Stroke="#444" StrokeThickness="1" HeightRequest="40" Padding="15,0">
+                        <SearchBar Placeholder="Wpisz szukaną grupę..."
+                               PlaceholderColor="#666" TextColor="White" FontSize="14"
+                               VerticalOptions="Center" BackgroundColor="Transparent"
+                               Text="{Binding SearchQuery}" CancelButtonColor="{StaticResource TextSubtle}"
+                               Margin="-10,0,0,0"/>
+                    </Border>
+                </Grid>
+
 
                 <Border Grid.Row="3"
                         IsVisible="{OnIdiom Phone=True, Default=False}"
@@ -196,12 +201,12 @@
 
 
                     <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
-                        <Border StrokeShape="RoundRectangle 10" Stroke="#7F00FF" StrokeThickness="2" HeightRequest="120" WidthRequest="120" HorizontalOptions="Center">
+                        <Border Stroke="#7F00FF" StrokeThickness="2" HeightRequest="120" WidthRequest="120" HorizontalOptions="Center">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding PickPhotoCommand}" />
                             </Border.GestureRecognizers>
                             <Border.StrokeShape>
-                                <RoundRectangle />
+                                <RoundRectangle CornerRadius="60" />
                             </Border.StrokeShape>
                             <Grid>
                                 <BoxView Color="#2B2B3D" />

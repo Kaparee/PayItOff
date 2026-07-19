@@ -17,7 +17,7 @@ public class GroupMemberService
     {
         try
         {
-            return await _httpClient.GetFromJsonAsync<List<GroupPendingInvitationResponse>>("GroupMember/all-pending-invitation");
+            return await _httpClient.GetFromJsonAsync<List<GroupPendingInvitationResponse>>($"GroupMember/all-pending-invitation?t={DateTime.UtcNow.Ticks}");
         }
         catch
         {
@@ -29,7 +29,7 @@ public class GroupMemberService
     {
         try
         {
-            return await _httpClient.GetFromJsonAsync<List<GroupMemberResponse>>($"GroupMember/{groupId}/all-group-members");
+            return await _httpClient.GetFromJsonAsync<List<GroupMemberResponse>>($"GroupMember/{groupId}/all-group-members?t={DateTime.UtcNow.Ticks}");
         }
         catch
         {

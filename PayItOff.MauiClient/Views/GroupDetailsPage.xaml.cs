@@ -21,7 +21,17 @@ public partial class GroupDetailsPage : ContentPage, IQueryAttributable
         base.OnNavigatedTo(args);
         if (BindingContext is GroupDetailsViewModel vm && vm.GroupId > 0)
         {
+            vm.SubscribeToEvents();
             _ = vm.LoadDataAsync();
+        }
+    }
+
+    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    {
+        base.OnNavigatedFrom(args);
+        if (BindingContext is GroupDetailsViewModel vm)
+        {
+            vm.UnsubscribeFromEvents();
         }
     }
 

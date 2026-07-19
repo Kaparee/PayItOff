@@ -22,7 +22,7 @@ public class GroupService
 
     public async Task<GroupDetailsResponse?> GetGroupDetails(int groupId)
     {
-        var response = await _httpClient.GetAsync($"Group/{groupId}/details");
+        var response = await _httpClient.GetAsync($"Group/{groupId}/details?t={DateTime.UtcNow.Ticks}");
         if (response.IsSuccessStatusCode)
         {
             return await response.Content.ReadFromJsonAsync<GroupDetailsResponse>(_options);
@@ -32,7 +32,7 @@ public class GroupService
 
     public async Task<List<GroupInfoResponse>> GetUserGroups()
     {
-        var response = await _httpClient.GetAsync("Group/groups");
+        var response = await _httpClient.GetAsync($"Group/groups?t={DateTime.UtcNow.Ticks}");
         return response.IsSuccessStatusCode
             ? await response.Content.ReadFromJsonAsync<List<GroupInfoResponse>>(_options) ?? []
             : [];

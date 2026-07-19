@@ -20,7 +20,18 @@ public partial class MainPage : ContentPage
 
         if (_viewModel != null)
         {
+            _viewModel.SubscribeToEvents();
             await _viewModel.LoadDashboardDataAsync();
+        }
+    }
+
+    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    {
+        base.OnNavigatedFrom(args);
+
+        if (_viewModel != null)
+        {
+            _viewModel.UnsubscribeFromEvents();
         }
     }
 }

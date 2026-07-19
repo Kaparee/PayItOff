@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:PayItOff.MauiClient.ViewModels"
              xmlns:controls="clr-namespace:PayItOff.MauiClient.Controls"
-             xmlns:dto="using:PayItOff.Shared.Responses"
+             xmlns:dto="clr-namespace:PayItOff.Shared.Responses;assembly=PayItOff.Shared"
              x:Class="PayItOff.MauiClient.Views.GroupDetailsPage"
              x:DataType="vm:GroupDetailsViewModel"
              BackgroundColor="{StaticResource MainBackground}"
@@ -16,7 +16,7 @@
             <ScrollView Grid.Column="1" VerticalScrollBarVisibility="Always">
                 <VerticalStackLayout Padding="{OnIdiom Phone='15', Default='30'}" Spacing="18">
 
-                    
+
                     <Grid Grid.Row="0" ColumnDefinitions="Auto, *" IsVisible="{OnIdiom Phone=True, Default=False}" Margin="{OnPlatform iOS='0,40,0,0', Android='0,25,0,0', Default='0,10,0,0'}">
                         <HorizontalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
                             <Image Source="payitoff_logo_img.png" WidthRequest="32" HeightRequest="32" VerticalOptions="Center" />
@@ -32,10 +32,10 @@
                         </HorizontalStackLayout>
                     </Grid>
 
-                    
+
                     <Grid ColumnDefinitions="Auto, *, Auto" VerticalOptions="Center">
 
-                        
+
                         <HorizontalStackLayout Grid.Column="0" Grid.ColumnSpan="2" Spacing="15" VerticalOptions="Center">
                             <HorizontalStackLayout.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding GoBackCommand}" />
@@ -46,7 +46,7 @@
                             <Label Text="{Binding RoleSubtitle}" TextColor="{StaticResource TextMain}" FontSize="{OnIdiom Phone=16, Default=24}" FontAttributes="Bold" VerticalOptions="Center" MaxLines="1" LineBreakMode="TailTruncation"/>
                         </HorizontalStackLayout>
 
-                        
+
                         <HorizontalStackLayout Grid.Column="2" Spacing="{OnIdiom Phone=10, Default=20}" VerticalOptions="Center" IsVisible="{Binding IsNotArchived}">
                             <HorizontalStackLayout Spacing="6" IsVisible="{Binding IsAdminOrFounder}">
                                 <HorizontalStackLayout.GestureRecognizers>
@@ -94,20 +94,20 @@
                         </HorizontalStackLayout>
                     </Grid>
 
-                    
-                    
-                    
+
+
+
                     <Border StrokeShape="RoundRectangle 24" BackgroundColor="{StaticResource SurfaceDark}"
                             Padding="0" StrokeThickness="0">
                         <VerticalStackLayout Spacing="0">
 
-                            
+
                             <Grid Padding="{OnIdiom Phone='15,20', Default='30,24'}" ColumnDefinitions="{OnIdiom Phone='*', Default='*, Auto'}" RowDefinitions="{OnIdiom Phone='Auto, Auto', Default='*'}" ColumnSpacing="20" RowSpacing="15">
                                 <Label Grid.Row="0" Grid.Column="0" Text="{Binding GroupName}"
                                        FontSize="{OnIdiom Phone=32, Default=46}" FontAttributes="Bold"
                                        TextColor="White" LineBreakMode="TailTruncation"
                                        VerticalOptions="Center" HorizontalOptions="Start"/>
-                                
+
                                 <Border Grid.Row="{OnIdiom Phone=1, Default=0}" Grid.Column="{OnIdiom Phone=0, Default=1}"
                                         StrokeShape="RoundRectangle 20"
                                         BackgroundColor="#0A000000"
@@ -133,17 +133,26 @@
                                                 <VerticalStackLayout.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GroupDetailsViewModel}}, Path=ShowMemberDetailsCommand}" CommandParameter="{Binding .}" />
                                                 </VerticalStackLayout.GestureRecognizers>
-                                                
-                                                <Border HeightRequest="64" WidthRequest="64"
+
+                                                <Grid HorizontalOptions="Center" HeightRequest="64" WidthRequest="64">
+                                                    <Border HeightRequest="64" WidthRequest="64"
                                                         StrokeShape="RoundRectangle 32" StrokeThickness="2"
                                                         Stroke="#7F00FF"
-                                                        BackgroundColor="#1E232D"
-                                                        HorizontalOptions="Center">
-                                                    <Grid>
-                                                        <Image Source="default_user_avatar.png" Aspect="AspectFill" IsVisible="{Binding AvatarUrl, Converter={StaticResource InverseStringNullOrEmptyConverter}}" />
-                                                        <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
-                                                    </Grid>
-                                                </Border>
+                                                        BackgroundColor="#1E232D">
+                                                        <Grid>
+                                                            <Image Source="default_user_avatar.png" Aspect="AspectFill" IsVisible="{Binding AvatarUrl, Converter={StaticResource InverseStringNullOrEmptyConverter}}" />
+                                                            <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <Border HeightRequest="16" WidthRequest="16"
+                                                        StrokeShape="RoundRectangle 8"
+                                                        BackgroundColor="{StaticResource StatusGreen}"
+                                                        Stroke="#1E232D" StrokeThickness="2"
+                                                        HorizontalOptions="End" VerticalOptions="End"
+                                                        TranslationX="-2" TranslationY="-2"
+                                                        IsVisible="{Binding IsOnline}" />
+                                                </Grid>
                                                 <Label Text="{Binding FullName}"
                                                        FontSize="11" TextColor="White"
                                                        HorizontalOptions="Center" HorizontalTextAlignment="Center"
@@ -156,7 +165,7 @@
                         </VerticalStackLayout>
                     </Border>
 
-                    
+
                     <Border StrokeShape="RoundRectangle 28" BackgroundColor="#7F00FF" Padding="0"
                             StrokeThickness="0" HeightRequest="56" WidthRequest="400" HorizontalOptions="Center" Margin="0,10"
                             IsVisible="{Binding IsNotArchived}">
@@ -169,14 +178,14 @@
                         </HorizontalStackLayout>
                     </Border>
 
-                    
-                    
-                    
+
+
+
                     <Border StrokeShape="RoundRectangle 24" BackgroundColor="{StaticResource SurfaceDark}"
                             Padding="0" StrokeThickness="0" Margin="0,0,0,40">
                         <VerticalStackLayout Spacing="0">
 
-                            
+
                             <VerticalStackLayout Padding="30,24" Spacing="16">
                                 <Label Text="Lista Transakcji"
                                        FontSize="28" FontAttributes="Bold"
@@ -189,7 +198,7 @@
                                         </Border.GestureRecognizers>
                                         <Label Text="Zmień widok" TextColor="White" FontSize="14" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="Center" Padding="20,0"/>
                                     </Border>
-                                    
+
                                     <Border Grid.Column="1"
                                             StrokeShape="RoundRectangle 20"
                                             BackgroundColor="#0A000000"
@@ -205,11 +214,11 @@
                                     </Border>
                                 </Grid>
                             </VerticalStackLayout>
-                            
-                            
+
+
                             <BoxView HeightRequest="1" Color="#11FFFFFF" Margin="30,0" />
 
-                            
+
                             <!-- WERSJA DLA TELEFONÓW (SZYBKA, BEZ FLEXLAYOUT I BEZ COLLECTIONVIEW KTÓRE WYWALA BŁĘDY NA DESKTOPIE) -->
                             <VerticalStackLayout BindableLayout.ItemsSource="{Binding TransactionSections}" Spacing="15" Margin="30,15,30,30" IsVisible="{OnIdiom Phone=True, Default=False}">
                                 <BindableLayout.ItemTemplate>
@@ -280,7 +289,7 @@
             </ScrollView>
         </Grid>
 
-        
+
         <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsMenuVisible}"
               BackgroundColor="#CC121212" ZIndex="100">
             <Grid.GestureRecognizers>
@@ -289,7 +298,7 @@
             <controls:SidebarMenu HorizontalOptions="Start" ActiveTab="Groups" WidthRequest="300"/>
         </Grid>
 
-        
+
         <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsBusy}"
               BackgroundColor="#CC121212" ZIndex="450">
             <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="16">
@@ -311,7 +320,7 @@
                 </Border.GestureRecognizers>
                 <VerticalStackLayout Spacing="20">
                     <Label Text="Edytuj grupę" FontSize="22" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
-                    
+
                     <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
                         <Border StrokeShape="RoundRectangle 10" Stroke="#7F00FF" StrokeThickness="2" HeightRequest="120" WidthRequest="120" HorizontalOptions="Center">
                             <Border.GestureRecognizers>
@@ -328,7 +337,7 @@
                         </Border>
                         <Label Text="Kliknij, aby zmienić zdjęcie" TextColor="#7F00FF" FontSize="12" HorizontalOptions="Center" />
                     </VerticalStackLayout>
-                    
+
                     <Entry Placeholder="Nazwa grupy" Text="{Binding NewGroupName}" PlaceholderColor="#888" TextColor="White" BackgroundColor="#2A303C" />
 
                     <Grid ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,10,0,0">
@@ -348,7 +357,7 @@
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer />
                 </Border.GestureRecognizers>
-                
+
                 <ScrollView>
                     <VerticalStackLayout Spacing="25">
                         <Label Text="Zarządzaj członkami" FontSize="22" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
@@ -356,7 +365,7 @@
                         <!-- SEKCJA: Szybkie zapraszanie znajomych -->
                         <VerticalStackLayout Spacing="10">
                             <Label Text="Szybko zaproś znajomych" FontSize="14" TextColor="{StaticResource TextSubtle}" FontAttributes="Bold"/>
-                            
+
                             <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Default">
                                 <HorizontalStackLayout BindableLayout.ItemsSource="{Binding FriendsList}" Spacing="15" Padding="0,0,0,15">
                                     <BindableLayout.EmptyView>
@@ -368,7 +377,7 @@
                                                 <VerticalStackLayout.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding BindingContext.InviteFriendCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}"/>
                                                 </VerticalStackLayout.GestureRecognizers>
-                                                
+
                                                 <Grid WidthRequest="60" HeightRequest="60">
                                                     <Border WidthRequest="60" HeightRequest="60" StrokeShape="RoundRectangle 30" StrokeThickness="2" Stroke="#333" BackgroundColor="#2A303C">
                                                         <Grid>
@@ -377,7 +386,7 @@
                                                         </Grid>
                                                     </Border>
                                                     <!-- Ikonka plusa -->
-                                                    <Border StrokeShape="RoundRectangle 10" WidthRequest="20" HeightRequest="20" BackgroundColor="{StaticResource StatusGreen}" StrokeThickness="0" 
+                                                    <Border StrokeShape="RoundRectangle 10" WidthRequest="20" HeightRequest="20" BackgroundColor="{StaticResource StatusGreen}" StrokeThickness="0"
                                                             HorizontalOptions="End" VerticalOptions="End" TranslationX="2" TranslationY="2">
                                                         <Image Source="plus_icon.png" WidthRequest="12" HeightRequest="12" HorizontalOptions="Center" VerticalOptions="Center"/>
                                                     </Border>
@@ -402,7 +411,7 @@
                         <!-- SEKCJA: Lista obecnych członków -->
                         <VerticalStackLayout Spacing="10">
                             <Label Text="Obecni członkowie grupy" FontSize="14" TextColor="{StaticResource TextSubtle}" FontAttributes="Bold"/>
-                            
+
                             <VerticalStackLayout BindableLayout.ItemsSource="{Binding ActiveMembersList}" Spacing="10" Padding="0,0,15,0">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="dto:GroupMemberResponse">
@@ -414,7 +423,7 @@
                                                         <Image Source="{Binding AvatarUrl}" Aspect="AspectFill"/>
                                                     </Grid>
                                                 </Border>
-                                                
+
                                                 <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                                                     <Label Text="{Binding FullName}" FontSize="14" FontAttributes="Bold" TextColor="White" LineBreakMode="TailTruncation"/>
                                                     <Label Text="{Binding Role}" FontSize="10" TextColor="{StaticResource StatusGreen}" FontAttributes="Bold"/>
@@ -451,15 +460,15 @@
             <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="450" HorizontalOptions="Center" VerticalOptions="Center">
                 <VerticalStackLayout Spacing="20">
                     <Label Text="Szczegóły transakcji" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
-                    
+
                     <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto, Auto" RowSpacing="15" ColumnSpacing="15">
-                        
+
                         <!-- Nazwa & Kategoria -->
                         <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="4">
                             <Label Text="Nazwa" TextColor="{StaticResource TextSubtle}" FontSize="12"/>
                             <Label Text="{Binding SelectedExpenseDetails.Title}" TextColor="{StaticResource TextMain}" FontSize="15" FontAttributes="Bold"/>
                         </VerticalStackLayout>
-                        
+
                         <VerticalStackLayout Grid.Row="0" Grid.Column="1" Spacing="4">
                             <Label Text="Kategoria" TextColor="{StaticResource TextSubtle}" FontSize="12"/>
                             <Label Text="{Binding SelectedExpenseDetails.Category}" TextColor="{StaticResource TextMain}" FontSize="15" FontAttributes="Bold"/>
@@ -487,7 +496,7 @@
                                         <Image Source="{Binding SelectedExpenseDetails.PayerAvatarUrl}" Aspect="AspectFill" />
                                     </Grid>
                                 </Border>
-                                
+
                                 <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                                     <Label Text="{Binding SelectedExpenseDetails.PayerName}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource TextMain}"/>
                                     <Label Text="{Binding SelectedExpenseDetails.PayerPhoneNumber}" FontSize="12" TextColor="{StaticResource TextSubtle}">
@@ -552,7 +561,7 @@
                     <BoxView HeightRequest="1" Color="{StaticResource Border}" Margin="0,5"/>
 
                     <Label Text="Podział kosztów" FontSize="14" TextColor="{StaticResource TextSubtle}" Margin="0,0,0,-5"/>
-                    
+
                     <ScrollView MaximumHeightRequest="180">
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding SelectedExpenseDetails.Participants}" Spacing="10" Padding="0,0,15,0">
                             <BindableLayout.ItemTemplate>
@@ -660,11 +669,11 @@
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer />
                 </Border.GestureRecognizers>
-                
+
                 <Grid RowDefinitions="Auto, *, Auto" RowSpacing="20">
                     <VerticalStackLayout Grid.Row="0" Spacing="15">
                         <Label Text="Edytuj Wydatek" FontSize="22" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
-                        
+
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
                             <VerticalStackLayout Grid.Column="0" Spacing="8">
                                 <Label Text="Nazwa" TextColor="{StaticResource TextSubtle}" FontSize="12"/>
@@ -675,7 +684,7 @@
                                 <Entry Text="{Binding EditExpenseCategory}" PlaceholderColor="#888" TextColor="White" BackgroundColor="#2A303C" />
                             </VerticalStackLayout>
                         </Grid>
-                        
+
                         <VerticalStackLayout Spacing="8">
                             <Label Text="Łączna kwota wydatku" TextColor="{StaticResource TextSubtle}" FontSize="12"/>
                             <Entry Text="{Binding EditExpenseTotalAmount, Mode=TwoWay}" Keyboard="Numeric" TextColor="White" BackgroundColor="#2A303C" />
@@ -683,7 +692,7 @@
 
                         <Grid ColumnDefinitions="*,Auto" Margin="0,5,0,0">
                             <Label Grid.Column="0" Text="Podział" FontSize="16" FontAttributes="Bold" TextColor="White" VerticalOptions="Center"/>
-                            <Label Grid.Column="1" Text="{Binding RemainingAmountToSplit, StringFormat='Pozostało: {0:N2} zł'}" 
+                            <Label Grid.Column="1" Text="{Binding RemainingAmountToSplit, StringFormat='Pozostało: {0:N2} zł'}"
                                    FontSize="14" FontAttributes="Bold" VerticalOptions="Center" TextColor="{StaticResource StatusRed}">
                                 <Label.Triggers>
                                     <DataTrigger TargetType="Label" Binding="{Binding RemainingAmountToSplit}" Value="0">
@@ -693,7 +702,7 @@
                             </Label>
                         </Grid>
                     </VerticalStackLayout>
-                    
+
                     <ScrollView Grid.Row="1">
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding EditExpenseSplits}" Spacing="10" Padding="0,0,15,0">
                             <BindableLayout.ItemTemplate>
@@ -775,7 +784,7 @@
                     <TapGestureRecognizer />
                 </Border.GestureRecognizers>
                 <VerticalStackLayout Spacing="0" x:DataType="dto:GroupMemberBalanceDto">
-                    
+
                     <Grid Padding="0,0,0,15" ColumnDefinitions="Auto, *, Auto">
                         <Border Grid.Column="0" HeightRequest="40" WidthRequest="40"
                                 StrokeShape="RoundRectangle 20" StrokeThickness="0"

@@ -25,8 +25,21 @@ public class GroupService : IGroupService
     private readonly IGroupDebtRepository _groupDebtRepository;
     private readonly IExpenseRepository _expenseRepository;
     private readonly IAuditLogRepository _auditLogRepository;
+    private readonly IRealTimeNotificationService _realTimeNotificationService;
 
-    public GroupService(IGroupRepository groupRepository, IUserRepository userRepository, IGroupMemberRepository groupMemberRepository, IUnitOfWork unitOfWork, IValidator<CreateGroupRequest> validator, IJWTService jwtService, IConfiguration configuration, IFileService fileService, IGroupDebtRepository groupDebtRepository, IExpenseRepository expenseRepository, IAuditLogRepository auditLogRepository)
+    public GroupService(
+        IGroupRepository groupRepository,
+        IUserRepository userRepository,
+        IGroupMemberRepository groupMemberRepository,
+        IUnitOfWork unitOfWork,
+        IValidator<CreateGroupRequest> validator,
+        IJWTService jwtService,
+        IConfiguration configuration,
+        IFileService fileService,
+        IGroupDebtRepository groupDebtRepository,
+        IExpenseRepository expenseRepository,
+        IAuditLogRepository auditLogRepository,
+        IRealTimeNotificationService realTimeNotificationService)
     {
         _groupRepository = groupRepository;
         _userRepository = userRepository;
@@ -38,6 +51,7 @@ public class GroupService : IGroupService
         _groupDebtRepository = groupDebtRepository;
         _expenseRepository = expenseRepository;
         _auditLogRepository = auditLogRepository;
+        _realTimeNotificationService = realTimeNotificationService;
     }
     public async Task CreateAsync(CreateGroupRequest request, int userId, IFormFile? avatar)
     {
@@ -154,6 +168,7 @@ public class GroupService : IGroupService
         group.Edit(request.NewName, savedFileName);
         await _groupRepository.UpdateAsync(group);
         await _unitOfWork.SaveChangesAsync();
+        await _realTimeNotificationService.SendGroupUpdateEventAsync(group.Id);
     }
 
     public async Task DeleteGroupAsync(int userId, DeleteGroupRequest request)
@@ -175,6 +190,7 @@ public class GroupService : IGroupService
         group.Delete();
         await _groupRepository.UpdateAsync(group);
         await _unitOfWork.SaveChangesAsync();
+        await _realTimeNotificationService.SendGroupUpdateEventAsync(group.Id);
     }
 
     public async Task<GroupDetailsResponse> GetGroupDetailsAsync(int groupId, int userId)

@@ -17,6 +17,11 @@
 ## HOTFIX
 
 - [x] **Naprawa zdjęć:** Możliwość usunięcia dodanego zdjęcia w rejestracji - ustawianie na default 
+- [ ] **Usunięcie wysłanego zaproszenia** Możliwość usunięcia wysłanego zaproszenia do grupy przez Ownera/Admina
+- [ ] **Naprawa głównego widoku** Naprawienie wyświetlania kategorii płatności w głównym widoku - wyświetla wszystkie kategorie, powinno wyśweitlać tylko te nieopłacone
+- [ ] **Zapamiętaj mnie** Dodanie opcji automatycznego logowania po odpaleniu aplikacji, wyłącza się po wylogowaniu
+- [ ] **Naprawa tokenów** Naprawa błędu z tokenami, które nie wylogowują użytkownika po wygaśnięciu
+- [ ] **Naprawa wskaźnika dostępności** Naprawa błędu z niepoprawnym wyświetlaniem aktywności użytkownika w grupie po wyjsciu w inny sposób niż strzałką wstecz
 
 ## Roadmapa
 

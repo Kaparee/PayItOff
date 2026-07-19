@@ -16,6 +16,13 @@ public partial class WalletPage : ContentPage
     {
         base.OnNavigatedTo(args);
 
+        _viewModel.SubscribeToEvents();
         await _viewModel.LoadDataAsync();
+    }
+
+    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    {
+        base.OnNavigatedFrom(args);
+        _viewModel.UnsubscribeFromEvents();
     }
 }

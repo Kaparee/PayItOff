@@ -23,6 +23,7 @@ public partial class MainViewModel : BaseViewModel
     private readonly SettlementService _settlementService;
     private readonly GroupService _groupService;
     private readonly NotificationService _notificationService;
+    private readonly SignalRService _signalRService;
 
     [ObservableProperty]
     public partial ObservableCollection<DebtDisplayItem> Incomes { get; set; } = new();
@@ -51,11 +52,27 @@ public partial class MainViewModel : BaseViewModel
     [ObservableProperty]
     public required partial string CurrentUserEmail { get; set; }
 
-    public MainViewModel(SettlementService settlementService, GroupService groupService, NotificationService notificationService)
+    public MainViewModel(
+        SettlementService settlementService,
+        GroupService groupService,
+        NotificationService notificationService,
+        SignalRService signalRService
+        )
     {
         _settlementService = settlementService;
         _groupService = groupService;
         _notificationService = notificationService;
+        _signalRService = signalRService;
+    }
+
+    public void SubscribeToEvents()
+    {
+        _signalRService.OnSettlementUpdateReceived += HandleSettlementUpdate;
+    }
+
+    public void UnsubscribeFromEvents()
+    {
+        _signalRService.OnSettlementUpdateReceived -= HandleSettlementUpdate;
     }
 
     public async Task LoadDashboardDataAsync()
@@ -65,10 +82,7 @@ public partial class MainViewModel : BaseViewModel
 
         try
         {
-            var token = await SecureStorage.Default.GetAsync("jwt_token");
-            DebugStatus = string.IsNullOrEmpty(token) ? "Brak Tokena" : "Token OK";
-            DebugColor = string.IsNullOrEmpty(token) ? "#FF4500" : "#00FF7F";
-            CurrentUserEmail = string.IsNullOrEmpty(token) ? "Niezalogowany" : "Zalogowano pomyślnie";
+            if (_signalRService.IsDisconnected) { await _signalRService.StartAsync(); }
 
             var incTask = _settlementService.GetUserAllIncomesSummaryAsync();
             var expTask = _settlementService.GetUserAllExpensesSummaryAsync();
@@ -182,5 +196,13 @@ public partial class MainViewModel : BaseViewModel
     private async Task NavigateToNotifications()
     {
         await Shell.Current.GoToAsync("//NotificationsPage");
+    }
+
+    private void HandleSettlementUpdate()
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await LoadDashboardDataAsync();
+        });
     }
 }

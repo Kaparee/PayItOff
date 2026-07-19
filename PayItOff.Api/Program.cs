@@ -17,6 +17,8 @@ using PayItOff.Infrastructure.Repositories;
 using PayItOff.Infrastructure.Services;
 using PayItOff.Shared.Requests;
 using System.Text;
+using PayItOff.Api.Hubs;
+using PayItOff.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,6 +57,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddOpenApi();
 
+//REPOSITORIES
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();
@@ -67,7 +70,7 @@ builder.Services.AddScoped<ISettlementRepository, SettlementRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 
-
+//SERVICES
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IJWTService, JWTService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -79,7 +82,7 @@ builder.Services.AddScoped<IGroupMemberService, GroupMemberService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ISettlementService, SettlementService>();
-
+builder.Services.AddScoped<IRealTimeNotificationService, SignalRNotificationService>();
 
 builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
 builder.Services.AddScoped<IValidator<CreateGroupRequest>, CreateGroupRequestValidator>();
@@ -93,6 +96,8 @@ builder.Services.AddHangfire(configuration => configuration
     .UsePostgreSqlStorage(c => c.UseNpgsqlConnection(connectionString)));
 
 builder.Services.AddHangfireServer();
+
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -119,6 +124,8 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+
+
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseStaticFiles();
@@ -135,5 +142,7 @@ RecurringJob.AddOrUpdate<IDailySummaryJob>(
 );
 
 app.MapControllers();
+
+app.MapHub<EventHub>("/hubs/notifications");
 
 app.Run();

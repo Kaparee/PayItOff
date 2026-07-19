@@ -8,7 +8,7 @@ using PayItOff.Domain.Interfaces;
 using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
 using System.Data;
-
+using Microsoft.AspNetCore.SignalR;
 namespace PayItOff.Application.Services;
 
 public class GroupMemberService : IGroupMemberService
@@ -19,8 +19,18 @@ public class GroupMemberService : IGroupMemberService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IConfiguration _configuration;
     private readonly INotificationService _notificationService;
+    private readonly IRealTimeNotificationService _realTimeNotificationService;
 
-    public GroupMemberService(IGroupRepository groupRepository, IUserRepository userRepository, IGroupMemberRepository groupMemberRepository, IUnitOfWork unitOfWork, IJWTService jwtService, IConfiguration configuration, INotificationService notificationService)
+    public GroupMemberService(
+        IGroupRepository groupRepository,
+        IUserRepository userRepository,
+        IGroupMemberRepository groupMemberRepository,
+        IUnitOfWork unitOfWork,
+        IJWTService jwtService,
+        IConfiguration configuration,
+        INotificationService notificationService,
+        IRealTimeNotificationService realTimeNotificationService
+        )
     {
         _groupRepository = groupRepository;
         _userRepository = userRepository;
@@ -28,6 +38,7 @@ public class GroupMemberService : IGroupMemberService
         _unitOfWork = unitOfWork;
         _configuration = configuration;
         _notificationService = notificationService;
+        _realTimeNotificationService = realTimeNotificationService;
     }
 
     public async Task InviteUserAsync(int userId, GroupInviteUserRequest request)
@@ -78,6 +89,8 @@ public class GroupMemberService : IGroupMemberService
             await _groupRepository.UpdateAsync(group);
             await _unitOfWork.SaveChangesAsync();
             await _unitOfWork.CommitAsync();
+
+            await _realTimeNotificationService.SendInvitationEventAsync(user.Id);
         }
         catch
         {
@@ -106,6 +119,8 @@ public class GroupMemberService : IGroupMemberService
         await _notificationService.ResolveActionNotificationAsync(userId, invitationId, EntityType.GroupMembers, true);
 
         await _unitOfWork.SaveChangesAsync();
+
+        await _realTimeNotificationService.SendGroupUpdateEventAsync(invitation.GroupId);
     }
     public async Task DeclineInviteAsync(int userId, int invitationId)
     {
@@ -157,6 +172,7 @@ public class GroupMemberService : IGroupMemberService
         await _notificationService.CreateNotificationAsync(targetUser.UserId, userId, NotificationType.Normal, $"Twoja rola w grupie '{group.Name}' została zmieniona przez {actor.User!.FullName} na {request.NewRole.ToString()}", request.GroupId, EntityType.Groups);
         await _groupMemberRepository.UpdateAsync(targetUser);
         await _unitOfWork.SaveChangesAsync();
+        await _realTimeNotificationService.SendGroupUpdateEventAsync(group.Id);
     }
     public async Task SetGroupAsFavoriteAsync(int userId, int groupId)
     {
@@ -184,6 +200,7 @@ public class GroupMemberService : IGroupMemberService
 
         await _groupMemberRepository.UpdateAsync(user);
         await _unitOfWork.SaveChangesAsync();
+        await _realTimeNotificationService.SendUserKickedEventAsync(userId, groupId);
     }
     public async Task KickUserFromGroupAsync(int userId, int groupId, int targetUserId)
     {
@@ -212,6 +229,7 @@ public class GroupMemberService : IGroupMemberService
 
         await _groupMemberRepository.UpdateAsync(targetUser);
         await _unitOfWork.SaveChangesAsync();
+        await _realTimeNotificationService.SendUserKickedEventAsync(targetUserId, groupId);
     }
 
     public async Task<List<GroupPendingInvitationResponse>> GetPendingInvitationsAsync(int userId)
