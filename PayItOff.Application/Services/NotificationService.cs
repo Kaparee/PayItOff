@@ -17,13 +17,20 @@ public class NotificationService : INotificationService
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IConfiguration _configuration;
+    private readonly IRealTimeNotificationService _realTimeNotificationService;
 
-    public NotificationService(INotificationRepository notificationRepository, IUserRepository userRepository, IUnitOfWork unitOfWork, IConfiguration configuration)
+    public NotificationService(
+        INotificationRepository notificationRepository,
+        IUserRepository userRepository,
+        IUnitOfWork unitOfWork,
+        IConfiguration configuration,
+        IRealTimeNotificationService realTimeNotificationService)
     {
         _notificationRepository = notificationRepository;
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _configuration = configuration;
+        _realTimeNotificationService = realTimeNotificationService;
     }
 
     public async Task<List<NotificationResponse>> GetUserNotificationAsync(int userId, List<string> filters)
@@ -124,6 +131,7 @@ public class NotificationService : INotificationService
         }
 
         await _notificationRepository.AddAsync(newNotification);
+        await _realTimeNotificationService.SendSystemNotificationEventAsync(userId);
     }
 
     public async Task<List<NotificationResponse>> GetUserLast5Notifications(int userId)

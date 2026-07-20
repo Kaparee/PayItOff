@@ -68,11 +68,13 @@ public partial class MainViewModel : BaseViewModel
     public void SubscribeToEvents()
     {
         _signalRService.OnSettlementUpdateReceived += HandleSettlementUpdate;
+        _signalRService.OnSystemNotificationEventReceived += HandleNotificationEvent;
     }
 
     public void UnsubscribeFromEvents()
     {
         _signalRService.OnSettlementUpdateReceived -= HandleSettlementUpdate;
+        _signalRService.OnSystemNotificationEventReceived -= HandleNotificationEvent;
     }
 
     public async Task LoadDashboardDataAsync()
@@ -205,4 +207,13 @@ public partial class MainViewModel : BaseViewModel
             await LoadDashboardDataAsync();
         });
     }
+
+    private void HandleNotificationEvent()
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await LoadDashboardDataAsync();
+        });
+    }
+
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using PayItOff.Application.Helpers;
 using PayItOff.Application.Interfaces;
@@ -7,8 +8,8 @@ using PayItOff.Domain.Exceptions;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
+using System.Buffers.Text;
 using System.Data;
-using Microsoft.AspNetCore.SignalR;
 namespace PayItOff.Application.Services;
 
 public class GroupMemberService : IGroupMemberService
@@ -91,6 +92,7 @@ public class GroupMemberService : IGroupMemberService
             await _unitOfWork.CommitAsync();
 
             await _realTimeNotificationService.SendInvitationEventAsync(user.Id);
+            await _realTimeNotificationService.SendGroupUpdateEventAsync(request.GroupId);
         }
         catch
         {
@@ -271,5 +273,48 @@ public class GroupMemberService : IGroupMemberService
     public async Task<bool> IsInviteAlreadyExistsAsync(int groupId, int userId)
     {
         return await _groupMemberRepository.IsInviteAlreadyExistsAsync(groupId, userId);
+    }
+
+    public async Task CancelInviteAsync(int groupId, int targetUserId, int currentUserId)
+    {
+        var currentUser = await _groupMemberRepository.GetMemberAsync(groupId, currentUserId);
+        if (currentUser is null) { throw new UserNotFoundException(); }
+        if (currentUser.Role == GroupMemberRole.Member) { throw new InvalidUserRoleException(); }
+
+        var invitation = await _groupMemberRepository.GetUserGroupInvitationAsync(groupId, targetUserId);
+        if(invitation is null) { throw new InvitationNotFoundException(); }
+
+        var group = await _groupRepository.GetGroupInfoByIdAsync(groupId);
+        if (group == null) { throw new GroupNotFoundException(); }
+
+        invitation.Decline();
+
+        await _groupMemberRepository.UpdateAsync(invitation);
+
+        await _unitOfWork.SaveChangesAsync();
+        await _realTimeNotificationService.SendGroupUpdateEventAsync(groupId);
+    }
+
+    public async Task<List<AllGroupPendingInvitationResponse>> GetAllGroupPendingInvitationsAsync(int groupId, int userId)
+    {
+        var user = await _groupMemberRepository.GetMemberAsync(groupId, userId);
+        if (user is null) { throw new UserNotFoundException(); }
+        if (user.Role == GroupMemberRole.Member) { throw new InvalidUserRoleException(); }
+
+        var group = await _groupRepository.GetGroupInfoByIdAsync(groupId);
+        if (group == null) { throw new GroupNotFoundException(); }
+
+        var invitations = await _groupMemberRepository.GetAllGroupPendingInvitationsAsync(groupId);
+
+        var baseUrl = _configuration["AppUrls:BackendUrl"];
+
+        return invitations.Select(x => new AllGroupPendingInvitationResponse
+        {
+            UserId = x.UserId,
+            AvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, x.User!.AvatarUrl),
+            Name = x.User!.Name,
+            Surname = x.User!.Surname,
+            Nickname = x.User!.Nickname
+        }).ToList();
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -12,5 +12,6 @@ namespace PayItOff.Application.Interfaces
         Task SendSettlementUpdateEventAsync(int user1Id, int user2Id);
         Task SendGroupUpdateEventAsync(int groupId);
         Task SendFriendUpdateEventAsync(int targetUserId);
+        Task SendSystemNotificationEventAsync(int userId);
     }
 }

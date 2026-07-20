@@ -14,6 +14,7 @@ public partial class NotificationsViewModel : PopupViewModelBase
     private readonly FriendService _friendService;
     private readonly GroupMemberService _groupMemberService;
     private readonly SettlementService _settlementService;
+    private readonly SignalRService _signalRService;
 
     [ObservableProperty]
     public partial ObservableCollection<NotificationDisplayItem> Notifications { get; set; } = new();
@@ -22,13 +23,15 @@ public partial class NotificationsViewModel : PopupViewModelBase
         NotificationService notificationService,
         FriendService friendService,
         GroupMemberService groupMemberService,
-        SettlementService settlementService)
+        SettlementService settlementService,
+        SignalRService signalRService)
     {
         _notificationService = notificationService;
         _friendService = friendService;
         _groupMemberService = groupMemberService;
         _settlementService = settlementService;
         IsCustomAlertSupported = true;
+        _signalRService = signalRService;
     }
 
     [ObservableProperty]
@@ -51,6 +54,16 @@ public partial class NotificationsViewModel : PopupViewModelBase
 
     private int _actionRequiredCount;
     public int ActionRequiredCount { get => _actionRequiredCount; set => SetProperty(ref _actionRequiredCount, value); }
+
+    public void SubscribeToEvents()
+    {
+        _signalRService.OnSystemNotificationEventReceived += HandleNotificationEvent;
+    }
+
+    public void UnsubscribeFromEvents()
+    {
+        _signalRService.OnSystemNotificationEventReceived -= HandleNotificationEvent;
+    }
 
     [RelayCommand]
     public void ToggleFilter(string filter)
@@ -299,5 +312,13 @@ public partial class NotificationsViewModel : PopupViewModelBase
         SummaryPopupContent = string.Empty;
         SummaryLines = new();
         OnPropertyChanged(nameof(SummaryLines));
+    }
+
+    public void HandleNotificationEvent()
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await LoadNotificationsAsync();
+        });
     }
 }

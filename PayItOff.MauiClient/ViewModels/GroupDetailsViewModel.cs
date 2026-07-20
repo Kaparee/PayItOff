@@ -106,6 +106,20 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     public decimal RemainingAmountToSplit => EditExpenseTotalAmount - EditExpenseSplits.Sum(s => s.OwedAmount);
 
     public ObservableCollection<GroupMemberResponse> ActiveMembersList { get; } = new();
+    public ObservableCollection<GroupMemberResponse> FilteredActiveMembersList { get; } = new();
+
+    private string _popupMembersSearchText = string.Empty;
+    public string PopupMembersSearchText
+    {
+        get => _popupMembersSearchText;
+        set
+        {
+            if (SetProperty(ref _popupMembersSearchText, value))
+            {
+                ApplyPopupMemberFilter();
+            }
+        }
+    }
 
     public ObservableCollection<FriendListResponse> FriendsList { get; } = new();
     public ObservableCollection<GroupMemberBalanceDto> FilteredMembers { get; } = new();
@@ -113,6 +127,14 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
 
     private readonly HashSet<int> _onlineUsers = new();
 
+    [ObservableProperty]
+    public partial ObservableCollection<AllGroupPendingInvitationResponse> PendingInvitations { get; set; } = new();
+
+    [ObservableProperty]
+    public partial int PendingInvitationsCount { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsPendingInvitationsPopupVisible { get; set; }
 
     public bool IsAdminOrFounder => UserRole is "Owner" or "Admin";
     public bool IsOwner => UserRole == "Owner";
@@ -468,28 +490,10 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     {
         IsBusy = true;
 
-        var friendsTask = _friendService.GetUserFriendListAsync();
         var membersTask = _groupMemberService.GetAllActiveGroupMembersAsync(GroupId);
-
-        await Task.WhenAll(friendsTask, membersTask);
-
-        FriendsList.Clear();
-        if (friendsTask.Result != null)
-        {
-            foreach (var friend in friendsTask.Result)
-            {
-                var result = await _groupMemberService.IsUserAlreadyInvitedAsync(GroupId, friend.FriendId);
-                if (result == false && !FilteredMembers.Any(m => m.UserId == friend.FriendId))
-                {
-                    friend.AvatarUrl = friend.AvatarUrl;
-                    FriendsList.Add(friend);
-                } else
-                {
-                    continue;
-                }
-
-            }
-        }
+        await LoadFriendsListAsync();
+        
+        await membersTask;
 
         ActiveMembersList.Clear();
         if (membersTask.Result != null)
@@ -501,8 +505,56 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
             }
         }
 
+        PopupMembersSearchText = string.Empty;
+        ApplyPopupMemberFilter();
+
         IsBusy = false;
         IsManageMembersPopupVisible = true;
+    }
+
+    private async Task LoadFriendsListAsync()
+    {
+        var friendsTask = _friendService.GetUserFriendListAsync();
+        await friendsTask;
+
+        FriendsList.Clear();
+        if (friendsTask.Result != null)
+        {
+            foreach (var friend in friendsTask.Result)
+            {
+                var result = await _groupMemberService.IsUserAlreadyInvitedAsync(GroupId, friend.FriendId);
+                if (result == false && !FilteredMembers.Any(m => m.UserId == friend.FriendId))
+                {
+                    friend.AvatarUrl = friend.AvatarUrl;
+                    FriendsList.Add(friend);
+                } 
+            }
+        }
+    }
+
+    private void ApplyPopupMemberFilter()
+    {
+        FilteredActiveMembersList.Clear();
+        
+        if (string.IsNullOrWhiteSpace(PopupMembersSearchText))
+        {
+            foreach (var member in ActiveMembersList)
+            {
+                FilteredActiveMembersList.Add(member);
+            }
+        }
+        else
+        {
+            var lowerQuery = PopupMembersSearchText.ToLowerInvariant();
+            var filtered = ActiveMembersList.Where(m => 
+                (m.FullName != null && m.FullName.ToLowerInvariant().Contains(lowerQuery)) ||
+                (m.Email != null && m.Email.ToLowerInvariant().Contains(lowerQuery)));
+
+            foreach (var member in filtered)
+            {
+                FilteredActiveMembersList.Add(member);
+            }
+        }
     }
 
     [RelayCommand]
@@ -643,6 +695,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
                         m.AvatarUrl = m.AvatarUrl;
                         ActiveMembersList.Add(m);
                     }
+                    ApplyPopupMemberFilter();
                 }
             }
         }
@@ -663,6 +716,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         if (success)
         {
             ActiveMembersList.Remove(member);
+            ApplyPopupMemberFilter();
             await LoadDataAsync();
         }
         IsBusy = false;
@@ -724,6 +778,16 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
             SyncOnlineStatus();
             ApplyMemberFilter();
             ApplyTransactionFilter();
+
+            if (IsManageMembersPopupVisible)
+            {
+                await LoadFriendsListAsync();
+            }
+
+            if (IsAdminOrFounder)
+            {
+                await LoadPendingInvitationsAsync();
+            }
         }
         finally
         {
@@ -913,11 +977,64 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         });
     }
 
+    private async Task LoadPendingInvitationsAsync()
+    {
+        var invites = await _groupMemberService.GetAllGroupPendingInvitationsAsync(GroupId);
+        PendingInvitations.Clear();
+        if (invites != null)
+        {
+            foreach (var invite in invites)
+                PendingInvitations.Add(invite);
+        }
+        PendingInvitationsCount = PendingInvitations.Count;
+    }
+
     private void SyncOnlineStatus()
     {
         foreach (var member in _loadedMembers)
         {
             member.IsOnline = _onlineUsers.Contains(member.UserId);
+        }
+    }
+
+    [RelayCommand]
+    private void ShowPendingInvitations()
+    {
+        IsPendingInvitationsPopupVisible = true;
+    }
+
+    [RelayCommand]
+    private void HidePendingInvitations()
+    {
+        IsPendingInvitationsPopupVisible = false;
+    }
+
+    [RelayCommand]
+    private async Task CancelInviteAsync(AllGroupPendingInvitationResponse item)
+    {
+        if (item == null) return;
+
+        IsBusy = true;
+        try
+        {
+            var success = await _groupMemberService.CancelInviteAsync(GroupId, item.UserId);
+            if (success)
+            {
+                PendingInvitations.Remove(item);
+                PendingInvitationsCount = PendingInvitations.Count;
+                if (PendingInvitationsCount == 0)
+                {
+                    IsPendingInvitationsPopupVisible = false;
+                }
+            }
+            else
+            {
+                await ShowAlertAsync("Błąd", "Nie udało się usunąć zaproszenia.", "OK");
+            }
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 }

@@ -62,7 +62,7 @@ namespace PayItOff.Domain.Entities
             }
             else
             {
-                throw new Exception("Tu bÄ™dzie exception dla zÅ‚ego statusu akceptu");
+                throw new Exception("Tu bêdzie exception dla z³ego statusu akceptu");
             }
         }
 
@@ -77,7 +77,7 @@ namespace PayItOff.Domain.Entities
             }
             else
             {
-                throw new Exception("Tu bÄ™dzie exception dla zÅ‚ego statusu declined");
+                throw new Exception("Tu bêdzie exception dla z³ego statusu declined");
             }
         }
 
@@ -90,7 +90,7 @@ namespace PayItOff.Domain.Entities
             }
             else
             {
-                throw new Exception("Tu bÄ™dzie exception dla zÅ‚ego statusu role");
+                throw new Exception("Tu bêdzie exception dla z³ego statusu role");
             }
         }
 
@@ -110,7 +110,7 @@ namespace PayItOff.Domain.Entities
             }
             else
             {
-                throw new Exception("Tu bÄ™dzie exception dla zÅ‚ego statusu role albo Å¼e ma sie ownera");
+                throw new Exception("Tu bêdzie exception dla z³ego statusu role albo ¿e ma sie ownera");
             }
         }
 
@@ -124,7 +124,7 @@ namespace PayItOff.Domain.Entities
             }
             else
             {
-                throw new Exception("Tu bÄ™dzie exception dla zÅ‚ego statusu");
+                throw new Exception("Tu bêdzie exception dla z³ego statusu");
             }
         }
 

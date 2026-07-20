@@ -15,5 +15,7 @@ namespace PayItOff.Application.Interfaces
         Task<List<GroupPendingInvitationResponse>> GetPendingInvitationsAsync(int userId);
         Task<List<GroupMemberResponse>> GetAllActiveGroupMembersAsync(int groupId);
         Task<bool> IsInviteAlreadyExistsAsync(int groupId, int userId);
+        Task CancelInviteAsync(int groupId, int targetUserId, int currentUserId);
+        Task<List<AllGroupPendingInvitationResponse>> GetAllGroupPendingInvitationsAsync(int groupId, int userId);
     }
 }

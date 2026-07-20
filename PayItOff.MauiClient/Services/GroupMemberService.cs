@@ -1,3 +1,4 @@
+using PayItOff.Domain.Entities;
 using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
 using System.Net.Http.Json;
@@ -85,5 +86,23 @@ public class GroupMemberService
             return await response.Content.ReadFromJsonAsync<bool>();
         }
         return false;
+    }
+
+    public async Task<List<AllGroupPendingInvitationResponse>?> GetAllGroupPendingInvitationsAsync(int groupId)
+    {
+        try
+        {
+            return await _httpClient.GetFromJsonAsync<List<AllGroupPendingInvitationResponse>>($"GroupMember/{groupId}/all-invites?t={DateTime.UtcNow.Ticks}");
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public async Task<bool> CancelInviteAsync(int groupId, int userId)
+    {
+        var response = await _httpClient.DeleteAsync($"GroupMember/{groupId}/invites/{userId}");
+        return response.IsSuccessStatusCode;
     }
 }

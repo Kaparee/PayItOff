@@ -3,6 +3,7 @@ using PayItOff.Domain.Entities;
 using PayItOff.Domain.Enums;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Infrastructure.Persistence;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PayItOff.Infrastructure.Repositories;
 
@@ -80,5 +81,20 @@ public class GroupMemberRepository : IGroupMemberRepository
         return await _context.GroupMembers
             .Where(x => x.GroupId == groupId && x.UserId == userId && x.Status == GroupMemberStatus.Pending)
             .AnyAsync();
+    }
+
+    public async Task<GroupMember?> GetUserGroupInvitationAsync(int groupId, int userId)
+    {
+        return await _context.GroupMembers
+            .Where(x => x.GroupId == groupId && x.UserId == userId && x.Status == GroupMemberStatus.Pending)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<List<GroupMember>> GetAllGroupPendingInvitationsAsync(int groupId)
+    {
+        return await _context.GroupMembers
+            .Include(x => x.User)
+            .Where(x => x.GroupId == groupId && x.Status == GroupMemberStatus.Pending)
+            .ToListAsync();
     }
 }

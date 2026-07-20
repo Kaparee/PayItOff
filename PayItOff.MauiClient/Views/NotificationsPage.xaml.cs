@@ -16,7 +16,18 @@ public partial class NotificationsPage : ContentPage
 
         if (BindingContext is NotificationsViewModel vm)
         {
+            vm.SubscribeToEvents();
             await vm.LoadNotificationsAsync();
+        }
+    }
+
+    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    {
+        base.OnNavigatedFrom(args);
+
+        if (BindingContext is NotificationsViewModel vm)
+        {
+            vm.UnsubscribeFromEvents();
         }
     }
 }

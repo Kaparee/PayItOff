@@ -13,4 +13,6 @@ public interface IGroupMemberRepository
     Task<List<GroupMember>> GetPendingInvitationsByUserIdAsync(int userId);
     Task<List<GroupMember>> GetAllActiveGroupMembersAsync(int groupId);
     Task<bool> IsInviteAlreadyExistsAsync(int groupId, int userId);
+    Task<GroupMember?> GetUserGroupInvitationAsync(int groupId, int userId);
+    Task<List<GroupMember>> GetAllGroupPendingInvitationsAsync(int groupId);
 }

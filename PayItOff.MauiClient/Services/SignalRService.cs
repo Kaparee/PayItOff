@@ -23,6 +23,7 @@ namespace PayItOff.MauiClient.Services
         public event Action<int[]>? OnInitialPresenceReceived;
         public event Action<int, bool>? OnUserPresenceReceived;
         public event Action? OnFriendUpdateReceived;
+        public event Action? OnSystemNotificationEventReceived;
 
         public bool IsDisconnected => _connection.State == HubConnectionState.Disconnected;
 
@@ -37,6 +38,7 @@ namespace PayItOff.MauiClient.Services
             _connection.On<int, bool>("ReceiveUserPresence", (userId, isOnline) => OnUserPresenceReceived?.Invoke(userId, isOnline));
             _connection.On<int[]>("ReceiveInitialPresence", (userIds) => OnInitialPresenceReceived?.Invoke(userIds));
             _connection.On("ReceiveFriendUpdate", () => OnFriendUpdateReceived?.Invoke());
+            _connection.On("ReceiveSystemNotification", () => OnSystemNotificationEventReceived?.Invoke());
         }
 
         public async Task StartAsync()
@@ -56,10 +58,13 @@ namespace PayItOff.MauiClient.Services
         {
             if (IsDisconnected)
             {
-                return;
+                await StartAsync();
             }
 
-            await _connection.InvokeAsync("JoinGroup", groupId.ToString());
+            if (!IsDisconnected)
+            {
+                await _connection.InvokeAsync("JoinGroup", groupId.ToString());
+            }
         }
 
         public async Task LeaveGroupAsync(int groupId)

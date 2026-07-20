@@ -17,7 +17,7 @@
 ## HOTFIX
 
 - [x] **Naprawa zdjęć:** Możliwość usunięcia dodanego zdjęcia w rejestracji - ustawianie na default 
-- [ ] **Usunięcie wysłanego zaproszenia** Możliwość usunięcia wysłanego zaproszenia do grupy przez Ownera/Admina
+- [x] **Usunięcie wysłanego zaproszenia** Możliwość usunięcia wysłanego zaproszenia do grupy przez Ownera/Admina
 - [ ] **Naprawa głównego widoku** Naprawienie wyświetlania kategorii płatności w głównym widoku - wyświetla wszystkie kategorie, powinno wyśweitlać tylko te nieopłacone
 - [ ] **Zapamiętaj mnie** Dodanie opcji automatycznego logowania po odpaleniu aplikacji, wyłącza się po wylogowaniu
 - [ ] **Naprawa tokenów** Naprawa błędu z tokenami, które nie wylogowują użytkownika po wygaśnięciu
@@ -29,7 +29,7 @@ Poniżej przedstawiono planowane kierunki rozwoju projektu w kolejnych wersjach.
 
 ### Wersja 2.0 – Live & Connect
 
-- [ ] **SignalR (Real-Time Updates):** Podpięcie hubów po stronie API oraz klienta MAUI. Aktualizacje wydatków i sald pojawiają się u wszystkich członków grupy w czasie rzeczywistym bez konieczności odświeżania ekranu.
+- [x] **SignalR (Real-Time Updates):** Podpięcie hubów po stronie API oraz klienta MAUI. Aktualizacje wydatków i sald pojawiają się u wszystkich członków grupy w czasie rzeczywistym bez konieczności odświeżania ekranu.
 - [ ] **Powiadomienia Push (FCM):** Integracja z Firebase Cloud Messaging – powiadomienia systemowe na zablokowanym ekranie telefonu przy każdej nowej płatności lub zaproszeniu.
 
 ### Wersja 2.1 – Smart Money

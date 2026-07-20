@@ -360,7 +360,29 @@
 
                 <ScrollView>
                     <VerticalStackLayout Spacing="25">
-                        <Label Text="Zarządzaj członkami" FontSize="22" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
+                        <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                            <Label Grid.Column="0" Text="Zarządzaj członkami" FontSize="22" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
+
+                            <Grid Grid.Column="1" VerticalOptions="Center" Margin="0,10,10,0" IsVisible="{Binding PendingInvitationsCount, Converter={StaticResource IntToBoolConverter}}">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ShowPendingInvitationsCommand}" />
+                                </Grid.GestureRecognizers>
+
+                                <!-- PUDEŁKO / TŁO IKONY -->
+                                <Border BackgroundColor="#2A303C" StrokeThickness="0" StrokeShape="RoundRectangle 10" WidthRequest="45" HeightRequest="45" VerticalOptions="Center">
+                                    <Image Source="notifications_icon.png" WidthRequest="26" HeightRequest="26" HorizontalOptions="Center" VerticalOptions="Center" Aspect="AspectFit"/>
+                                </Border>
+
+                                <!-- CZERWONY ZNACZEK (BADGE) -->
+                                <Border BackgroundColor="{StaticResource StatusRed}" StrokeThickness="0"
+                                        WidthRequest="20" HeightRequest="20" StrokeShape="RoundRectangle 10"
+                                        HorizontalOptions="End" VerticalOptions="Start"
+                                        Margin="0,-5,-5,0"
+                                        IsVisible="{Binding PendingInvitationsCount, Converter={StaticResource IntToBoolConverter}}">
+                                    <Label Text="{Binding PendingInvitationsCount}" TextColor="White" FontSize="10" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                </Border>
+                            </Grid>
+                        </Grid>
 
                         <!-- SEKCJA: Szybkie zapraszanie znajomych -->
                         <VerticalStackLayout Spacing="10">
@@ -412,7 +434,14 @@
                         <VerticalStackLayout Spacing="10">
                             <Label Text="Obecni członkowie grupy" FontSize="14" TextColor="{StaticResource TextSubtle}" FontAttributes="Bold"/>
 
-                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding ActiveMembersList}" Spacing="10" Padding="0,0,15,0">
+                            <Border StrokeShape="RoundRectangle 8" BackgroundColor="#2A303C" StrokeThickness="0" Padding="10,0" HeightRequest="40">
+                                <Grid ColumnDefinitions="Auto, *">
+                                    <Image Grid.Column="0" Source="search_icon.png" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" Margin="0,0,10,0" Opacity="0.5"/>
+                                    <Entry Grid.Column="1" Placeholder="Szukaj członka..." Text="{Binding PopupMembersSearchText}" TextColor="White" PlaceholderColor="#888" BackgroundColor="Transparent" VerticalOptions="Center" />
+                                </Grid>
+                            </Border>
+
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding FilteredActiveMembersList}" Spacing="10" Padding="0,0,15,0">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="dto:GroupMemberResponse">
                                         <Border StrokeShape="RoundRectangle 12" BackgroundColor="#2A303C" StrokeThickness="0" Padding="10">
@@ -840,11 +869,63 @@
                     <Label Text="{Binding LinesTotal, StringFormat='Suma: {0:N2} zł'}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="End"/>
                 </VerticalStackLayout>
             </Border>
+    </Grid>
+        <Grid Grid.ColumnSpan="2" IsVisible="{Binding IsPendingInvitationsPopupVisible}" Style="{StaticResource PopupOverlayStyle}" ZIndex="350">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding HidePendingInvitationsCommand}" />
+            </Grid.GestureRecognizers>
+            <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PopupContainerStyle}" WidthRequest="350" MaximumHeightRequest="400" HorizontalOptions="Center" VerticalOptions="Center">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="20">
+                    <Label Text="Wysłane Zaproszenia" FontSize="20" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
+
+                    <ScrollView>
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding PendingInvitations}" Spacing="10">
+                            <BindableLayout.EmptyView>
+                                <Label Text="Brak oczekujących zaproszeń." TextColor="#888" HorizontalOptions="Center" Margin="0,20"/>
+                            </BindableLayout.EmptyView>
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="dto:AllGroupPendingInvitationResponse">
+                                    <Border StrokeShape="RoundRectangle 10" BackgroundColor="#2A303C" StrokeThickness="0" Padding="15,10">
+                                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="15" VerticalOptions="Center">
+
+                                            <!-- AVATAR -->
+                                            <Border Grid.Column="0" WidthRequest="40" HeightRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0" VerticalOptions="Center">
+                                                <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" WidthRequest="40" HeightRequest="40" VerticalOptions="Center" />
+                                            </Border>
+
+                                            <!-- INFO -->
+                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                                <Label Text="{Binding FullName, StringFormat='{0} {1}'}" FontSize="14" FontAttributes="Bold" TextColor="White" LineBreakMode="TailTruncation">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding Name}" Value="{x:Null}">
+                                                            <Setter Property="Text" Value="{Binding Nickname}"/>
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                                <Label Text="{Binding Nickname, StringFormat='{0} {1}'}" FontSize="10" TextColor="{StaticResource StatusYellow}" FontAttributes="Bold"/>
+                                            </VerticalStackLayout>
+
+                                            <!-- USUŃ -->
+                                            <ImageButton Grid.Column="2" Source="delete_icon.png" WidthRequest="32" HeightRequest="32" BackgroundColor="Transparent" Padding="4" VerticalOptions="Center"
+                                                         Command="{Binding BindingContext.CancelInviteCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                         CommandParameter="{Binding .}"
+                                                         ToolTipProperties.Text="Anuluj zaproszenie"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </ScrollView>
+
+                    <controls:AppButton Text="Zamknij" Command="{Binding HidePendingInvitationsCommand}" ButtonBackgroundColor="{StaticResource SurfaceDark}" ButtonTextColor="{StaticResource TextMain}" />
+                </VerticalStackLayout>
+            </Border>
         </Grid>
     </Grid>
-
 </ContentPage>
-
 
 
 

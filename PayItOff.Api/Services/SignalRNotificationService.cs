@@ -46,5 +46,10 @@ namespace PayItOff.Api.Services
         {
             await _hubContext.Clients.User(targetUserId.ToString()).SendAsync("ReceiveFriendUpdate");
         }
+
+        public async Task SendSystemNotificationEventAsync(int userId)
+        {
+            await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveSystemNotification");
+        }
     }
 }

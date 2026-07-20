@@ -38,6 +38,13 @@ public class GroupMemberController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("{groupId}/all-invites")]
+    public async Task<ActionResult<AllGroupPendingInvitationResponse>> AllGroupPendingInvitations([FromRoute] int groupId)
+    {
+        var result = await _groupMemberService.GetAllGroupPendingInvitationsAsync(groupId, GetUserId());
+        return Ok(result);
+    }
+
     [HttpPost("invite")]
     public async Task<IActionResult> Invite([FromBody] GroupInviteUserRequest request)
     {
@@ -84,6 +91,13 @@ public class GroupMemberController : ControllerBase
     public async Task<IActionResult> KickMember([FromRoute] int groupId, [FromRoute] int targetUserId)
     {
         await _groupMemberService.KickUserFromGroupAsync(GetUserId(), groupId, targetUserId);
+        return NoContent();
+    }
+
+    [HttpDelete("{groupId}/invites/{targetUserId}")]
+    public async Task<IActionResult> CancelInvitation([FromRoute] int groupId, [FromRoute] int targetUserId)
+    {
+        await _groupMemberService.CancelInviteAsync(groupId, targetUserId, GetUserId());
         return NoContent();
     }
 }
