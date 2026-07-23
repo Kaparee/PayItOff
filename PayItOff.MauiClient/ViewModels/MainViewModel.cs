@@ -13,6 +13,8 @@ public class DebtDisplayItem
     public int UserId { get; set; }
     public required string FullName { get; set; }
     public required string AvatarUrl { get; set; }
+    public required string Number { get; set; }
+    public string DisplayNumber => string.IsNullOrWhiteSpace(Number) ? "Brak numeru" : Number;
     public required string CategoriesDisplay { get; set; }
     public required DateTime Date { get; set; }
     public decimal Amount { get; set; }
@@ -77,6 +79,11 @@ public partial class MainViewModel : BaseViewModel
         _signalRService.OnSystemNotificationEventReceived -= HandleNotificationEvent;
     }
 
+    public void OnDisappearing()
+    {
+        UnsubscribeFromEvents();
+    }
+
     public async Task LoadDashboardDataAsync()
     {
         if (IsBusy) return;
@@ -106,6 +113,7 @@ public partial class MainViewModel : BaseViewModel
                     UserId = i.UserId,
                     FullName = $"{i.Name} {i.Surname}",
                     AvatarUrl = i.AvatarUrl,
+                    Number = i.Number,
                     Amount = i.Amount,
                     Date = i.Date,
                     CategoriesDisplay = i.Categories != null ? string.Join(", ", i.Categories) : "Brak"
@@ -122,6 +130,7 @@ public partial class MainViewModel : BaseViewModel
                     UserId = e.UserId,
                     FullName = $"{e.Name} {e.Surname}",
                     AvatarUrl = e.AvatarUrl,
+                    Number = e.Number,
                     Amount = e.Amount,
                     Date = e.Date,
                     CategoriesDisplay = e.Categories != null ? string.Join(", ", e.Categories) : "Brak"

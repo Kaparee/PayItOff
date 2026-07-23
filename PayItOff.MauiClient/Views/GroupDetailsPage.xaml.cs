@@ -26,13 +26,10 @@ public partial class GroupDetailsPage : ContentPage, IQueryAttributable
         }
     }
 
-    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    protected override void OnDisappearing()
     {
-        base.OnNavigatedFrom(args);
-        if (BindingContext is GroupDetailsViewModel vm)
-        {
-            vm.UnsubscribeFromEvents();
-        }
+        base.OnDisappearing();
+        (BindingContext as GroupDetailsViewModel)?.OnDisappearing();
     }
 
 }

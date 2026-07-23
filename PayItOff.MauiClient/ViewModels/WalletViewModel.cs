@@ -165,6 +165,11 @@ public partial class WalletViewModel : PopupViewModelBase
         _signalRService.OnSettlementUpdateReceived -= HandleSettlementUpdate;
     }
 
+    public void OnDisappearing()
+    {
+        UnsubscribeFromEvents();
+    }
+
     [RelayCommand]
     private void ChangeFilter(string filter)
     {
@@ -673,6 +678,7 @@ public partial class WalletViewModel : PopupViewModelBase
             UserId = e.UserId,
             FullName = $"{e.Name} {e.Surname}",
             AvatarUrl = e.AvatarUrl,
+            Number = e.Number,
             CategoriesDisplay = e.Categories != null && e.Categories.Count > 0 ? string.Join(", ", e.Categories) : "—",
             Date = e.Date,
             Amount = e.Amount

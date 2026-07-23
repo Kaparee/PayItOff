@@ -4,5 +4,6 @@ namespace PayItOff.Shared.Requests
     {
         public required string EmailOrNickname { get; set; }
         public required string Password { get; set; }
+        public bool RememberMe { get; set; }
     }
 }

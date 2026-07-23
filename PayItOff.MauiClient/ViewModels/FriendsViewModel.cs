@@ -139,6 +139,11 @@ public partial class FriendsViewModel : BaseViewModel
         _signalRService.OnFriendUpdateReceived -= HandleFriendUpdate;
     }
 
+    public void OnDisappearing()
+    {
+        UnsubscribeFromEvents();
+    }
+
     partial void OnSearchQueryChanged(string value)
     {
         FilterFriends();

@@ -21,13 +21,9 @@ public partial class GroupsPage : ContentPage
         }
     }
 
-    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    protected override void OnDisappearing()
     {
-        base.OnNavigatedFrom(args);
-        
-        if (BindingContext is GroupsViewModel vm)
-        {
-            vm.UnsubscribeFromEvents();
-        }
+        base.OnDisappearing();
+        (BindingContext as GroupsViewModel)?.OnDisappearing();
     }
 }

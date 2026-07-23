@@ -56,25 +56,39 @@ namespace PayItOff.MauiClient.Services
 
         public async Task JoinGroupAsync(int groupId)
         {
-            if (IsDisconnected)
+            try
             {
-                await StartAsync();
-            }
+                if (IsDisconnected)
+                {
+                    await StartAsync();
+                }
 
-            if (!IsDisconnected)
+                if (!IsDisconnected)
+                {
+                    await _connection.InvokeAsync("JoinGroup", groupId.ToString());
+                }
+            }
+            catch (Exception ex)
             {
-                await _connection.InvokeAsync("JoinGroup", groupId.ToString());
+                System.Diagnostics.Debug.WriteLine($"[JoinGroupAsync ERROR]: {ex.Message}");
             }
         }
 
         public async Task LeaveGroupAsync(int groupId)
         {
-            if (IsDisconnected)
+            try
             {
-                return;
-            }
+                if (IsDisconnected)
+                {
+                    return;
+                }
 
-            await _connection.InvokeAsync("LeaveGroup", groupId.ToString());
+                await _connection.InvokeAsync("LeaveGroup", groupId.ToString());
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[LeaveGroupAsync ERROR]: {ex.Message}");
+            }
         }
     }
 }

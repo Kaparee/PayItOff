@@ -20,9 +20,9 @@ public partial class WalletPage : ContentPage
         await _viewModel.LoadDataAsync();
     }
 
-    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    protected override void OnDisappearing()
     {
-        base.OnNavigatedFrom(args);
-        _viewModel.UnsubscribeFromEvents();
+        base.OnDisappearing();
+        (BindingContext as WalletViewModel)?.OnDisappearing();
     }
 }

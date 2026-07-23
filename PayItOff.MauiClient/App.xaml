@@ -9,6 +9,7 @@
             <helpers:InverseStringNullOrEmptyConverter x:Key="InverseStringNullOrEmptyConverter" />
             <helpers:AllTrueConverter x:Key="AllTrueConverter" />
             <helpers:IsAlertErrorToColorConverter x:Key="IsAlertErrorToColorConverter" />
+            <helpers:IntToBoolConverter x:Key="IntToBoolConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />

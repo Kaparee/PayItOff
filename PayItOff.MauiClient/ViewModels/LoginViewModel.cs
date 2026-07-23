@@ -19,8 +19,6 @@ public partial class LoginViewModel : PopupViewModelBase
     [ObservableProperty]
     public partial string Password { get; set; } = string.Empty;
 
-
-
     [ObservableProperty]
     public partial bool HasError { get; set; }
 
@@ -29,6 +27,9 @@ public partial class LoginViewModel : PopupViewModelBase
 
     [ObservableProperty]
     public partial string PasswordIcon { get; set; } = "eye_closed.png";
+
+    [ObservableProperty]
+    public partial bool RememberMe { get; set; } = false;
 
     public LoginViewModel(
         AuthService authService,
@@ -103,7 +104,7 @@ public partial class LoginViewModel : PopupViewModelBase
 
         try
         {
-            var request = new LoginRequest { EmailOrNickname = EmailOrNickname, Password = Password };
+            var request = new LoginRequest { EmailOrNickname = EmailOrNickname, Password = Password, RememberMe = this.RememberMe };
 
             await _authService.LoginAsync(request);
 
@@ -124,34 +125,6 @@ public partial class LoginViewModel : PopupViewModelBase
         }
     }
 
-
-
-    [RelayCommand]
-    private async Task SeedHeavyDataAsync()
-    {
-        if (IsBusy) return;
-
-        var password = await Shell.Current.DisplayPromptAsync("Seeder", "Wpisz hasło do seedera", "Uruchom", "Anuluj", "Hasło");
-        if (string.IsNullOrWhiteSpace(password)) return;
-
-        IsBusy = true;
-        HasError = false;
-
-        try
-        {
-            await _authService.SeedHeavyLoginDataAsync(password);
-            await ShowAlertAsync("Seeder", "Seeder został wykonany. Możesz się zalogować!.", "OK");
-        }
-        catch (Exception ex)
-        {
-            HasError = true;
-            await ShowAlertAsync("Błąd seedera", ex.Message, "OK");
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
 
     [RelayCommand]
     private void TogglePasswordVisibility()
@@ -188,5 +161,23 @@ public partial class LoginViewModel : PopupViewModelBase
         {
             await Shell.Current.GoToAsync(nameof(RegisterPage));
         }
+    }
+
+    public async Task CheckAutoLoginAsync()
+    {
+        IsBusy = true;
+        bool refresh = await _authService.RefreshTokensAsync();
+
+        if (refresh)
+        {
+            if (_signalRService.IsDisconnected)
+            {
+                await _signalRService.StartAsync();
+            }
+
+            await Shell.Current.GoToAsync("//MainPage");
+        }
+
+        IsBusy = false;
     }
 }

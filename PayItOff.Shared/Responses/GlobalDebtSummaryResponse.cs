@@ -6,6 +6,7 @@
         public required string Name { get; set; }
         public required string Surname { get; set; }
         public required string AvatarUrl { get; set; }
+        public string? Number { get; set; }
         public required List<string> Categories { get; set; }
         public required DateTime Date { get; set; }
         public decimal Amount { get; set; }

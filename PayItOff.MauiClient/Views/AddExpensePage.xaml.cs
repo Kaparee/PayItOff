@@ -27,6 +27,12 @@ public partial class AddExpensePage : ContentPage, IQueryAttributable
             _ = _viewModel.LoadGroupDataAsync();
     }
 
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        _viewModel.OnDisappearing();
+    }
+
     private List<ReceiptItem> GetItemsToProcess(ReceiptItem item)
     {
         var list = new List<ReceiptItem>();
@@ -190,15 +196,15 @@ public partial class AddExpensePage : ContentPage, IQueryAttributable
 
                     if (y < 150 && scrollY > 0)
                     {
-                        MainScrollView.ScrollToAsync(0, Math.Max(0, scrollY - 30), false);
+                        MainScrollView.ScrollToAsync(0, Math.Max(0, scrollY - 15), false);
                     }
                     else if (y > height - 150)
                     {
-                        MainScrollView.ScrollToAsync(0, scrollY + 30, false);
+                        MainScrollView.ScrollToAsync(0, scrollY + 15, false);
                     }
                 }
             }
-            catch { } // Ignore layout/calculation exceptions during rapid drag
+            catch { }
         }
     }
 

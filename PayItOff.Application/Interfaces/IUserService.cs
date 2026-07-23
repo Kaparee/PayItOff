@@ -19,5 +19,6 @@ namespace PayItOff.Application.Interfaces
         Task ResetPasswordConfirmAsync(ResetPasswordRequest request);
         Task EmailChangeConfirmAsync(string token);
         Task DeleteUserAsync(int userId);
+        Task<LoginResponse> RefreshTokenAsync(RefreshRequest request);
     }
 }

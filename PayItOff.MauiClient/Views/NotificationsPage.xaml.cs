@@ -21,13 +21,9 @@ public partial class NotificationsPage : ContentPage
         }
     }
 
-    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    protected override void OnDisappearing()
     {
-        base.OnNavigatedFrom(args);
-
-        if (BindingContext is NotificationsViewModel vm)
-        {
-            vm.UnsubscribeFromEvents();
-        }
+        base.OnDisappearing();
+        (BindingContext as NotificationsViewModel)?.OnDisappearing();
     }
 }

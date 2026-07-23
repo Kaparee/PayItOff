@@ -492,7 +492,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
 
         var membersTask = _groupMemberService.GetAllActiveGroupMembersAsync(GroupId);
         await LoadFriendsListAsync();
-        
+
         await membersTask;
 
         ActiveMembersList.Clear();
@@ -527,7 +527,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
                 {
                     friend.AvatarUrl = friend.AvatarUrl;
                     FriendsList.Add(friend);
-                } 
+                }
             }
         }
     }
@@ -535,7 +535,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     private void ApplyPopupMemberFilter()
     {
         FilteredActiveMembersList.Clear();
-        
+
         if (string.IsNullOrWhiteSpace(PopupMembersSearchText))
         {
             foreach (var member in ActiveMembersList)
@@ -546,7 +546,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         else
         {
             var lowerQuery = PopupMembersSearchText.ToLowerInvariant();
-            var filtered = ActiveMembersList.Where(m => 
+            var filtered = ActiveMembersList.Where(m =>
                 (m.FullName != null && m.FullName.ToLowerInvariant().Contains(lowerQuery)) ||
                 (m.Email != null && m.Email.ToLowerInvariant().Contains(lowerQuery)));
 
@@ -1036,5 +1036,11 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         {
             IsBusy = false;
         }
+    }
+
+    public void OnDisappearing()
+    {
+        UnsubscribeFromEvents();
+        _ = _signalRService.LeaveGroupAsync(GroupId);
     }
 }

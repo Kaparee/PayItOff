@@ -8,6 +8,8 @@ using PayItOff.Domain.Exceptions;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
+using System.Security.Claims;
+using System.Security.Cryptography;
 
 namespace PayItOff.Application.Services;
 
@@ -86,10 +88,20 @@ public class UserService : IUserService
         if (user is null) { throw new UserNotFoundException(); }
         if (!_passwordHasher.Verify(request.Password, user.PassHash)) { throw new InvalidPasswordException(); }
         if (!user.IsActive || !user.IsVerified) { throw new UserNotActiveOrVerifiedException(); }
+        if (request.RememberMe is true)
+        {
+            var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(128));
+
+            user.UpdateRefreshToken(refreshToken, DateTime.UtcNow.AddDays(30));
+        }
+
+        await _userRepository.UpdateAsync(user);
+
+        await _unitOfWork.SaveChangesAsync();
 
         var token = _jwtService.GenerateToken(user);
 
-        return new LoginResponse { Token = token };
+        return new LoginResponse { Token = token, RefreshToken = user.RefreshToken };
     }
 
     public async Task VerifyUserAsync(string token)
@@ -350,5 +362,29 @@ public class UserService : IUserService
             await _unitOfWork.RollbackAsync();
             throw;
         }
+    }
+
+    public async Task<LoginResponse> RefreshTokenAsync(RefreshRequest request)
+    {
+        var principal = _jwtService.GetPrincipalFromExpiredToken(request.AccessToken);
+
+        var userIdStr = principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        var userId = int.Parse(userIdStr!);
+
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user is null) { throw new UserNotFoundException(); }
+
+        if(user.RefreshToken != request.RefreshToken ||  user.RefreshTokenExpiryTime < DateTime.UtcNow) { throw new UnauthorizedAccessException("Nieprawidłowy token odświeżający."); }
+
+        var newToken = _jwtService.GenerateToken(user);
+
+        var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(128));
+
+        user.UpdateRefreshToken(refreshToken, DateTime.UtcNow.AddDays(30));
+
+        await _unitOfWork.SaveChangesAsync();
+
+        return new LoginResponse { Token = newToken, RefreshToken = refreshToken };
     }
 }

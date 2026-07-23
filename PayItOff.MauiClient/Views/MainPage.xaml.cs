@@ -25,13 +25,9 @@ public partial class MainPage : ContentPage
         }
     }
 
-    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    protected override void OnDisappearing()
     {
-        base.OnNavigatedFrom(args);
-
-        if (_viewModel != null)
-        {
-            _viewModel.UnsubscribeFromEvents();
-        }
+        base.OnDisappearing();
+        (BindingContext as MainViewModel)?.OnDisappearing();
     }
 }

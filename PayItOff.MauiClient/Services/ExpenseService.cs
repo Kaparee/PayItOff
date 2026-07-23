@@ -1,4 +1,5 @@
 using PayItOff.Shared.Requests;
+using PayItOff.Shared.Responses;
 using System.Net.Http.Json;
 
 namespace PayItOff.MauiClient.Services;
@@ -31,14 +32,14 @@ public class ExpenseService
         return result?["fileName"]?.ToString() ?? string.Empty;
     }
 
-    public async Task<PayItOff.Shared.Responses.ExpenseDetailsResponse?> GetExpenseDetailsAsync(int expenseId)
+    public async Task<ExpenseDetailsResponse?> GetExpenseDetailsAsync(int expenseId)
     {
-        return await _httpClient.GetFromJsonAsync<PayItOff.Shared.Responses.ExpenseDetailsResponse>($"Expense/{expenseId}");
+        return await _httpClient.GetFromJsonAsync<ExpenseDetailsResponse>($"Expense/{expenseId}");
     }
 
-    public async Task<PayItOff.Shared.Responses.ExpenseDetailsResponse?> GetExpenseItemDetailsAsync(int expenseId, int itemId)
+    public async Task<ExpenseDetailsResponse?> GetExpenseItemDetailsAsync(int expenseId, int itemId)
     {
-        return await _httpClient.GetFromJsonAsync<PayItOff.Shared.Responses.ExpenseDetailsResponse>($"Expense/{expenseId}/item/{itemId}");
+        return await _httpClient.GetFromJsonAsync<ExpenseDetailsResponse>($"Expense/{expenseId}/item/{itemId}");
     }
 
     public async Task UpdateExpenseItemAsync(int expenseId, int itemId, PayItOff.Shared.Requests.UpdateExpenseItemRequest request)

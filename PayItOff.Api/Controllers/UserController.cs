@@ -94,6 +94,15 @@ public class UserController : ControllerBase
         return Ok();
     }
 
+    [AllowAnonymous]
+    [HttpPost]
+    [Route("refresh")]
+    public async Task<ActionResult<LoginResponse>> RefreshToken(RefreshRequest request)
+    {
+        var result = await _userService.RefreshTokenAsync(request);
+        return Ok(result);
+    }
+
     [HttpPatch("notifications")]
     public async Task<IActionResult> UpdateNotification([FromBody] UserNotificationChangeRequest request)
     {

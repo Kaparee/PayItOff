@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="img/widok_projektu.png" width="80" alt="PayItOff Logo"/>
+  <img src="img/widok_projektu.png" width="300" alt="PayItOff Logo"/>
   <h1>PayItOff</h1>
   <p><strong>A cross-platform financial settlement engine and bill-splitting mobile app</strong></p>
   <p>
@@ -19,9 +19,9 @@
 - [x] **Naprawa zdjęć:** Możliwość usunięcia dodanego zdjęcia w rejestracji - ustawianie na default 
 - [x] **Usunięcie wysłanego zaproszenia** Możliwość usunięcia wysłanego zaproszenia do grupy przez Ownera/Admina
 - [ ] **Naprawa głównego widoku** Naprawienie wyświetlania kategorii płatności w głównym widoku - wyświetla wszystkie kategorie, powinno wyśweitlać tylko te nieopłacone
-- [ ] **Zapamiętaj mnie** Dodanie opcji automatycznego logowania po odpaleniu aplikacji, wyłącza się po wylogowaniu
-- [ ] **Naprawa tokenów** Naprawa błędu z tokenami, które nie wylogowują użytkownika po wygaśnięciu
-- [ ] **Naprawa wskaźnika dostępności** Naprawa błędu z niepoprawnym wyświetlaniem aktywności użytkownika w grupie po wyjsciu w inny sposób niż strzałką wstecz
+- [x] **Zapamiętaj mnie** Dodanie opcji automatycznego logowania po odpaleniu aplikacji, wyłącza się po wylogowaniu
+- [x] **Naprawa tokenów** Naprawa błędu z tokenami, które nie wylogowują użytkownika po wygaśnięciu
+- [x] **Naprawa wskaźnika dostępności** Naprawa błędu z niepoprawnym wyświetlaniem aktywności użytkownika w grupie po wyjsciu w inny sposób niż strzałką wstecz
 
 ## Roadmapa
 
@@ -46,11 +46,12 @@ Poniżej przedstawiono planowane kierunki rozwoju projektu w kolejnych wersjach.
 
 ---
 
+
 ## O Projekcie
 
 **PayItOff** to zaawansowana, wieloplatformowa aplikacja mobilna (Windows & Android) przeznaczona do zarządzania wspólnymi wydatkami i rozliczeniami w grupach znajomych. Projekt eliminuje problem ręcznego obliczania "kto jest komu winien" po wspólnych wyjściach, wyjazdach czy zakupach.
 
-Zbudowany w oparciu o **Clean Architecture**, system posiada własny silnik finansowy z autorskim algorytmem kompensacji długów, asynchronicznym harmonogramowaniem zadań w tle (Hangfire), pełnym systemem audytu zmian bazy danych oraz rozbudowanym interfejsem MAUI z obsługą Drag & Drop.
+Zbudowany w oparciu o **Clean Architecture**, system posiada własny silnik finansowy z autorskim algorytmem kompensacji długów, asynchronicznym harmonogramowaniem zadań w tle (Hangfire), pełnym systemem audytu zmian bazy danych, rozbudowanym interfejsem MAUI (spójny ciemny motyw, autorskie kontrolki np. `AppButton`, Drag & Drop) oraz komunikacją w czasie rzeczywistym (SignalR) dla natychmiastowej synchronizacji danych.
 
 ---
 
@@ -58,11 +59,12 @@ Zbudowany w oparciu o **Clean Architecture**, system posiada własny silnik fina
 
 | Moduł | Opis |
 |---|---|
-| **Autoryzacja** | Rejestracja z weryfikacją e-mail, logowanie JWT, reset hasła przez link tokenowy, zmiana e-mail z potwierdzeniem |
+| **Autoryzacja** | Rejestracja z weryfikacją e-mail, logowanie JWT, reset hasła, zmiana e-mail, **długoterminowe sesje (Refresh Token + Zapamiętaj mnie)** |
 | **Znajomi & Grupy** | System zaproszeń, RBAC (role Owner/Admin/Member), zarządzanie grupami wydatków, ulubione grupy |
-| **Paragony** | Dodawanie rachunków z podziałem na produkty i kategorie, parser wyrażeń matematycznych w polu ceny (`5.50 + 2*3`), wgrywanie zdjęć paragonów |
-| **Rozliczenia** | Spłaty brutto/netto, algorytm kompensacji wzajemnych długów (Simplify Debts) do 500 iteracji, przypomnienia o spłacie z zabezpieczeniem antyspamowym (24h) |
-| **Powiadomienia** | System alertów w aplikacji z filtrowaniem (nieprzeczytane, wymagające akcji), codzienne podsumowanie zbiorcze (Hangfire), SMTP e-mails (MailKit) |
+| **Paragony** | Dodawanie rachunków, parser wyrażeń matematycznych w polu ceny (`5.50 + 2*3`), wgrywanie zdjęć paragonów |
+| **Rozliczenia** | Spłaty brutto/netto, algorytm kompensacji wzajemnych długów (Simplify Debts), zabezpieczenia antyspamowe przypomnień (24h) |
+| **Powiadomienia** | System alertów z filtrowaniem, codzienne podsumowanie zbiorcze (Hangfire), wiadomości SMTP (MailKit) |
+| **Real-Time (SignalR)** | Natychmiastowe odświeżanie sald i wydatków. Zoptymalizowane zarządzanie cyklem życia (natywne `OnDisappearing`) dla płynnego statusu online. |
 | **Audit Trail** | Automatyczne logowanie każdej zmiany w bazie przez interceptory EF Core z porównaniem wartości przed i po |
 | **Hangfire** | Zadania w tle (Daily Summary Job codziennie o 20:00), Dashboard do monitorowania kolejki |
 | **Archiwum** | Miękkie usuwanie (Soft Delete) grup i wydatków, tryb tylko do odczytu dla zarchiwizowanych środowisk |
@@ -76,11 +78,11 @@ Projekt stosuje **Clean Architecture** z podziałem na 5 niezależnych warstw:
 
 ```
 PayItOff/
-├── PayItOff.Domain/          # Encje, reguły biznesowe, wyjątki domenowe (16 klas)
+├── PayItOff.Domain/          # 13 Encji, reguły biznesowe, wyjątki domenowe
 ├── PayItOff.Application/     # Serwisy aplikacyjne, walidatory FluentValidation
 ├── PayItOff.Infrastructure/  # EF Core, repozytoria, JWT, BCrypt, Hangfire
 ├── PayItOff.Api/             # ASP.NET Core Web API, kontrolery, middleware
-├── PayItOff.Shared/          # 22 Requesty + 20 Responses współdzielone z klientem
+├── PayItOff.Shared/          # 23 Requesty + 21 Responses współdzielone z klientem
 └── PayItOff.MauiClient/      # .NET MAUI, MVVM (CommunityToolkit), Drag & Drop
 ```
 
@@ -90,17 +92,21 @@ PayItOff/
 - ASP.NET Core 10 Web API + Entity Framework Core 10
 - PostgreSQL + Npgsql
 - JWT Authentication (HmacSha256) + BCrypt.Net-Next
+- SignalR (Huby, zdarzenia w czasie rzeczywistym)
 - Hangfire 1.8 (zadania cykliczne, Dashboard)
-- FluentValidation + Swashbuckle (Swagger UI)
+- FluentValidation + OpenAPI / Scalar API Reference (nowoczesna dokumentacja)
 - MailKit (SMTP / Mailtrap)
 - Humanizer (polskie daty: "10 dni temu")
 
 **Frontend (MAUI):**
 - .NET MAUI (Windows + Android)
 - CommunityToolkit.Mvvm (MVVM, ObservableProperty, RelayCommand)
+- SignalR Client (nasłuchiwanie zdarzeń, automatyczna rekonekcja)
 - IHttpClientFactory + DelegatingHandler (automatyczna iniekcja JWT)
 - SecureStorage (bezpieczne przechowywanie tokenu)
+- Velopack (wbudowany instalator i auto-updater dla platformy Windows)
 - Drag & Drop (natywny GestureRecognizer)
+- Custom Handlers (własne modyfikatory kontrolek pod system Windows eliminujące ramki)
 
 ---
 
@@ -137,8 +143,9 @@ Dashboard prezentuje sumaryczne saldo przychodów i wydatków, karuzelę aktywny
   <img src="img/login/login_widoczne_haslo.png" width="22%" alt="Podgląd hasła"/>
 </p>
 
-Formularz rejestracji weryfikuje hasło (min. 8 znaków, duża/mała litera, znak specjalny), numer telefonu (format PL) i IBAN (26-cyfrowy polski format z opcjonalnym prefixem PL). Po rejestracji system wysyła e-mail z tokenem aktywacyjnym przez SMTP.
+Formularz rejestracji weryfikuje hasło (min. 8 znaków, duża/mała litera, znak specjalny), numer telefonu (format PL z wymuszoną unikalnością w bazie danych) i IBAN (26-cyfrowy polski format z opcjonalnym prefixem PL). Wspiera również wgrywanie i bezproblemowe usuwanie zdjęć profilowych (powrót do domyślnego awatara). Po rejestracji system wysyła e-mail z tokenem aktywacyjnym przez SMTP.
 
+Na ekranie logowania wdrożono mechanizm **Zapamiętaj mnie** oparty na architekturze krótkoterminowego Access Tokenu i długoterminowego Refresh Tokenu. Dzięki temu użytkownik pozostaje zalogowany między sesjami, a tokeny są bezszelestnie odświeżane w tle.
 <p align="center">
   <img src="img/register/register_mailtrapio.png" width="45%" alt="Weryfikacja e-mail"/>
   &nbsp;
@@ -195,7 +202,7 @@ Panel konta umożliwia edycję danych osobowych (nick, IBAN), zmianę awatara, z
   <img src="img/friend/friend_ranking_po_dodaniu_wydatku.png" width="90%" alt="Ranking znajomych z bilansem"/>
 </p>
 
-Moduł znajomych wyświetla zbiorczy bilans finansowy z każdym kontaktem wyliczany w locie z tabeli `GroupDebts`. Wyszukiwarka obsługuje filtrowanie po nicku, e-mailu i numerze telefonu z debouncingiem (CancellationTokenSource) dla płynnego wyszukiwania znak po znaku.
+Moduł znajomych wyświetla zbiorczy bilans finansowy z każdym kontaktem wyliczany w locie z tabeli `GroupDebts`. Moduł w pełni współpracuje z SignalR, na bieżąco odświeżając statusy online i przychodzące zaproszenia. Wyszukiwarka obsługuje filtrowanie po nicku, e-mailu i numerze telefonu z debouncingiem (CancellationTokenSource) dla płynnego wyszukiwania znak po znaku.
 
 ### Grupy Wydatków
 
@@ -227,7 +234,7 @@ Moduł znajomych wyświetla zbiorczy bilans finansowy z każdym kontaktem wylicz
   <img src="img/group/group_opuszczenie_grupy.png" width="30%" alt="Opuszczenie grupy"/>
 </p>
 
-System RBAC (Role-Based Access Control) wymusza hierarchię Owner > Admin > Member. Właściciela grupy nie można wyrzucić ani zdegradować. Usunięcie grupy jest blokowane jeśli istnieją w niej nieuregulowane długi (`HasActiveGroupDebt`).
+System RBAC (Role-Based Access Control) wymusza hierarchię Owner > Admin > Member. Właściciela grupy nie można wyrzucić ani zdegradować. Usunięcie grupy jest blokowane jeśli istnieją w niej nieuregulowane długi (`HasActiveGroupDebt`). Odświeżone pop-upy zarządzania posiadają szybką wyszukiwarkę uczestników oraz wskaźniki obecności, a same zaproszenia po zaakceptowaniu / odrzuceniu znikają z modali w locie (bez obciążania API).
 
 <p align="center">
   <img src="img/group/group_widok_po_dodaniu_wydatków.png" width="90%" alt="Widok grupy z wydatkami"/>
@@ -255,7 +262,7 @@ System RBAC (Role-Based Access Control) wymusza hierarchię Owner > Admin > Memb
   <img src="img/new_expense/new_expense_podzial_wydatkow.png" width="45%" alt="Podział wydatków"/>
 </p>
 
-Kreator paragonów obsługuje parser wyrażeń matematycznych (`System.Data.DataTable.Compute`) wbudowany bezpośrednio w pole ceny – wystarczy wpisać `5.50 + 2*3` zamiast ręcznie liczyć. Algorytm **Penny-Drop** rozwiązuje problem reszty z dzielenia (np. 10 zł / 3 osoby) rozdzielając nadmiarowe grosze kolejnym uczestnikom po zaokrągleniu w dół.
+Kreator paragonów wspiera dodawanie zdjęć rachunków do płatności (encja `ExpensePhoto`) i obsługuje parser wyrażeń matematycznych (`System.Data.DataTable.Compute`) wbudowany bezpośrednio w pole ceny – wystarczy wpisać `5.50 + 2*3` zamiast ręcznie liczyć. Algorytm **Penny-Drop** rozwiązuje problem reszty z dzielenia (np. 10 zł / 3 osoby) rozdzielając nadmiarowe grosze kolejnym uczestnikom po zaokrągleniu w dół.
 
 <p align="center">
   <img src="img/new_expense/new_expense_usuniecie_uczestnika_zmiana_kwot.png" width="30%" alt="Usunięcie uczestnika"/>
@@ -287,7 +294,7 @@ Przycisk zapisu jest zablokowany dopóki suma przypisanych kwot nie wynosi dokł
   <img src="img/group/group_edycja_wydatku_poprawne.png" width="30%" alt="Poprawna edycja"/>
 </p>
 
-Edycja archiwalnego wydatku transakcyjnie cofa stary podział długów z bazy, przelicza i zapisuje nowy. Modal blokuje zapis dopóki `RemainingAmountToSplit` nie wynosi 0.
+Edycja archiwalnego wydatku transakcyjnie cofa stary podział długów z bazy, przelicza i zapisuje nowy. Zmodyfikowana logika wybiórczego usuwania elementów z rachunku pilnuje natychmiastowego przeliczania całkowitych sum i wycofywania poszczególnych zobowiązań. Modal blokuje zapis dopóki `RemainingAmountToSplit` nie wynosi 0.
 
 ### Rozliczenia (Settlement)
 
@@ -362,7 +369,7 @@ Powiadomienia typu `NeedAction` (zaproszenia, spłaty) można obsłużyć bezpo�
 <p align="center">
   <img src="img/swagger1.png" width="45%" alt="Swagger – Expense, Friend, Group"/>
   &nbsp;
-  <img src="img/swagger2.png" width="45%" alt="Swagger – GroupMember, Notification, Seeder"/>
+  <img src="img/swagger2.png" width="45%" alt="Swagger – GroupMember, Notification"/>
 </p>
 
 <p align="center">
@@ -383,8 +390,7 @@ Powiadomienia typu `NeedAction` (zaproszenia, spłaty) można obsłużyć bezpo�
   <img src="img/diagram_erd.png" width="90%" alt="Diagram ERD bazy danych"/>
 </p>
 
-Baza składa się z 12 tabel połączonych kluczami obcymi z `DeleteBehavior.Restrict` (brak kaskadowego usuwania). Każda wartość finansowa (`decimal`) ma narzuconą precyzję `18,2`. Tabela `GroupDebts` posiada `IsConcurrencyToken()` na polu `Amount` chroniący przed Race Conditions.
-
+Baza składa się z 13 głównych tabel (w tym najnowsza `ExpensePhotos`) połączonych kluczami obcymi z `DeleteBehavior.Restrict` (brak kaskadowego usuwania). Każda wartość finansowa (`decimal`) ma narzuconą precyzję `18,2`. Dodatkowo, ustawienia powiadomień użytkownika (`NotificationsSettings`) są optymalnie mapowane do pojedynczej kolumny typu `JSONB` w PostgreSQL. Tabela `GroupDebts` posiada `IsConcurrencyToken()` na polu `Amount` chroniący przed Race Conditions.
 ---
 
 ## Kluczowe Algorytmy
@@ -403,18 +409,32 @@ foreach (var participant in sortedParticipants)
 }
 ```
 
-### Automatyczna iniekcja JWT (DelegatingHandler)
+### Automatyczna iniekcja JWT i Odświeżanie Sesji (DelegatingHandler)
 ```csharp
 public class AuthHandler : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        // 1. Wstrzyknięcie tokenu z SecureStorage
         var token = await SecureStorage.Default.GetAsync("jwt_token");
         if (!string.IsNullOrEmpty(token))
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        return await base.SendAsync(request, cancellationToken);
+        var response = await base.SendAsync(request, cancellationToken);
+        
+        // 2. Przechwycenie wygasłej sesji (HTTP 401)
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            var newToken = await _authService.RefreshSessionAsync();
+            if (newToken != null)
+            {
+                // 3. Automatyczne powtórzenie żądania z nowym tokenem
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", newToken);
+                return await base.SendAsync(request, cancellationToken);
+            }
+        }
+        return response;
     }
 }
 ```
@@ -507,8 +527,8 @@ PayItOff/
 │   ├── Migrations/           # Historia migracji EF Core
 │   └── Interceptors/         # AuditLogInterceptor (śledzi wszystkie zmiany w bazie)
 ├── PayItOff.Shared/
-│   ├── Requests/             # 22 klasy DTO żądań
-│   └── Responses/            # 20 klas DTO odpowiedzi
+│   ├── Requests/             # 23 klasy DTO żądań
+│   └── Responses/            # 21 klas DTO odpowiedzi
 ├── PayItOff.MauiClient/
 │   ├── Views/                # 10+ ekranów XAML
 │   ├── ViewModels/           # MVVM z CommunityToolkit
@@ -523,8 +543,8 @@ PayItOff/
 ## Bezpieczeństwo
 
 - **Hasła:** Hashowane z BCrypt (bez Plain-Text nigdzie w bazie)
-- **Tokeny JWT:** Symetryczny podpis HMAC-SHA256, przechowywane przez `SecureStorage`
-- **Walidacja IBAN:** Regex wymuszający polski format 26-cyfrowy (`PL00 0000 0000...`)
+- **Tokeny JWT i Refresh Tokens:** Symetryczny podpis HMAC-SHA256. Access Token posiada krótki czas życia, natomiast sesje są bezpiecznie odnawiane w tle za pomocą długoterminowych Refresh Tokenów zapisanych w bazie danych. Wyciek dostępu jest chroniony szyfrowanym magazynem `SecureStorage` po stronie klienta MAUI.
+- **Walidacja Telefonu i IBAN:** Rygorystyczne zabezpieczenie w bazie na unikalność numerów telefonu (Unique Constraints) oraz Regex wymuszający polski format 26-cyfrowy IBAN
 - **Walidacja Hasła:** Min. 8 znaków, wymagana duża/mała litera i znak specjalny
 - **Audit Trail:** Każda operacja `INSERT/UPDATE/DELETE` logowana automatycznie przez EF Core Interceptor
 - **Blokady kaskadowe:** `DeleteBehavior.Restrict` – brak możliwości przypadkowego skasowania historii finansowej

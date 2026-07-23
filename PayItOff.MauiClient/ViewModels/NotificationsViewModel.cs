@@ -65,6 +65,11 @@ public partial class NotificationsViewModel : PopupViewModelBase
         _signalRService.OnSystemNotificationEventReceived -= HandleNotificationEvent;
     }
 
+    public void OnDisappearing()
+    {
+        UnsubscribeFromEvents();
+    }
+
     [RelayCommand]
     public void ToggleFilter(string filter)
     {

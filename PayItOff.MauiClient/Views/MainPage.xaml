@@ -65,12 +65,12 @@
                                                                     <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
                                                                 </Grid>
                                                             </Border>
-                                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
                                                                 <Label Text="{Binding FullName}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=14, Default=18}"/>
                                                                 <Label Text="{Binding CategoriesDisplay}" TextColor="{StaticResource TextSubtle}" FontSize="{OnIdiom Phone=12, Default=14}"/>
                                                                 <Label Text="{Binding Date, StringFormat='{0:dd/MM/yy}'}" TextColor="{StaticResource TextSubtle}" FontSize="11" IsVisible="{OnIdiom Phone=True, Default=False}" />
                                                             </VerticalStackLayout>
-                                                            <Label Grid.Column="2" Text="{Binding Date, StringFormat='{0:dd/MM/yy}'}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=15}" VerticalOptions="Center" HorizontalOptions="Center" IsVisible="{OnIdiom Phone=False, Default=True}" />
+                                                            <Label Grid.Column="2" Text="{Binding DisplayNumber}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=14}" VerticalOptions="Center"/>
                                                             <Label Grid.Column="{OnIdiom Phone=2, Default=3}" Text="{Binding Amount, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusGreen}" FontAttributes="Bold" FontSize="{OnIdiom Phone=16, Default=20}" VerticalOptions="Center" HorizontalOptions="End"/>
                                                         </Grid>
                                                     </Border>
@@ -113,12 +113,12 @@
                                                                     <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" />
                                                                 </Grid>
                                                             </Border>
-                                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
                                                                 <Label Text="{Binding FullName}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=14, Default=18}"/>
                                                                 <Label Text="{Binding CategoriesDisplay}" TextColor="{StaticResource TextSubtle}" FontSize="{OnIdiom Phone=12, Default=14}"/>
-                                                                <Label Text="{Binding Date, StringFormat='{0:dd/MM}'}" TextColor="{StaticResource TextSubtle}" FontSize="11" IsVisible="{OnIdiom Phone=True, Default=False}" />
+                                                                <Label Text="{Binding Date, StringFormat='{0:dd/MM/yy}'}" TextColor="{StaticResource TextSubtle}" FontSize="11" IsVisible="{OnIdiom Phone=True, Default=False}" />
                                                             </VerticalStackLayout>
-                                                            <Label Grid.Column="2" Text="{Binding Date, StringFormat='{0:dd/MM}'}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="12" VerticalOptions="Center" HorizontalOptions="Center" IsVisible="{OnIdiom Phone=False, Default=True}" />
+                                                            <Label Grid.Column="2" Text="{Binding DisplayNumber}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=14}" VerticalOptions="Center"/>
                                                             <Label Grid.Column="{OnIdiom Phone=2, Default=3}" Text="{Binding Amount, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" FontSize="{OnIdiom Phone=16, Default=20}" VerticalOptions="Center" HorizontalOptions="End"/>
                                                         </Grid>
                                                     </Border>
@@ -155,13 +155,13 @@
                                                     </ContentView.GestureRecognizers>
                                                     <Border BackgroundColor="{Binding BackgroundColor}" Padding="0" StrokeShape="RoundRectangle 12" StrokeThickness="0">
                                                         <Grid ColumnDefinitions="Auto, 50, *" ColumnSpacing="10">
-                                                            
+
                                                             <BoxView Grid.Column="0" WidthRequest="4" Color="{Binding LeftBarColor}" VerticalOptions="Fill" />
-                                                            
+
                                                             <Image Grid.Column="1" Source="{Binding IconSource}" WidthRequest="22" HeightRequest="22" VerticalOptions="Center" HorizontalOptions="Center" />
-                                                            
+
                                                             <Label Grid.Column="2" Text="{Binding DisplayText}" TextColor="{Binding TextColor}" FontAttributes="Bold" FontSize="13" VerticalOptions="Center" LineBreakMode="TailTruncation" MaxLines="2" Margin="0,10" />
-                                                            
+
                                                         </Grid>
                                                     </Border>
                                                 </ContentView>

@@ -5,7 +5,6 @@ namespace PayItOff.Application.Services
 {
     public class EmailService : IEmailService
     {
-        public static bool IsDisabledForSeeder { get; set; } = false;
 
         private readonly IConfiguration _configuration;
 

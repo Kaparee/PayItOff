@@ -14,6 +14,9 @@ public partial class LoginPage : ContentPage
     {
         base.OnNavigatedTo(args);
         if (BindingContext is LoginViewModel vm)
+        {
             _ = vm.CheckForAppUpdateAsync();
+            _ = vm.CheckAutoLoginAsync();
+        }
     }
 }

@@ -11,7 +11,7 @@
         <Style x:Key="PasswordEntryBorderStyle" TargetType="Border" BasedOn="{StaticResource BaseEntryBorderStyle}">
             <Style.Triggers>
                 <DataTrigger TargetType="Border" Binding="{Binding HasError}" Value="True">
-                    
+
                     <Setter Property="Stroke" Value="{StaticResource StatusRed}" />
                     <Setter Property="StrokeThickness" Value="2" />
                 </DataTrigger>
@@ -21,19 +21,19 @@
 
     <Grid>
         <ScrollView>
-        
+
         <VerticalStackLayout Spacing="25" Padding="{OnIdiom Phone='20', Default='30'}" VerticalOptions="Center" MaximumWidthRequest="450">
 
             <Image Source="payitoff_logo_img.png" HeightRequest="150" WidthRequest="150" HorizontalOptions="Center" Margin="0,0,0,0" />
             <Label Text="PayItOff!" Style="{StaticResource Headline}" Margin="0,0,0,20" HorizontalOptions="Center" />
 
             <VerticalStackLayout Spacing="8">
-                
+
                 <Label Text="Adres E-Mail lub Nazwa Użytkownika"
                        TextColor="{StaticResource TextSubtle}"
                        Margin="15, 0, 0, 0" />
                 <Border StrokeShape="RoundRectangle 10" Style="{StaticResource BaseEntryBorderStyle}">
-                    
+
                     <Entry Text="{Binding EmailOrNickname}"
                            Placeholder="Wpisz email lub nickname..."
                            Keyboard="Email"
@@ -43,7 +43,7 @@
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="8">
-                
+
                 <Label Text="Hasło" TextColor="{StaticResource TextSubtle}" Margin="15, 0, 0, 0" />
                 <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PasswordEntryBorderStyle}">
                     <Grid ColumnDefinitions="*, Auto">
@@ -68,9 +68,12 @@
                 </Border>
             </VerticalStackLayout>
 
+            <HorizontalStackLayout Spacing="0" Margin="0,0,0,0">
+                <CheckBox IsChecked="{Binding RememberMe}" />
+                <Label Text="Zapamiętaj mnie" VerticalOptions="Center" />
+            </HorizontalStackLayout>
 
 
-            
             <controls:AppButton Text="Zaloguj się"
                     Command="{Binding LoginCommand}"
                     Margin="0,10,0,0" />
@@ -83,12 +86,12 @@
 
         </VerticalStackLayout>
         </ScrollView>
-        
+
         <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#B3000000" ZIndex="999">
-            <Border HorizontalOptions="Center" VerticalOptions="Center" BackgroundColor="{StaticResource BgDark}" Padding="30" StrokeShape="RoundRectangle 20" StrokeThickness="0">
+            <Border HorizontalOptions="Center" VerticalOptions="Center">
                 <VerticalStackLayout Spacing="15" HorizontalOptions="Center" VerticalOptions="Center">
                     <ActivityIndicator IsRunning="{Binding IsBusy}" Color="{StaticResource BrandViolet}" HorizontalOptions="Center" />
-                    <Label Text="Ładowanie..." TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" />
+                    <Label Text="Automatyczne logowanie..." TextColor="{StaticResource TextSubtle}" HorizontalOptions="Center" />
                 </VerticalStackLayout>
             </Border>
         </Grid>
@@ -98,7 +101,7 @@
             <Border StrokeShape="RoundRectangle 10" Style="{StaticResource PopupContainerStyle}" MaximumWidthRequest="400">
                 <VerticalStackLayout Spacing="15">
                     <Label Text="{Binding CustomAlertTitle}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextMain}" HorizontalOptions="Center"/>
-                    
+
                     <ScrollView MaximumHeightRequest="250">
                         <Label Text="{Binding CustomAlertMessage}" TextType="Html" FontSize="14" TextColor="{StaticResource TextSubtle}" LineBreakMode="WordWrap" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
                     </ScrollView>

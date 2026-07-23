@@ -24,6 +24,8 @@ namespace PayItOff.Domain.Entities
         public DateTime CreatedAt { get; private set; }
         public DateTime UpdatedAt { get; private set; }
         public DateTime? DeletedAt { get; private set; }
+        public string? RefreshToken { get; private set; }
+        public DateTime? RefreshTokenExpiryTime { get; private set; }
 
         protected User() { }
 
@@ -156,6 +158,14 @@ namespace PayItOff.Domain.Entities
         {
             if (string.IsNullOrWhiteSpace(newEmail)) { throw new ArgumentException("Invalid new Email."); }
             Email = newEmail;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void UpdateRefreshToken(string newRefreshToken, DateTime expiryTime)
+        {
+            if (string.IsNullOrWhiteSpace(newRefreshToken)) { throw new ArgumentException("Invalid tokens"); }
+            RefreshToken = newRefreshToken;
+            RefreshTokenExpiryTime = expiryTime;
             UpdatedAt = DateTime.UtcNow;
         }
     }

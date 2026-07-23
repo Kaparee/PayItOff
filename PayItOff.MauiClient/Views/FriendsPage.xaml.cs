@@ -20,9 +20,9 @@ public partial class FriendsPage : ContentPage
         _viewModel.LoadFriendsCommand.Execute(null);
     }
 
-    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    protected override void OnDisappearing()
     {
-        base.OnNavigatedFrom(args);
-        _viewModel.UnsubscribeFromEvents();
+        base.OnDisappearing();
+        (BindingContext as FriendsViewModel)?.OnDisappearing();
     }
 }

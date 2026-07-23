@@ -57,6 +57,7 @@ public class SettlementService : ISettlementService
     public async Task<GlobalSettlementResponse> GetUserAllIncomesSummaryAsync(int userId)
     {
         var incomes = await _groupDebtRepository.GetUserTotalIncomesAsync(userId);
+        var user = await _userRepository.GetUserByIdAsync(userId);
         var baseUrl = _configuration["AppUrls:BackendUrl"];
 
         var items = incomes.Select(data => new GlobalDebtSummaryResponse
@@ -64,6 +65,7 @@ public class SettlementService : ISettlementService
             UserId = data.UserId,
             Name = data.Name,
             Surname = data.Surname,
+            Number = data.Number,
             AvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, data.AvatarUrl),
             Categories = data.Categories,
             Date = data.Date,
@@ -76,6 +78,7 @@ public class SettlementService : ISettlementService
     public async Task<GlobalSettlementResponse> GetUserAllExpensesSummaryAsync(int userId)
     {
         var expenses = await _groupDebtRepository.GetUserTotalExpensesAsync(userId);
+        var user = await _userRepository.GetUserByIdAsync(userId);
         var baseUrl = _configuration["AppUrls:BackendUrl"];
 
         var items = expenses.Select(data => new GlobalDebtSummaryResponse
@@ -83,6 +86,7 @@ public class SettlementService : ISettlementService
             UserId = data.UserId,
             Name = data.Name,
             Surname = data.Surname,
+            Number = data.Number,
             AvatarUrl = UrlHelper.BuildUserAvatarUrl(baseUrl!, data.AvatarUrl),
             Categories = data.Categories,
             Date = data.Date,

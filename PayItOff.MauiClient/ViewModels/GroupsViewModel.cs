@@ -68,6 +68,11 @@ public partial class GroupsViewModel : PopupViewModelBase
         _signalRService.OnInvitationReceived -= HandleInvitationReceived;
     }
 
+    public void OnDisappearing()
+    {
+        UnsubscribeFromEvents();
+    }
+
     private void HandleInvitationReceived()
     {
         MainThread.BeginInvokeOnMainThread(async () =>

@@ -124,7 +124,7 @@ public class GroupDebtRepository : IGroupDebtRepository
         return balances;
     }
 
-    public async Task<List<(int UserId, string Name, string Surname, string? AvatarUrl, List<string> Categories, DateTime Date, decimal Amount)>> GetUserTotalIncomesAsync(int userId)
+    public async Task<List<(int UserId, string Name, string Surname, string? Number, string? AvatarUrl, List<string> Categories, DateTime Date, decimal Amount)>> GetUserTotalIncomesAsync(int userId)
     {
         var allDebts = await _context.GroupDebts
             .Include(d => d.Debtor)
@@ -143,10 +143,10 @@ public class GroupDebtRepository : IGroupDebtRepository
             .Where(x => x.NetBalance > 0)
             .ToList();
 
-        return await MapToResponseWithMetadata(userId, globalBalances.Select(x => (x.User, x.NetBalance)).ToList());
+        return await MapToResponseWithMetadata(userId, globalBalances.ConvertAll(x => (x.User, x.NetBalance)));
     }
 
-    public async Task<List<(int UserId, string Name, string Surname, string? AvatarUrl, List<string> Categories, DateTime Date, decimal Amount)>> GetUserTotalExpensesAsync(int userId)
+    public async Task<List<(int UserId, string Name, string Surname, string? Number, string? AvatarUrl, List<string> Categories, DateTime Date, decimal Amount)>> GetUserTotalExpensesAsync(int userId)
     {
         var allDebts = await _context.GroupDebts
             .Include(d => d.Debtor)
@@ -165,12 +165,12 @@ public class GroupDebtRepository : IGroupDebtRepository
             .Where(x => x.NetBalance < 0)
             .ToList();
 
-        return await MapToResponseWithMetadata(userId, globalBalances.Select(x => (x.User, Math.Abs(x.NetBalance))).ToList());
+        return await MapToResponseWithMetadata(userId, globalBalances.ConvertAll(x => (x.User, Math.Abs(x.NetBalance))));
     }
 
-    private async Task<List<(int UserId, string Name, string Surname, string? AvatarUrl, List<string> Categories, DateTime Date, decimal Amount)>> MapToResponseWithMetadata(int userId, List<(User User, decimal Amount)> balances)
+    private async Task<List<(int UserId, string Name, string Surname, string? Number, string? AvatarUrl, List<string> Categories, DateTime Date, decimal Amount)>> MapToResponseWithMetadata(int userId, List<(User User, decimal Amount)> balances)
     {
-        var result = new List<(int, string, string, string?, List<string>, DateTime, decimal)>();
+        var result = new List<(int, string, string, string?, string?, List<string>, DateTime, decimal)>();
 
         foreach (var item in balances)
         {
@@ -186,6 +186,7 @@ public class GroupDebtRepository : IGroupDebtRepository
                 item.User.Id,
                 item.User.Name,
                 item.User.Surname,
+                item.User.PhoneNumber,
                 item.User.AvatarUrl,
                 metadata.Select(m => m.Category).Distinct().ToList(),
                 metadata.FirstOrDefault()?.PurchasedAt ?? DateTime.Now,

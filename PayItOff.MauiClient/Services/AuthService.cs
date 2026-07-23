@@ -20,11 +20,17 @@ public class AuthService
 
         if (response.IsSuccessStatusCode)
         {
+
             var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+
+            if (!string.IsNullOrEmpty(result!.RefreshToken))
+            {
+                await SecureStorage.Default.SetAsync("refresh_token", result.RefreshToken);
+            }
 
             await SecureStorage.Default.SetAsync("jwt_token", result!.Token);
 
-            var userId = PayItOff.MauiClient.Helpers.JwtHelper.GetClaimValue(result.Token, "nameid");
+            var userId = Helpers.JwtHelper.GetClaimValue(result.Token, "nameid");
             if (!string.IsNullOrEmpty(userId))
             {
                 await SecureStorage.Default.SetAsync("user_id", userId);
@@ -51,13 +57,36 @@ public class AuthService
         }
     }
 
-    public async Task SeedHeavyLoginDataAsync(string password)
+
+    public async Task<bool> RefreshTokensAsync()
     {
-        var response = await _httpClient.PostAsync($"Seeder/heavy-login-seed?password={password}", null);
-        if (!response.IsSuccessStatusCode)
+        var oldAccessToken = await SecureStorage.Default.GetAsync("jwt_token");
+        var refreshToken = await SecureStorage.Default.GetAsync("refresh_token");
+
+        if (string.IsNullOrEmpty(oldAccessToken) || string.IsNullOrEmpty(refreshToken))
+            return false;
+
+        var request = new RefreshRequest
         {
-            var error = await response.Content.ReadAsStringAsync();
-            throw new Exception(string.IsNullOrWhiteSpace(error) ? "Seeder zwrócił błąd." : error);
+            AccessToken = oldAccessToken,
+            RefreshToken = refreshToken
+        };
+
+        var response = await _httpClient.PostAsJsonAsync("User/refresh", request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+
+            await SecureStorage.Default.SetAsync("jwt_token", result!.Token);
+            if (!string.IsNullOrEmpty(result.RefreshToken))
+            {
+                await SecureStorage.Default.SetAsync("refresh_token", result.RefreshToken);
+            }
+
+            return true;
         }
+
+        return false;
     }
 }

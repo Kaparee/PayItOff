@@ -13,6 +13,7 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
 {
     private readonly GroupService _groupService;
     private readonly ExpenseService _expenseService;
+    private readonly SignalRService _signalRService;
 
     [ObservableProperty]
     public partial int GroupId { get; set; }
@@ -53,10 +54,14 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
     private int _currentUserId;
     private DisplayGroupMember? _defaultPayer;
 
-    public AddExpenseViewModel(GroupService groupService, ExpenseService expenseService)
+    public AddExpenseViewModel(
+        GroupService groupService,
+        ExpenseService expenseService,
+        SignalRService signalRService)
     {
         _groupService = groupService;
         _expenseService = expenseService;
+        _signalRService = signalRService;
         IsCustomAlertSupported = true;
 
         ReceiptPhotos.CollectionChanged += (s, e) => OnPropertyChanged(nameof(IsReceiptPhotosEmpty));
@@ -98,6 +103,8 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
         IsBusy = true;
         try
         {
+            await _signalRService.JoinGroupAsync(GroupId);
+
             var details = await _groupService.GetGroupDetails(GroupId);
             if (details != null)
             {
@@ -712,6 +719,11 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
         {
             SelectedPhoto = ReceiptPhotos[currentIndex - 1];
         }
+    }
+
+    public void OnDisappearing()
+    {
+        _ = _signalRService.LeaveGroupAsync(GroupId);
     }
 }
 
