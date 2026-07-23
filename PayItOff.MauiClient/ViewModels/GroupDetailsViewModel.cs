@@ -29,8 +29,8 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     private readonly ExpenseService _expenseService;
     private readonly SignalRService _signalRService;
 
-    private List<GroupMemberBalanceDto> _loadedMembers = new();
-    private List<ExpenseSummaryDto> _loadedExpenses = new();
+    private List<GroupMemberBalanceDto> _loadedMembers = [];
+    private List<ExpenseSummaryDto> _loadedExpenses = [];
     private int _currentUserId;
 
     [ObservableProperty]
@@ -101,12 +101,12 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     [NotifyPropertyChangedFor(nameof(RemainingAmountToSplit))]
     public partial decimal EditExpenseTotalAmount { get; set; }
 
-    public ObservableCollection<EditableExpenseSplit> EditExpenseSplits { get; } = new();
+    public ObservableCollection<EditableExpenseSplit> EditExpenseSplits { get; } = [];
 
     public decimal RemainingAmountToSplit => EditExpenseTotalAmount - EditExpenseSplits.Sum(s => s.OwedAmount);
 
-    public ObservableCollection<GroupMemberResponse> ActiveMembersList { get; } = new();
-    public ObservableCollection<GroupMemberResponse> FilteredActiveMembersList { get; } = new();
+    public ObservableCollection<GroupMemberResponse> ActiveMembersList { get; } = [];
+    public ObservableCollection<GroupMemberResponse> FilteredActiveMembersList { get; } = [];
 
     private string _popupMembersSearchText = string.Empty;
     public string PopupMembersSearchText
@@ -121,11 +121,11 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         }
     }
 
-    public ObservableCollection<FriendListResponse> FriendsList { get; } = new();
-    public ObservableCollection<GroupMemberBalanceDto> FilteredMembers { get; } = new();
-    public ObservableCollection<TransactionGroup> TransactionSections { get; } = new();
+    public ObservableCollection<FriendListResponse> FriendsList { get; } = [];
+    public ObservableCollection<GroupMemberBalanceDto> FilteredMembers { get; } = [];
+    public ObservableCollection<TransactionGroup> TransactionSections { get; } = [];
 
-    private readonly HashSet<int> _onlineUsers = new();
+    private readonly HashSet<int> _onlineUsers = [];
 
     [ObservableProperty]
     public partial ObservableCollection<AllGroupPendingInvitationResponse> PendingInvitations { get; set; } = new();
@@ -182,7 +182,10 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        if (!query.TryGetValue("groupId", out var raw)) return;
+        if (!query.TryGetValue("groupId", out var raw))
+        {
+            return;
+        }
 
         var id = raw switch
         {
@@ -193,7 +196,9 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         };
 
         if (id > 0)
+        {
             GroupId = id;
+        }
     }
 
     partial void OnGroupIdChanged(int value)
@@ -274,7 +279,10 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     [RelayCommand]
     private async Task ShowExpenseDetailsAsync(ExpenseSummaryDto expense)
     {
-        if (expense == null) return;
+        if (expense == null)
+        {
+            return;
+        }
 
         IsBusy = true;
         try
@@ -307,10 +315,16 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     [RelayCommand]
     private async Task DeleteExpenseAsync()
     {
-        if (SelectedExpenseDetails == null || !IsAdminOrFounder) return;
+        if (SelectedExpenseDetails == null || !IsAdminOrFounder)
+        {
+            return;
+        }
 
         bool confirm = await ShowAlertAsync("Usuń wydatek", $"Czy na pewno chcesz usunąć wydatek '{SelectedExpenseDetails.Title}'? Wszystkie powiązane długi zostaną wycofane.", "Usuń", "Anuluj");
-        if (!confirm) return;
+        if (!confirm)
+        {
+            return;
+        }
 
         IsBusy = true;
         try
@@ -340,12 +354,20 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     [RelayCommand]
     private void ShowEditExpensePopup()
     {
-        if (SelectedExpenseDetails == null) return;
+        if (SelectedExpenseDetails == null)
+        {
+            return;
+        }
+
         EditExpenseName = SelectedExpenseDetails.Title;
         EditExpenseCategory = SelectedExpenseDetails.Category;
         EditExpenseTotalAmount = SelectedExpenseDetails.TotalAmount;
 
-        foreach (var old in EditExpenseSplits) old.PropertyChanged -= OnSplitPropertyChanged;
+        foreach (var old in EditExpenseSplits)
+        {
+            old.PropertyChanged -= OnSplitPropertyChanged;
+        }
+
         EditExpenseSplits.Clear();
         foreach (var p in SelectedExpenseDetails.Participants)
         {
@@ -382,7 +404,9 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     private async Task ConfirmEditExpenseAsync()
     {
         if (SelectedExpenseDetails == null || string.IsNullOrWhiteSpace(EditExpenseName) || string.IsNullOrWhiteSpace(EditExpenseCategory))
+        {
             return;
+        }
 
         if (Math.Abs(RemainingAmountToSplit) > 0.01m)
         {
@@ -425,13 +449,19 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     [RelayCommand]
     private async Task ConfirmEditGroupAsync()
     {
-        if (string.IsNullOrWhiteSpace(NewGroupName)) return;
+        if (string.IsNullOrWhiteSpace(NewGroupName))
+        {
+            return;
+        }
 
         IsBusy = true;
         IsEditGroupPopupVisible = false;
 
         var request = new EditGroupInfoRequest { GroupId = GroupId, NewName = NewGroupName.Trim() };
-        if (_tempEditAvatarStream != null) _tempEditAvatarStream.Position = 0;
+        if (_tempEditAvatarStream != null)
+        {
+            _tempEditAvatarStream.Position = 0;
+        }
 
         var success = await _groupService.EditGroupInfoAsync(request, _tempEditAvatarStream, _tempEditFileName);
 
@@ -451,7 +481,10 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     private async Task DeleteGroupAsync()
     {
         bool confirm = await ShowAlertAsync("Usuń Grupę", "Czy na pewno chcesz usunąć tę grupę? Tej operacji nie można cofnąć.", "Tak, usuń", "Anuluj");
-        if (!confirm) return;
+        if (!confirm)
+        {
+            return;
+        }
 
         IsBusy = true;
         var success = await _groupService.DeleteGroupAsync(GroupId);
@@ -470,7 +503,10 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     private async Task LeaveGroupAsync()
     {
         bool confirm = await ShowAlertAsync("Opuść Grupę", "Czy na pewno chcesz opuścić tę grupę?", "Tak, opuść", "Anuluj");
-        if (!confirm) return;
+        if (!confirm)
+        {
+            return;
+        }
 
         IsBusy = true;
         var success = await _groupMemberService.LeaveGroupAsync(GroupId);
@@ -577,7 +613,10 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     [RelayCommand]
     private async Task InviteUserBySearchAsync()
     {
-        if (string.IsNullOrWhiteSpace(InviteSearchText)) return;
+        if (string.IsNullOrWhiteSpace(InviteSearchText))
+        {
+            return;
+        }
 
         IsBusy = true;
         var isEmail = InviteSearchText.Contains('@');
@@ -599,7 +638,11 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     [RelayCommand]
     private async Task InviteFriendAsync(FriendListResponse friend)
     {
-        if (friend == null) return;
+        if (friend == null)
+        {
+            return;
+        }
+
         IsBusy = true;
         await ExecuteInviteAsync(friend.FriendId);
     }
@@ -635,18 +678,42 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     [RelayCommand]
     private async Task ChangeMemberRoleAsync(GroupMemberResponse member)
     {
-        if (!IsAdminOrFounder) return;
-        if (member.UserId == _currentUserId) return;
+        if (!IsAdminOrFounder)
+        {
+            return;
+        }
+
+        if (member.UserId == _currentUserId)
+        {
+            return;
+        }
 
         var options = new List<string>();
-        if (member.Role != GroupMemberRole.Member) options.Add("Ustaw jako Zwykły członek");
-        if (member.Role != GroupMemberRole.Admin) options.Add("Ustaw jako Administrator");
-        if (IsOwner && member.Role != GroupMemberRole.Owner) options.Add("Przekaż własność grupy");
+        if (member.Role != GroupMemberRole.Member)
+        {
+            options.Add("Ustaw jako Zwykły członek");
+        }
 
-        if (options.Count == 0) return;
+        if (member.Role != GroupMemberRole.Admin)
+        {
+            options.Add("Ustaw jako Administrator");
+        }
+
+        if (IsOwner && member.Role != GroupMemberRole.Owner)
+        {
+            options.Add("Przekaż własność grupy");
+        }
+
+        if (options.Count == 0)
+        {
+            return;
+        }
 
         var action = await ShowActionSheetAsync("Wybierz nową rolę", options.ToArray());
-        if (string.IsNullOrEmpty(action) || action == "Anuluj") return;
+        if (string.IsNullOrEmpty(action) || action == "Anuluj")
+        {
+            return;
+        }
 
         GroupMemberRole newRole = member.Role;
         string confirmMessage = "";
@@ -672,7 +739,10 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         }
 
         bool confirm = await ShowAlertAsync("Potwierdzenie zmiany roli", confirmMessage, "Tak", "Anuluj");
-        if (!confirm) return;
+        if (!confirm)
+        {
+            return;
+        }
 
         IsBusy = true;
         var success = await _groupMemberService.UpdateRoleAsync(new GroupMemberUpdateRequest { GroupId = GroupId, TargetUserId = member.UserId, NewRole = newRole });
@@ -705,11 +775,21 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     [RelayCommand]
     private async Task KickMemberAsync(GroupMemberResponse member)
     {
-        if (!IsAdminOrFounder) return;
-        if (member.UserId == _currentUserId) return;
+        if (!IsAdminOrFounder)
+        {
+            return;
+        }
+
+        if (member.UserId == _currentUserId)
+        {
+            return;
+        }
 
         bool confirm = await ShowAlertAsync("Wyrzuć członka", $"Czy na pewno chcesz wyrzucić {member.FullName} z grupy?", "Tak", "Anuluj");
-        if (!confirm) return;
+        if (!confirm)
+        {
+            return;
+        }
 
         IsBusy = true;
         var success = await _groupMemberService.KickUserFromGroupAsync(GroupId, member.UserId);
@@ -724,7 +804,10 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
 
     public async Task LoadDataAsync()
     {
-        if (GroupId <= 0) return;
+        if (GroupId <= 0)
+        {
+            return;
+        }
 
         await _signalRService.JoinGroupAsync(GroupId);
 
@@ -764,7 +847,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
             OnPropertyChanged(nameof(RoleSubtitle));
             OnPropertyChanged(nameof(IsNotArchived));
 
-            _loadedMembers = response.Members ?? new List<GroupMemberBalanceDto>();
+            _loadedMembers = response.Members ?? [];
             foreach (var member in _loadedMembers)
             {
                 member.AvatarUrl = member.AvatarUrl;
@@ -773,7 +856,7 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
                     line.AvatarUrl = line.AvatarUrl;
                 }
             }
-            _loadedExpenses = response.Expenses ?? new List<ExpenseSummaryDto>();
+            _loadedExpenses = response.Expenses ?? [];
 
             SyncOnlineStatus();
             ApplyMemberFilter();
@@ -800,11 +883,15 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         var q = (MemberSearchText ?? string.Empty).Trim().ToLowerInvariant();
         IEnumerable<GroupMemberBalanceDto> src = _loadedMembers;
         if (q.Length > 0)
+        {
             src = src.Where(m => m.FullName.ToLowerInvariant().Contains(q));
+        }
 
         FilteredMembers.Clear();
         foreach (var m in src)
+        {
             FilteredMembers.Add(m);
+        }
     }
 
     private void ApplyTransactionFilter()
@@ -829,13 +916,23 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
 
         TransactionSections.Clear();
         foreach (var g in grouped)
+        {
             TransactionSections.Add(g);
+        }
     }
 
     private static string FormatDate(DateTime date)
     {
-        if (date.Date == DateTime.Today) return "Dzisiaj";
-        if (date.Date == DateTime.Today.AddDays(-1)) return "Wczoraj";
+        if (date.Date == DateTime.Today)
+        {
+            return "Dzisiaj";
+        }
+
+        if (date.Date == DateTime.Today.AddDays(-1))
+        {
+            return "Wczoraj";
+        }
+
         return date.ToString("dd.MM.yyyy", CultureInfo.GetCultureInfo("pl-PL"));
     }
 
@@ -871,12 +968,18 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     private void ShowExpensePhotos()
     {
         if (SelectedExpenseDetails?.ReceiptPhotos == null || SelectedExpenseDetails.ReceiptPhotos.Count == 0)
+        {
             return;
+        }
 
         ExpensePhotosToView.Clear();
         foreach (var url in SelectedExpenseDetails.ReceiptPhotos)
         {
-            if (string.IsNullOrEmpty(url)) continue;
+            if (string.IsNullOrEmpty(url))
+            {
+                continue;
+            }
+
             ExpensePhotosToView.Add(url);
         }
 
@@ -896,7 +999,11 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     [RelayCommand]
     private void PhotoSwipeLeft()
     {
-        if (ExpensePhotosToView.Count == 0) return;
+        if (ExpensePhotosToView.Count == 0)
+        {
+            return;
+        }
+
         SelectedPhotoIndex = (SelectedPhotoIndex + 1) % ExpensePhotosToView.Count;
         SelectedExpensePhotoUrl = ExpensePhotosToView[SelectedPhotoIndex];
         OnPropertyChanged(nameof(PhotoViewerTitle));
@@ -905,7 +1012,11 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     [RelayCommand]
     private void PhotoSwipeRight()
     {
-        if (ExpensePhotosToView.Count == 0) return;
+        if (ExpensePhotosToView.Count == 0)
+        {
+            return;
+        }
+
         SelectedPhotoIndex = (SelectedPhotoIndex - 1 + ExpensePhotosToView.Count) % ExpensePhotosToView.Count;
         SelectedExpensePhotoUrl = ExpensePhotosToView[SelectedPhotoIndex];
         OnPropertyChanged(nameof(PhotoViewerTitle));
@@ -914,7 +1025,11 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     [RelayCommand]
     private void SelectPhotoThumbnail(string url)
     {
-        if (string.IsNullOrEmpty(url)) return;
+        if (string.IsNullOrEmpty(url))
+        {
+            return;
+        }
+
         var idx = ExpensePhotosToView.IndexOf(url);
         if (idx >= 0)
         {
@@ -957,7 +1072,11 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         MainThread.BeginInvokeOnMainThread(() =>
         {
             _onlineUsers.Clear();
-            foreach (var id in userIds) _onlineUsers.Add(id);
+            foreach (var id in userIds)
+            {
+                _onlineUsers.Add(id);
+            }
+
             SyncOnlineStatus();
             ApplyMemberFilter();
         });
@@ -968,9 +1087,13 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         MainThread.BeginInvokeOnMainThread(() =>
         {
             if (isOnline)
+            {
                 _onlineUsers.Add(userId);
+            }
             else
+            {
                 _onlineUsers.Remove(userId);
+            }
 
             SyncOnlineStatus();
             ApplyMemberFilter();
@@ -984,7 +1107,9 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
         if (invites != null)
         {
             foreach (var invite in invites)
+            {
                 PendingInvitations.Add(invite);
+            }
         }
         PendingInvitationsCount = PendingInvitations.Count;
     }
@@ -1012,7 +1137,10 @@ public partial class GroupDetailsViewModel : PopupViewModelBase, IQueryAttributa
     [RelayCommand]
     private async Task CancelInviteAsync(AllGroupPendingInvitationResponse item)
     {
-        if (item == null) return;
+        if (item == null)
+        {
+            return;
+        }
 
         IsBusy = true;
         try

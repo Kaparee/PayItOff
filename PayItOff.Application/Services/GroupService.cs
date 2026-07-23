@@ -59,7 +59,10 @@ public class GroupService : IGroupService
         if (user is null) { throw new UserNotFoundException(); }
 
         var validationResult = await _validator.ValidateAsync(request);
-        if (!validationResult.IsValid) throw new ValidationException(validationResult.Errors);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationException(validationResult.Errors);
+        }
 
         var savedFileName = await _fileService.SaveAvatarAsync(avatar);
 
@@ -150,7 +153,11 @@ public class GroupService : IGroupService
 
     public async Task EditGroupInfoAsync(int userId, EditGroupInfoRequest request, IFormFile? avatar)
     {
-        if (request == null) throw new ArgumentNullException(nameof(request), "Payload nie został zmapowany.");
+        if (request == null)
+        {
+            throw new ArgumentNullException(nameof(request), "Payload nie został zmapowany.");
+        }
+
         var user = await _userRepository.GetUserByIdAsync(userId);
         if (user is null) { throw new UserNotFoundException(); }
         var group = await _groupRepository.GetGroupInfoByIdAsync(request.GroupId);
@@ -196,10 +203,16 @@ public class GroupService : IGroupService
     public async Task<GroupDetailsResponse> GetGroupDetailsAsync(int groupId, int userId)
     {
         var group = await _groupRepository.GetGroupInfoIncludingArchivedByIdAsync(groupId);
-        if (group == null) throw new GroupNotFoundException();
+        if (group == null)
+        {
+            throw new GroupNotFoundException();
+        }
 
         var currentMember = await _groupMemberRepository.GetMemberAsync(groupId, userId);
-        if (currentMember == null) throw new GroupMemberNotFoundException();
+        if (currentMember == null)
+        {
+            throw new GroupMemberNotFoundException();
+        }
 
         var members = await _groupMemberRepository.GetAllActiveGroupMembersAsync(groupId);
         var debts = await _groupDebtRepository.GetGroupDebtsByGroupIdAsync(groupId);
@@ -211,7 +224,10 @@ public class GroupService : IGroupService
         foreach (var member in members)
         {
             var user = member.User;
-            if (user == null) continue;
+            if (user == null)
+            {
+                continue;
+            }
 
             var owedToUser = debts.Where(d => d.CreditorId == member.UserId).Sum(d => d.Amount);
             var userOwes = debts.Where(d => d.DebtorId == member.UserId).Sum(d => d.Amount);
@@ -247,7 +263,7 @@ public class GroupService : IGroupService
                 IsCreditorToCurrentUser = isCreditorToCurrent,
                 Lines = lines,
                 LinesTotal = lines.Sum(l => l.Amount),
-                Expenses = new List<MemberExpenseLineDto>(),
+                Expenses = [],
                 ExpensesTotal = 0
             });
         }
@@ -287,7 +303,10 @@ public class GroupService : IGroupService
         foreach (var groupMember in userGroups)
         {
             var group = groupMember.Group;
-            if (group == null) continue;
+            if (group == null)
+            {
+                continue;
+            }
 
             var activeMembersCount = (await _groupMemberRepository.GetAllActiveGroupMembersAsync(group.Id)).Count;
             var isOwner = await _groupMemberRepository.IsUserOwner(userId, group.Id);
@@ -311,10 +330,16 @@ public class GroupService : IGroupService
     public async Task<List<AuditLogResponse>> GetGroupHistoryAsync(int groupId, int userId)
     {
         var group = await _groupRepository.GetGroupInfoIncludingArchivedByIdAsync(groupId);
-        if (group == null) throw new GroupNotFoundException();
+        if (group == null)
+        {
+            throw new GroupNotFoundException();
+        }
 
         var currentMember = await _groupMemberRepository.GetMemberAsync(groupId, userId);
-        if (currentMember == null) throw new GroupMemberNotFoundException();
+        if (currentMember == null)
+        {
+            throw new GroupMemberNotFoundException();
+        }
 
         var baseUrl = _configuration["AppUrls:BackendUrl"];
         var logs = await _auditLogRepository.GetAuditLogsForGroupAsync(groupId);
@@ -360,7 +385,11 @@ public class GroupService : IGroupService
     {
         var name = (u.Name ?? string.Empty).Trim();
         var sur = (u.Surname ?? string.Empty).Trim();
-        if (string.IsNullOrEmpty(sur)) return name;
+        if (string.IsNullOrEmpty(sur))
+        {
+            return name;
+        }
+
         return $"{name} {char.ToUpperInvariant(sur[0])}.";
     }
 }

@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using PayItOff.Application.Helpers;
 using PayItOff.Application.Interfaces;
@@ -8,7 +7,6 @@ using PayItOff.Domain.Exceptions;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
-using System.Buffers.Text;
 using System.Data;
 namespace PayItOff.Application.Services;
 
@@ -62,7 +60,7 @@ public class GroupMemberService : IGroupMemberService
 
             if (existingMember is not null)
             {
-                if (existingMember.Status == GroupMemberStatus.Accepted || existingMember.Status == GroupMemberStatus.Pending)
+                if (existingMember.Status is GroupMemberStatus.Accepted or GroupMemberStatus.Pending)
                 {
                     throw new FriendInvitationAlreadyExistsException();
                 }
@@ -282,7 +280,7 @@ public class GroupMemberService : IGroupMemberService
         if (currentUser.Role == GroupMemberRole.Member) { throw new InvalidUserRoleException(); }
 
         var invitation = await _groupMemberRepository.GetUserGroupInvitationAsync(groupId, targetUserId);
-        if(invitation is null) { throw new InvitationNotFoundException(); }
+        if (invitation is null) { throw new InvitationNotFoundException(); }
 
         var group = await _groupRepository.GetGroupInfoByIdAsync(groupId);
         if (group == null) { throw new GroupNotFoundException(); }

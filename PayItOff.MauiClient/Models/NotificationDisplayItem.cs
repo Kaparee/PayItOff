@@ -33,7 +33,10 @@ public class NotificationDisplayItem
     {
         get
         {
-            if (IsRead) return "#374151";
+            if (IsRead)
+            {
+                return "#374151";
+            }
 
             return NotificationType switch
             {
@@ -51,28 +54,51 @@ public class NotificationDisplayItem
         get
         {
             if (NotificationType == NotificationType.DailySummary)
+            {
                 return "calendar_icon.png";
+            }
 
             if (EntityType == EntityType.Friends)
             {
                 if (NotificationType == NotificationType.Deleting || Body.Contains("odrzucone") || Body.Contains("Odrzucono") || Body.Contains("odrzucił") || Body.Contains("usunięte"))
+                {
                     return "friend_remove_icon.png";
+                }
+
                 if (NotificationType == NotificationType.NeedAction || NotificationType == NotificationType.Adding || Body.Contains("Zaakceptowano") || Body.Contains("zaakceptował"))
+                {
                     return "friends_icon_green.png";
+                }
+
                 return "friends_icon.png";
             }
             if (EntityType == EntityType.Expenses)
+            {
                 return "new_expense_icon.png";
-            if (EntityType == EntityType.Settlements || EntityType == EntityType.NetSettlements)
+            }
+
+            if (EntityType is EntityType.Settlements or EntityType.NetSettlements)
+            {
                 return "new_settlement_icon.png";
+            }
+
             if (EntityType == EntityType.GroupDebts)
+            {
                 return "wallet_icon.png";
-            if (EntityType == EntityType.Groups || EntityType == EntityType.GroupMembers)
+            }
+
+            if (EntityType is EntityType.Groups or EntityType.GroupMembers)
             {
                 if (Body.Contains("wyrzucony") || Body.Contains("usunął z grupy"))
+                {
                     return "red_leave_icon.png";
+                }
+
                 if (Body.Contains("opuścił") || Body.Contains("usunął"))
+                {
                     return "leave_icon.png";
+                }
+
                 return "groups_icon.png";
             }
             return "notifications_icon.png";

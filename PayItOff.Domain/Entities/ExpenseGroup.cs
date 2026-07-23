@@ -7,18 +7,17 @@ namespace PayItOff.Domain.Entities
         public int ExpenseId { get; private set; }
         public string Name { get; private set; } = string.Empty;
         public decimal TotalAmount { get; private set; }
-        private readonly List<ExpenseItem> _items = new();
+        private readonly List<ExpenseItem> _items = [];
         public IReadOnlyCollection<ExpenseItem> Items => _items.AsReadOnly();
 
         protected ExpenseGroup() { }
 
         private ExpenseGroup(Expense expense, string name, decimal totalAmount)
         {
-            if (expense == null) { throw new ArgumentNullException(nameof(expense), "Nie może być null"); }
             if (string.IsNullOrWhiteSpace(name)) { throw new ArgumentException("Name cannot be empty", nameof(name)); }
             if (totalAmount < 0) { throw new InvalidOperationException("Nie można mieć wydatku mniejszego od 0"); }
 
-            Expense = expense;
+            Expense = expense ?? throw new ArgumentNullException(nameof(expense), "Nie może być null");
             ExpenseId = expense.Id;
             Name = name;
             TotalAmount = totalAmount;
@@ -43,7 +42,11 @@ namespace PayItOff.Domain.Entities
 
         public void AddItem(ExpenseItem item)
         {
-            if (item == null) throw new ArgumentNullException(nameof(item));
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
             _items.Add(item);
         }
 

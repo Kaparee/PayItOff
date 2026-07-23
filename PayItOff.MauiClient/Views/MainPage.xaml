@@ -67,11 +67,11 @@
                                                             </Border>
                                                             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
                                                                 <Label Text="{Binding FullName}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=14, Default=18}"/>
+                                                                <Label Text="{Binding DisplayNumber}" TextColor="{StaticResource TextMain}" FontSize="{OnIdiom Phone=11, Default=14}" IsVisible="{OnIdiom Phone=True, Default=False}" LineBreakMode="TailTruncation"/>
                                                                 <Label Text="{Binding CategoriesDisplay}" TextColor="{StaticResource TextSubtle}" FontSize="{OnIdiom Phone=12, Default=14}"/>
-                                                                <Label Text="{Binding Date, StringFormat='{0:dd/MM/yy}'}" TextColor="{StaticResource TextSubtle}" FontSize="11" IsVisible="{OnIdiom Phone=True, Default=False}" />
                                                             </VerticalStackLayout>
-                                                            <Label Grid.Column="2" Text="{Binding DisplayNumber}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=14}" VerticalOptions="Center"/>
-                                                            <Label Grid.Column="{OnIdiom Phone=2, Default=3}" Text="{Binding Amount, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusGreen}" FontAttributes="Bold" FontSize="{OnIdiom Phone=16, Default=20}" VerticalOptions="Center" HorizontalOptions="End"/>
+                                                            <Label Grid.Column="2" Text="{Binding DisplayNumber}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=14}" VerticalOptions="Center" IsVisible="{OnIdiom Phone=False, Default=True}" LineBreakMode="TailTruncation"/>
+                                                            <Label Grid.Column="3" Text="{Binding Amount, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusGreen}" FontAttributes="Bold" FontSize="{OnIdiom Phone=16, Default=20}" VerticalOptions="Center" HorizontalOptions="End"/>
                                                         </Grid>
                                                     </Border>
                                                 </ContentView>
@@ -115,11 +115,11 @@
                                                             </Border>
                                                             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
                                                                 <Label Text="{Binding FullName}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=14, Default=18}"/>
+                                                                <Label Text="{Binding DisplayNumber}" TextColor="{StaticResource TextMain}" FontSize="{OnIdiom Phone=11, Default=14}" IsVisible="{OnIdiom Phone=True, Default=False}" LineBreakMode="TailTruncation"/>
                                                                 <Label Text="{Binding CategoriesDisplay}" TextColor="{StaticResource TextSubtle}" FontSize="{OnIdiom Phone=12, Default=14}"/>
-                                                                <Label Text="{Binding Date, StringFormat='{0:dd/MM/yy}'}" TextColor="{StaticResource TextSubtle}" FontSize="11" IsVisible="{OnIdiom Phone=True, Default=False}" />
                                                             </VerticalStackLayout>
-                                                            <Label Grid.Column="2" Text="{Binding DisplayNumber}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=14}" VerticalOptions="Center"/>
-                                                            <Label Grid.Column="{OnIdiom Phone=2, Default=3}" Text="{Binding Amount, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" FontSize="{OnIdiom Phone=16, Default=20}" VerticalOptions="Center" HorizontalOptions="End"/>
+                                                            <Label Grid.Column="2" Text="{Binding DisplayNumber}" TextColor="{StaticResource TextMain}" FontAttributes="Bold" FontSize="{OnIdiom Phone=12, Default=14}" VerticalOptions="Center" IsVisible="{OnIdiom Phone=False, Default=True}" LineBreakMode="TailTruncation"/>
+                                                            <Label Grid.Column="3" Text="{Binding Amount, StringFormat='{0:N2} zł'}" TextColor="{StaticResource StatusRed}" FontAttributes="Bold" FontSize="{OnIdiom Phone=16, Default=20}" VerticalOptions="Center" HorizontalOptions="End"/>
                                                         </Grid>
                                                     </Border>
                                                 </ContentView>

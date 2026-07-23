@@ -81,7 +81,10 @@ public class FileService : IFileService
 
     public void DeleteFile(string fileName)
     {
-        if (string.IsNullOrWhiteSpace(fileName)) return;
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return;
+        }
 
         var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "avatars", fileName);
 

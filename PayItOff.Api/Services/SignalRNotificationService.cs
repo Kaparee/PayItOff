@@ -1,10 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 using PayItOff.Api.Hubs;
 using PayItOff.Application.Interfaces;
-using PayItOff.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PayItOff.Api.Services
 {

@@ -68,7 +68,10 @@ public partial class RegisterViewModel : PopupViewModelBase
     [RelayCommand]
     private async Task Register()
     {
-        if (IsBusy) return;
+        if (IsBusy)
+        {
+            return;
+        }
 
         if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
         {
@@ -116,7 +119,10 @@ public partial class RegisterViewModel : PopupViewModelBase
         try
         {
             var photo = await MediaPicker.Default.PickPhotosAsync();
-            if (photo == null) return;
+            if (photo == null)
+            {
+                return;
+            }
 
             SelectedAvatarFile = photo?.FirstOrDefault();
 

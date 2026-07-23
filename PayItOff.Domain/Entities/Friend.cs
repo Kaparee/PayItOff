@@ -16,11 +16,8 @@ namespace PayItOff.Domain.Entities
 
         private Friend(User inviter, User receiver)
         {
-            if (inviter == null) { throw new ArgumentNullException(nameof(inviter), "Error przy inviter"); }
-            if (receiver == null) { throw new ArgumentNullException(nameof(receiver), "Error przy receiver"); }
-
-            Inviter = inviter;
-            Receiver = receiver;
+            Inviter = inviter ?? throw new ArgumentNullException(nameof(inviter), "Error przy inviter");
+            Receiver = receiver ?? throw new ArgumentNullException(nameof(receiver), "Error przy receiver");
             InviterId = inviter.Id;
             ReceiverId = receiver.Id;
             SentAt = DateTime.UtcNow;
@@ -28,7 +25,10 @@ namespace PayItOff.Domain.Entities
 
         public static Friend Invite(User inviter, User receiver)
         {
-            if (inviter.Id == receiver.Id) throw new InvalidOperationException("You cannot invite yourself.");
+            if (inviter.Id == receiver.Id)
+            {
+                throw new InvalidOperationException("You cannot invite yourself.");
+            }
 
             return new Friend(inviter, receiver);
         }

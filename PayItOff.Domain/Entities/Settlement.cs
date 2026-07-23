@@ -28,7 +28,7 @@ namespace PayItOff.Domain.Entities
             if (string.IsNullOrWhiteSpace(transferReference)) { throw new ArgumentException("Invalid Transfer Reference."); }
             if (sender == null) { throw new ArgumentNullException(nameof(sender), "Error przy sender"); }
             if (receiver == null) { throw new ArgumentNullException(nameof(receiver), "Error przy receiver"); }
-            if (group == null) { throw new ArgumentNullException(nameof(group), "Error przy group"); }
+
             if (amount <= 0) { throw new InvalidOperationException("Nie można mieć długu mniejszego od 0"); }
             if (string.IsNullOrWhiteSpace(description)) { throw new ArgumentException("Invalid Description."); }
             if (sender.Id == receiver.Id) { throw new InvalidOperationException("Nie można być winnym pieniędzy samemu sobie"); }
@@ -36,7 +36,7 @@ namespace PayItOff.Domain.Entities
             TransferReference = transferReference;
             Sender = sender;
             Receiver = receiver;
-            Group = group;
+            Group = group ?? throw new ArgumentNullException(nameof(group), "Error przy group");
             SenderId = sender.Id;
             GroupId = group.Id;
             ReceiverId = receiver.Id;

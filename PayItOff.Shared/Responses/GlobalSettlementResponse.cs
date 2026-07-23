@@ -2,6 +2,6 @@
 
 public class GlobalSettlementResponse
 {
-    public List<GlobalDebtSummaryResponse> Items { get; set; } = new();
+    public List<GlobalDebtSummaryResponse> Items { get; set; } = [];
     public decimal TotalAmount { get; set; }
 }

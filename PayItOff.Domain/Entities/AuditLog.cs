@@ -19,11 +19,10 @@ namespace PayItOff.Domain.Entities
         private AuditLog(EntityType entityType, int entityId, User user, AuditLogAction action, string? oldValues, string? newValues)
         {
             if (entityId == 0) { throw new InvalidOperationException("Nie można przypisać do Audytu id = 0"); }
-            if (user == null) { throw new ArgumentNullException(nameof(user), "Error przy user"); }
 
             EntityType = entityType;
             EntityId = entityId;
-            User = user;
+            User = user ?? throw new ArgumentNullException(nameof(user), "Error przy user");
             UserId = user.Id;
             Action = action;
             OldValues = oldValues;
@@ -38,14 +37,16 @@ namespace PayItOff.Domain.Entities
 
         public static AuditLog CreateWithUserId(EntityType entityType, int entityId, int userId, AuditLogAction action, string? oldValues, string? newValues)
         {
-            var auditLog = new AuditLog();
-            auditLog.EntityType = entityType;
-            auditLog.EntityId = entityId;
-            auditLog.UserId = userId;
-            auditLog.Action = action;
-            auditLog.OldValues = oldValues;
-            auditLog.NewValues = newValues;
-            auditLog.CreatedAt = DateTime.UtcNow;
+            var auditLog = new AuditLog
+            {
+                EntityType = entityType,
+                EntityId = entityId,
+                UserId = userId,
+                Action = action,
+                OldValues = oldValues,
+                NewValues = newValues,
+                CreatedAt = DateTime.UtcNow
+            };
             return auditLog;
         }
     }

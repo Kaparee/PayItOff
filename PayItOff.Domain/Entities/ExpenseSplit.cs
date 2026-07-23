@@ -8,17 +8,18 @@ namespace PayItOff.Domain.Entities
         public User User { get; private set; } = null!;
         public int UserId { get; private set; }
         public decimal OwedAmount { get; private set; }
+        public decimal PaidAmount { get; private set; }
+        public bool IsSettled => (OwedAmount - PaidAmount) <= 0;
 
         protected ExpenseSplit() { }
 
         private ExpenseSplit(ExpenseItem expenseItem, User user, decimal owedAmount)
         {
-            if (user == null) { throw new ArgumentNullException(nameof(user), "Nie może być null"); }
             if (owedAmount <= 0) { throw new InvalidOperationException("Dług musi być większy od zera"); }
 
             ExpenseItem = expenseItem;
             ExpenseItemId = expenseItem.Id;
-            User = user;
+            User = user ?? throw new ArgumentNullException(nameof(user), "Nie może być null");
             UserId = user.Id;
             OwedAmount = owedAmount;
         }
@@ -32,6 +33,28 @@ namespace PayItOff.Domain.Entities
         {
             if (newAmount <= 0) { throw new InvalidOperationException("Dług musi być większy od zera"); }
             OwedAmount = newAmount;
+        }
+
+        public decimal ApplyPayment(decimal amount)
+        {
+            if (amount <= 0)
+            {
+                return 0;
+            }
+
+            decimal remainingOwed = OwedAmount - PaidAmount;
+
+            if (amount >= remainingOwed)
+            {
+                decimal leftover = amount - remainingOwed;
+                PaidAmount = OwedAmount;
+                return leftover;
+            }
+            else
+            {
+                PaidAmount += amount;
+                return 0;
+            }
         }
     }
 }

@@ -46,13 +46,17 @@ public partial class LoginViewModel : PopupViewModelBase
     public async Task CheckForAppUpdateAsync()
     {
         if (Interlocked.Exchange(ref _updateCheckStarted, 1) == 1)
+        {
             return;
+        }
 
         try
         {
             var update = await _updateService.CheckForUpdateAsync();
             if (update == null)
+            {
                 return;
+            }
 
             var accept = await ShowAlertAsync(
                 "Dostępna aktualizacja",
@@ -91,7 +95,10 @@ public partial class LoginViewModel : PopupViewModelBase
     [RelayCommand]
     private async Task LoginAsync()
     {
-        if (IsBusy) return;
+        if (IsBusy)
+        {
+            return;
+        }
 
         if (string.IsNullOrWhiteSpace(EmailOrNickname) || string.IsNullOrWhiteSpace(Password))
         {

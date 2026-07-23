@@ -71,12 +71,14 @@ public partial class MainViewModel : BaseViewModel
     {
         _signalRService.OnSettlementUpdateReceived += HandleSettlementUpdate;
         _signalRService.OnSystemNotificationEventReceived += HandleNotificationEvent;
+        _signalRService.OnExpenseUpdateReceived += HandleExpenseUpdate;
     }
 
     public void UnsubscribeFromEvents()
     {
         _signalRService.OnSettlementUpdateReceived -= HandleSettlementUpdate;
         _signalRService.OnSystemNotificationEventReceived -= HandleNotificationEvent;
+        _signalRService.OnExpenseUpdateReceived -= HandleExpenseUpdate;
     }
 
     public void OnDisappearing()
@@ -86,7 +88,11 @@ public partial class MainViewModel : BaseViewModel
 
     public async Task LoadDashboardDataAsync()
     {
-        if (IsBusy) return;
+        if (IsBusy)
+        {
+            return;
+        }
+
         IsBusy = true;
 
         try
@@ -113,7 +119,7 @@ public partial class MainViewModel : BaseViewModel
                     UserId = i.UserId,
                     FullName = $"{i.Name} {i.Surname}",
                     AvatarUrl = i.AvatarUrl,
-                    Number = i.Number,
+                    Number = i.Number!,
                     Amount = i.Amount,
                     Date = i.Date,
                     CategoriesDisplay = i.Categories != null ? string.Join(", ", i.Categories) : "Brak"
@@ -130,7 +136,7 @@ public partial class MainViewModel : BaseViewModel
                     UserId = e.UserId,
                     FullName = $"{e.Name} {e.Surname}",
                     AvatarUrl = e.AvatarUrl,
-                    Number = e.Number,
+                    Number = e.Number!,
                     Amount = e.Amount,
                     Date = e.Date,
                     CategoriesDisplay = e.Categories != null ? string.Join(", ", e.Categories) : "Brak"
@@ -152,7 +158,10 @@ public partial class MainViewModel : BaseViewModel
             LastNotifications.Clear();
             if (notificationsResult != null)
             {
-                foreach (var n in notificationsResult) LastNotifications.Add(NotificationDisplayItem.FromResponse(n));
+                foreach (var n in notificationsResult)
+                {
+                    LastNotifications.Add(NotificationDisplayItem.FromResponse(n));
+                }
             }
         }
         catch (Exception ex)
@@ -184,7 +193,10 @@ public partial class MainViewModel : BaseViewModel
     [RelayCommand]
     private async Task NavigateToPerson(DebtDisplayItem item)
     {
-        if (item == null) return;
+        if (item == null)
+        {
+            return;
+        }
 
         string filter = Incomes.Contains(item) ? "Income" : "Expense";
 
@@ -199,7 +211,11 @@ public partial class MainViewModel : BaseViewModel
 
     public ICommand NavigateToGroupDetailsCommand => new Command<ActiveGroupsDisplayResponse>(async (group) =>
     {
-        if (group == null) return;
+        if (group == null)
+        {
+            return;
+        }
+
         await Shell.Current.GoToAsync($"//GroupDetailsPage?groupId={group.Id}");
     });
 
@@ -218,6 +234,14 @@ public partial class MainViewModel : BaseViewModel
     }
 
     private void HandleNotificationEvent()
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await LoadDashboardDataAsync();
+        });
+    }
+
+    private void HandleExpenseUpdate()
     {
         MainThread.BeginInvokeOnMainThread(async () =>
         {

@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:PayItOff.MauiClient.ViewModels"
+             xmlns:vm="clr-namespace:PayItOff.MauiClient.ViewModels"
              xmlns:models="clr-namespace:PayItOff.MauiClient.Models"
              xmlns:converters="clr-namespace:PayItOff.MauiClient.Converters"
              xmlns:controls="clr-namespace:PayItOff.MauiClient.Controls"
@@ -10,7 +11,7 @@
              Title=""
              Shell.NavBarIsVisible="False"
              BackgroundColor="{StaticResource BgDark}">
-             
+
     <ContentPage.Resources>
         <converters:DecimalConverter x:Key="DecimalConverter" />
         <converters:InverseBoolConverter x:Key="InverseBool" />
@@ -69,7 +70,7 @@
                                 <Label Grid.Column="2" Text="Szt." FontSize="10" TextColor="#AAA" HorizontalOptions="Center"/>
                                 <Label Grid.Column="3" Text="Cena/szt." FontSize="10" TextColor="#AAA" HorizontalOptions="Center"/>
                             </Grid>
-                            
+
                             <Border StrokeShape="RoundRectangle 10" BackgroundColor="Transparent" StrokeThickness="0">
                                 <Border.GestureRecognizers>
                                     <DropGestureRecognizer AllowDrop="True" Drop="OnUncategorizedDrop" DragOver="OnDragOver" DragLeave="OnDragLeave"/>
@@ -84,14 +85,14 @@
                                                 </Border.GestureRecognizers>
                                                 <Grid ColumnDefinitions="2*, 3*, 1.2*, 1.2*, 35, 35" ColumnSpacing="5">
                                                     <Entry Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" FontSize="13" BackgroundColor="Transparent" HeightRequest="36" VerticalTextAlignment="Center"/>
-                                                    
+
                                                     <Picker Grid.Column="1" ItemsSource="{Binding BindingContext.GroupMembers, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
                                                             SelectedIndexChanged="OnPayerSelectedIndexChanged"
                                                             Loaded="OnPayerPickerLoaded"
                                                             TextColor="White" FontSize="12" HeightRequest="36" VerticalOptions="Center" HorizontalOptions="Fill"/>
-                                                    
+
                                                     <Entry Grid.Column="2" Text="{Binding Quantity, Converter={StaticResource DecimalConverter}}" Keyboard="Numeric" TextColor="White" FontSize="12" HeightRequest="36" VerticalOptions="Center" HorizontalTextAlignment="Center"/>
-                                                    
+
                                                     <Entry Grid.Column="3" Text="{Binding UnitPriceInput}" Keyboard="Text" TextColor="White" FontSize="12" HeightRequest="36" VerticalOptions="Center" HorizontalTextAlignment="Center"/>
 
                                                     <controls:AppButton Grid.Column="4" Text="✓" Command="{Binding BindingContext.ConfirmItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" ButtonBackgroundColor="{StaticResource StatusGreen}" ButtonTextColor="White" ButtonFontSize="13" ButtonFontAttributes="Bold" WidthRequest="32" HeightRequest="32" ButtonHeight="32" ButtonPadding="0" VerticalOptions="Center" HorizontalOptions="End"/>
@@ -132,7 +133,7 @@
                                                         </Label.Triggers>
                                                     </Label>
                                                     <Label Grid.Column="2" Text="{Binding TotalPrice, StringFormat='{0:N2} zł'}" TextColor="White" FontAttributes="Bold" FontSize="12" Margin="5,0" VerticalOptions="Center"/>
-                                                    
+
                                                     <ImageButton Grid.Column="3" Source="edit_icon.png" Command="{Binding BindingContext.EditCategorizedItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="Transparent" Padding="7" WidthRequest="30" HeightRequest="30"/>
                                                     <ImageButton Grid.Column="4" Source="x_icon.png" Command="{Binding BindingContext.DeleteCategorizedItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="Transparent" Padding="7" WidthRequest="30" HeightRequest="30"/>
                                                 </Grid>
@@ -179,7 +180,7 @@
                                                                 </Label.Triggers>
                                                             </Label>
                                                             <Label Grid.Column="2" Text="{Binding TotalPrice, StringFormat='{0:N2} zł'}" TextColor="White" FontAttributes="Bold" FontSize="12" Margin="5,0" VerticalOptions="Center"/>
-                                                            
+
                                                             <ImageButton Grid.Column="3" Source="edit_icon.png" Command="{Binding BindingContext.EditCategorizedItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="Transparent" Padding="7" WidthRequest="30" HeightRequest="30"/>
                                                             <ImageButton Grid.Column="4" Source="x_icon.png" Command="{Binding BindingContext.DeleteCategorizedItemCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}" BackgroundColor="Transparent" Padding="7" WidthRequest="30" HeightRequest="30"/>
                                                         </Grid>
@@ -202,9 +203,9 @@
             <Grid Grid.Column="{OnIdiom Phone='0', Default='1'}" Grid.Row="0"
                   BackgroundColor="{StaticResource BgDark}" RowDefinitions="*, Auto, Auto" VerticalOptions="Fill">
                 <Grid Grid.Row="0">
-                    <Label Text="Dodaj zdjęcie paragonu" TextColor="{StaticResource TextSubtle}" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" 
+                    <Label Text="Dodaj zdjęcie paragonu" TextColor="{StaticResource TextSubtle}" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center"
                            IsVisible="{Binding IsReceiptPhotosEmpty}" />
-                    
+
                     <!-- MAIN IMAGE WITH SWIPE GESTURES -->
                     <Grid IsVisible="{Binding IsReceiptPhotosEmpty, Converter={StaticResource InverseBool}}">
                         <Image Source="{Binding SelectedPhotoImageSource}" Aspect="AspectFit" Margin="10" HeightRequest="{OnIdiom Phone=350, Default=720}">
@@ -213,14 +214,14 @@
                                 <SwipeGestureRecognizer Direction="Right" Command="{Binding SwipeRightCommand}" />
                             </Image.GestureRecognizers>
                         </Image>
-                        
-                        <ImageButton Source="x_icon.png" 
-                                     Command="{Binding RemovePhotoCommand}" 
-                                     CommandParameter="{Binding SelectedPhoto}" 
-                                     BackgroundColor="Red" 
-                                    
-                                     Padding="5" 
-                                     WidthRequest="30" 
+
+                        <ImageButton Source="x_icon.png"
+                                     Command="{Binding RemovePhotoCommand}"
+                                     CommandParameter="{Binding SelectedPhoto}"
+                                     BackgroundColor="Red"
+
+                                     Padding="5"
+                                     WidthRequest="30"
                                      HeightRequest="30"
                                      HorizontalOptions="End"
                                      VerticalOptions="Start"
@@ -269,10 +270,10 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
-                <HorizontalStackLayout Grid.Row="2" Spacing="25" HorizontalOptions="Center" Margin="0,0,0,15">
-                    <ImageButton Source="json_icon.png" Command="{Binding UploadJsonCommand}" WidthRequest="50" HeightRequest="50"/>
-                    <ImageButton Source="camera_icon.png" Command="{Binding TakePhotoCommand}" WidthRequest="60" HeightRequest="60"/>
-                    <ImageButton Source="gallery_icon.png" Command="{Binding PickGalleryCommand}" WidthRequest="50" HeightRequest="50"/>
+                <HorizontalStackLayout Grid.Row="2" Spacing="25" Background="Transparent" HorizontalOptions="Center" Margin="0,0,0,15">
+                    <ImageButton Source="json_icon.png" Command="{Binding UploadJsonCommand}" WidthRequest="50" HeightRequest="50" BackgroundColor="Transparent" BorderWidth="0" BorderColor="Transparent" />
+                    <ImageButton Source="camera_icon.png" Command="{Binding TakePhotoCommand}" WidthRequest="60" HeightRequest="60" BackgroundColor="Transparent" BorderWidth="0" BorderColor="Transparent" />
+                    <ImageButton Source="gallery_icon.png" Command="{Binding PickGalleryCommand}" WidthRequest="50" HeightRequest="50" BackgroundColor="Transparent" BorderWidth="0" BorderColor="Transparent" />
                 </HorizontalStackLayout>
             </Grid>
 
@@ -318,8 +319,8 @@
                                                     <SwipeView>
                                                         <SwipeView.RightItems>
                                                             <SwipeItems>
-                                                                <SwipeItem Text="Usuń" BackgroundColor="#EF4444" 
-                                                                           Command="{Binding BindingContext.RemoveMemberShareCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" 
+                                                                <SwipeItem Text="Usuń" BackgroundColor="#EF4444"
+                                                                           Command="{Binding BindingContext.RemoveMemberShareCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
                                                                            CommandParameter="{Binding .}"/>
                                                             </SwipeItems>
                                                         </SwipeView.RightItems>
@@ -358,6 +359,24 @@
                 <VerticalStackLayout Spacing="20">
                     <Label Text="Nowa Kategoria" FontSize="22" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center"/>
                     <Entry Placeholder="Nazwa Kategorii" Text="{Binding NewCategoryName}" PlaceholderColor="#888" TextColor="White" BackgroundColor="#2A303C" />
+
+                    <Border StrokeShape="RoundRectangle 8" BackgroundColor="#1E232D" Padding="5"
+                        IsVisible="{Binding FilteredGroupCategories.Count, Converter={StaticResource IntToBoolConverter}}"
+                        MaximumHeightRequest="160">
+                        <CollectionView ItemsSource="{Binding FilteredGroupCategories}">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <Label Text="{Binding .}" TextColor="White" FontSize="14" Padding="10,8">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddExpenseViewModel}}, Path=SelectExistingCategoryCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </Border>
 
                     <Grid ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,10,0,0">
                         <controls:AppButton Grid.Column="0" Text="Anuluj" Command="{Binding CloseAddCategoryPopupCommand}" ButtonBackgroundColor="{StaticResource SurfaceDark}" ButtonTextColor="{StaticResource TextMain}" />

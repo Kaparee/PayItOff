@@ -21,10 +21,14 @@ public class RegisterService
         content.Add(new StringContent(request.Surname ?? ""), "Surname");
 
         if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+        {
             content.Add(new StringContent(request.PhoneNumber), "PhoneNumber");
+        }
 
         if (!string.IsNullOrWhiteSpace(request.IBAN))
+        {
             content.Add(new StringContent(request.IBAN), "IBAN");
+        }
 
         if (avatarFile != null)
         {

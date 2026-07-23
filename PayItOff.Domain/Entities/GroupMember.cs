@@ -21,11 +21,8 @@ namespace PayItOff.Domain.Entities
 
         private GroupMember(User user, Group group, bool isFavorite, GroupMemberStatus status, GroupMemberRole role, DateTime? joinedAt)
         {
-            if (user == null) { throw new ArgumentException(nameof(user)); }
-            if (group == null) { throw new ArgumentException(nameof(group)); }
-
-            User = user;
-            Group = group;
+            User = user ?? throw new ArgumentException(nameof(user));
+            Group = group ?? throw new ArgumentException(nameof(group));
             UserId = user.Id;
             GroupId = group.Id;
             IsFavorite = isFavorite;

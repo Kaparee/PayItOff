@@ -84,14 +84,18 @@ public class SettlementService
         {
             var response = await _httpClient.PostAsJsonAsync("Settlement/create", request);
             if (response.IsSuccessStatusCode)
+            {
                 return (true, null);
+            }
 
             var raw = await response.Content.ReadAsStringAsync();
             try
             {
                 using var doc = JsonDocument.Parse(raw);
                 if (doc.RootElement.TryGetProperty("Error", out var err))
+                {
                     return (false, err.GetString());
+                }
             }
             catch
             {
@@ -122,7 +126,9 @@ public class SettlementService
             {
                 using var doc = JsonDocument.Parse(raw);
                 if (doc.RootElement.TryGetProperty("Error", out var err))
+                {
                     return (false, null, err.GetString());
+                }
             }
             catch { }
 
@@ -210,14 +216,18 @@ public class SettlementService
         {
             var response = await _httpClient.PostAsJsonAsync("Settlement/compensate", request);
             if (response.IsSuccessStatusCode)
+            {
                 return (true, null);
+            }
 
             var raw = await response.Content.ReadAsStringAsync();
             try
             {
                 using var doc = JsonDocument.Parse(raw);
                 if (doc.RootElement.TryGetProperty("Error", out var err))
+                {
                     return (false, err.GetString());
+                }
             }
             catch { }
 
@@ -236,14 +246,18 @@ public class SettlementService
         {
             var response = await _httpClient.PostAsJsonAsync("Settlement/remind-debt", request);
             if (response.IsSuccessStatusCode)
+            {
                 return (true, null);
+            }
 
             var raw = await response.Content.ReadAsStringAsync();
             try
             {
                 using var doc = JsonDocument.Parse(raw);
                 if (doc.RootElement.TryGetProperty("Error", out var err))
+                {
                     return (false, err.GetString());
+                }
             }
             catch { }
 

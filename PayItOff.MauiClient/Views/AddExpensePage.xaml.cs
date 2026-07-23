@@ -24,7 +24,9 @@ public partial class AddExpensePage : ContentPage, IQueryAttributable
     {
         base.OnNavigatedTo(args);
         if (_viewModel.GroupId > 0)
+        {
             _ = _viewModel.LoadGroupDataAsync();
+        }
     }
 
     protected override void OnDisappearing()
@@ -63,7 +65,9 @@ public partial class AddExpensePage : ContentPage, IQueryAttributable
         }
 
         if ((DateTime.UtcNow - _lastItemDropTime).TotalMilliseconds < 200)
+        {
             return;
+        }
 
         if (e.Data.Properties.TryGetValue("Item", out var itemObj) && itemObj is ReceiptItem draggedItem)
         {
@@ -96,7 +100,9 @@ public partial class AddExpensePage : ContentPage, IQueryAttributable
         }
 
         if ((DateTime.UtcNow - _lastItemDropTime).TotalMilliseconds < 200)
+        {
             return;
+        }
 
         if (e.Data.Properties.TryGetValue("Item", out var itemObj) && itemObj is ReceiptItem draggedItem)
         {
@@ -128,7 +134,9 @@ public partial class AddExpensePage : ContentPage, IQueryAttributable
         }
 
         if ((DateTime.UtcNow - _lastItemDropTime).TotalMilliseconds < 200)
+        {
             return;
+        }
 
         if (sender is Element element && element.BindingContext is DisplayGroupMember targetMember)
         {
@@ -236,11 +244,17 @@ public partial class AddExpensePage : ContentPage, IQueryAttributable
             target.Opacity = 1.0;
 
             if (target.BindingContext is DisplayGroupMember)
+            {
                 target.BackgroundColor = Color.FromArgb("#1E232D");
+            }
             else if (target.BindingContext is ReceiptItem)
+            {
                 target.BackgroundColor = Color.FromArgb("#353D4A");
+            }
             else
+            {
                 target.BackgroundColor = Colors.Transparent;
+            }
         }
     }
 

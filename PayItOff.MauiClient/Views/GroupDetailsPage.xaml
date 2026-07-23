@@ -192,12 +192,6 @@
                                        TextColor="White"
                                        HorizontalOptions="Center"/>
                                 <Grid ColumnDefinitions="Auto, *" ColumnSpacing="15">
-                                    <Border Grid.Column="0" BackgroundColor="#15FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 20" HeightRequest="44">
-                                        <Border.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding ToggleTransactionViewCommand}" />
-                                        </Border.GestureRecognizers>
-                                        <Label Text="Zmień widok" TextColor="White" FontSize="14" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="Center" Padding="20,0"/>
-                                    </Border>
 
                                     <Border Grid.Column="1"
                                             StrokeShape="RoundRectangle 20"

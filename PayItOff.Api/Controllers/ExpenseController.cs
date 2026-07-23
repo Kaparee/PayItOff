@@ -49,6 +49,13 @@ public class ExpenseController : ControllerBase
         return Ok(response);
     }
 
+    [HttpGet("{groupId}/categories")]
+    public async Task<ActionResult<string>> GetDistinctCategoriesByGroup(int groupId)
+    {
+        var response = await _expenseService.GetDistinctCategoriesByGroupAsync(groupId);
+        return Ok(response);
+    }
+
     [HttpDelete("{id}")]
     [EndpointSummary("Usunięcie wydatku")]
     [EndpointDescription("Endpoint do usuwania wydatku (tylko dla Owner/Admin).")]

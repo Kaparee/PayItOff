@@ -41,7 +41,10 @@ public partial class PopupViewModelBase : BaseViewModel
         }
 
         bool wasBusy = IsBusy;
-        if (wasBusy) IsBusy = false;
+        if (wasBusy)
+        {
+            IsBusy = false;
+        }
 
         CustomAlertTitle = title;
         CustomAlertMessage = message;
@@ -56,7 +59,11 @@ public partial class PopupViewModelBase : BaseViewModel
         IsCustomAlertVisible = true;
         var result = await _alertTcs.Task;
 
-        if (wasBusy) IsBusy = true;
+        if (wasBusy)
+        {
+            IsBusy = true;
+        }
+
         return result;
     }
 
@@ -67,9 +74,13 @@ public partial class PopupViewModelBase : BaseViewModel
 
         bool parsedResult = false;
         if (result is bool b)
+        {
             parsedResult = b;
+        }
         else if (result is string s)
+        {
             parsedResult = s.Equals("True", StringComparison.OrdinalIgnoreCase);
+        }
 
         _alertTcs?.TrySetResult(parsedResult);
     }
@@ -77,7 +88,10 @@ public partial class PopupViewModelBase : BaseViewModel
     public async Task<string> ShowActionSheetAsync(string title, params string[] options)
     {
         bool wasBusy = IsBusy;
-        if (wasBusy) IsBusy = false;
+        if (wasBusy)
+        {
+            IsBusy = false;
+        }
 
         ActionSheetTitle = title;
         ActionSheetOptions = new ObservableCollection<string>(options);
@@ -86,7 +100,11 @@ public partial class PopupViewModelBase : BaseViewModel
         IsActionSheetVisible = true;
         var result = await _actionSheetTcs.Task;
 
-        if (wasBusy) IsBusy = true;
+        if (wasBusy)
+        {
+            IsBusy = true;
+        }
+
         return result;
     }
 

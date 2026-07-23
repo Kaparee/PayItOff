@@ -12,11 +12,11 @@ public partial class FriendsViewModel : BaseViewModel
     private readonly FriendService _friendService;
     private readonly SignalRService _signalRService;
 
-    private readonly List<FriendDisplayModel> _allFriends = new();
+    private readonly List<FriendDisplayModel> _allFriends = [];
 
-    public ObservableCollection<FriendDisplayModel> Friends { get; } = new();
-    public ObservableCollection<FriendDisplayModel> TopDebtors { get; } = new();
-    public ObservableCollection<FriendDisplayModel> TopDebts { get; } = new();
+    public ObservableCollection<FriendDisplayModel> Friends { get; } = [];
+    public ObservableCollection<FriendDisplayModel> TopDebtors { get; } = [];
+    public ObservableCollection<FriendDisplayModel> TopDebts { get; } = [];
 
     [ObservableProperty]
     public partial string SearchQuery { get; set; } = string.Empty;
@@ -107,7 +107,7 @@ public partial class FriendsViewModel : BaseViewModel
     [ObservableProperty]
     public partial string SelectedFriendFullName { get; set; } = string.Empty;
 
-    public ObservableCollection<SharedGroupResponse> SelectedFriendSharedGroups { get; } = new();
+    public ObservableCollection<SharedGroupResponse> SelectedFriendSharedGroups { get; } = [];
 
     [RelayCommand]
     private void CloseAlertPopup()
@@ -175,14 +175,20 @@ public partial class FriendsViewModel : BaseViewModel
             try
             {
                 await Task.Delay(500, token);
-                if (token.IsCancellationRequested) return;
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
 
                 var user = await _friendService.SearchUserAsync(
                     string.IsNullOrWhiteSpace(nick) ? null : nick.Trim(),
                     string.IsNullOrWhiteSpace(email) ? null : email.Trim(),
                     string.IsNullOrWhiteSpace(phone) ? null : phone.Trim()
                 );
-                if (token.IsCancellationRequested) return;
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
 
                 MainThread.BeginInvokeOnMainThread(() => SearchedUser = user);
             }
@@ -200,7 +206,11 @@ public partial class FriendsViewModel : BaseViewModel
     [RelayCommand]
     private void ShowSharedGroupsPopup(FriendDisplayModel friend)
     {
-        if (friend == null || !friend.HasSharedGroups) return;
+        if (friend == null || !friend.HasSharedGroups)
+        {
+            return;
+        }
+
         SelectedFriendFullName = friend.FullName;
         SelectedFriendSharedGroups.Clear();
         foreach (var group in friend.SharedGroupsList)
@@ -219,7 +229,11 @@ public partial class FriendsViewModel : BaseViewModel
     [RelayCommand]
     private async Task GoToGroupAsync(SharedGroupResponse group)
     {
-        if (group == null) return;
+        if (group == null)
+        {
+            return;
+        }
+
         IsSharedGroupsPopupVisible = false;
         _signalRService.OnFriendUpdateReceived -= HandleFriendUpdate;
         await Shell.Current.GoToAsync($"//GroupDetailsPage?groupId={group.GroupId}");
@@ -228,7 +242,11 @@ public partial class FriendsViewModel : BaseViewModel
     [RelayCommand]
     private void ShowFriendDetailsPopup(FriendDisplayModel friend)
     {
-        if (friend == null) return;
+        if (friend == null)
+        {
+            return;
+        }
+
         SelectedFriendForDetails = friend;
         IsFriendDetailsPopupVisible = true;
     }
@@ -243,7 +261,10 @@ public partial class FriendsViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadFriendsAsync()
     {
-        if (IsBusy) return;
+        if (IsBusy)
+        {
+            return;
+        }
 
         try
         {
@@ -346,7 +367,11 @@ public partial class FriendsViewModel : BaseViewModel
     [RelayCommand]
     private void RemoveFriend(FriendDisplayModel friend)
     {
-        if (friend == null) return;
+        if (friend == null)
+        {
+            return;
+        }
+
         FriendToDelete = friend;
 
         if (friend.Status == FriendshipStatus.SentPending)
@@ -378,7 +403,10 @@ public partial class FriendsViewModel : BaseViewModel
     [RelayCommand]
     private async Task ConfirmDeleteFriendAsync()
     {
-        if (FriendToDelete == null) return;
+        if (FriendToDelete == null)
+        {
+            return;
+        }
 
         var friend = FriendToDelete;
         IsDeletePopupVisible = false;
@@ -423,7 +451,10 @@ public partial class FriendsViewModel : BaseViewModel
     [RelayCommand]
     private async Task AcceptInviteAsync(FriendDisplayModel friend)
     {
-        if (friend == null) return;
+        if (friend == null)
+        {
+            return;
+        }
 
         try
         {
@@ -527,14 +558,20 @@ public partial class FriendsViewModel : BaseViewModel
             .Where(f => f.Status == FriendshipStatus.Accepted && f.Income > 0)
             .OrderByDescending(f => f.Income)
             .Take(3);
-        foreach (var d in debtors) TopDebtors.Add(d);
+        foreach (var d in debtors)
+        {
+            TopDebtors.Add(d);
+        }
 
         TopDebts.Clear();
         var debts = _allFriends
             .Where(f => f.Status == FriendshipStatus.Accepted && f.Expense > 0)
             .OrderByDescending(f => f.Expense)
             .Take(3);
-        foreach (var d in debts) TopDebts.Add(d);
+        foreach (var d in debts)
+        {
+            TopDebts.Add(d);
+        }
     }
 
     private void UpdateTotals()
@@ -613,7 +650,7 @@ public class FriendDisplayModel
     public bool IsSentPending => Status == FriendshipStatus.SentPending;
     public bool IsReceivedPending => Status == FriendshipStatus.ReceivedPending;
 
-    public List<SharedGroupResponse> SharedGroupsList => _friend?.SharedGroups ?? new List<SharedGroupResponse>();
+    public List<SharedGroupResponse> SharedGroupsList => _friend?.SharedGroups ?? [];
     public bool HasSharedGroups => SharedGroupsList.Count > 0 && IsAccepted;
     public bool HasNickname => !string.IsNullOrWhiteSpace(_friend?.Nickname ?? _pending?.Nickname);
     public bool HasPhoneNumber => !string.IsNullOrWhiteSpace(_friend?.PhoneNumber);
@@ -623,21 +660,29 @@ public class FriendDisplayModel
         get
         {
             var items = new List<SharedGroupDisplayItem>();
-            var groups = _friend?.SharedGroups ?? new List<SharedGroupResponse>();
+            var groups = _friend?.SharedGroups ?? [];
             if (groups.Count <= 2)
             {
                 foreach (var group in groups)
+                {
                     items.Add(new SharedGroupDisplayItem { AvatarUrl = group.AvatarUrl, IsMoreIndicator = false });
+                }
             }
             else
             {
                 for (int i = 0; i < 2; i++)
+                {
                     items.Add(new SharedGroupDisplayItem { AvatarUrl = groups[i].AvatarUrl, IsMoreIndicator = false });
+                }
+
                 int remaining = groups.Count - 2;
                 items.Add(new SharedGroupDisplayItem { IsMoreIndicator = true, MoreText = $"+{remaining}" });
             }
             for (int i = 0; i < items.Count; i++)
+            {
                 items[i].ZIndex = items.Count - i;
+            }
+
             return items;
         }
     }

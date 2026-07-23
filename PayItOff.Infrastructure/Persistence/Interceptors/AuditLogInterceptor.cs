@@ -30,10 +30,16 @@ public class AuditLogInterceptor : SaveChangesInterceptor
 
     private void LogChanges(DbContext? context)
     {
-        if (context == null) return;
+        if (context == null)
+        {
+            return;
+        }
 
         var userIdString = _httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        if (!int.TryParse(userIdString, out var userId)) return;
+        if (!int.TryParse(userIdString, out var userId))
+        {
+            return;
+        }
 
         var entries = context.ChangeTracker.Entries()
             .Where(e => e.Entity is not AuditLog &&
@@ -43,19 +49,25 @@ public class AuditLogInterceptor : SaveChangesInterceptor
         foreach (var entry in entries)
         {
             var entityTypeEnum = GetEntityTypeEnum(entry.Entity);
-            if (entityTypeEnum == null) continue;
+            if (entityTypeEnum == null)
+            {
+                continue;
+            }
 
             var action = GetAuditAction(entry.State);
-            if (action == null) continue;
+            if (action == null)
+            {
+                continue;
+            }
 
             string? oldValues = null;
             string? newValues = null;
 
-            if (entry.State == EntityState.Modified || entry.State == EntityState.Deleted)
+            if (entry.State is EntityState.Modified or EntityState.Deleted)
             {
                 oldValues = GetEntityValues(entry, true);
             }
-            if (entry.State == EntityState.Added || entry.State == EntityState.Modified)
+            if (entry.State is EntityState.Added or EntityState.Modified)
             {
                 newValues = GetEntityValues(entry, false);
             }
@@ -68,7 +80,9 @@ public class AuditLogInterceptor : SaveChangesInterceptor
             }
 
             if (entityId == 0 && entry.State != EntityState.Added)
+            {
                 continue;
+            }
 
             var auditLog = AuditLog.CreateWithUserId(
                 entityTypeEnum.Value,
@@ -114,19 +128,26 @@ public class AuditLogInterceptor : SaveChangesInterceptor
         var values = new Dictionary<string, object?>();
         foreach (var property in entry.Properties)
         {
-            if (property.Metadata.IsPrimaryKey()) continue;
+            if (property.Metadata.IsPrimaryKey())
+            {
+                continue;
+            }
 
             if (getOld)
             {
                 if (entry.State == EntityState.Modified && !property.IsModified)
+                {
                     continue;
+                }
 
                 values[property.Metadata.Name] = property.OriginalValue;
             }
             else
             {
                 if (entry.State == EntityState.Modified && !property.IsModified)
+                {
                     continue;
+                }
 
                 values[property.Metadata.Name] = property.CurrentValue;
             }

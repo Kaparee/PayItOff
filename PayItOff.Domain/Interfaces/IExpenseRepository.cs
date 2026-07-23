@@ -10,4 +10,5 @@ public interface IExpenseRepository
     Task<List<Expense>> GetExpensesByGroupIdAsync(int groupId);
     Task DeleteAsync(Expense expense);
     Task DeleteExpenseItemAsync(ExpenseItem item);
+    Task<List<string>> GetDistinctCategoriesByGroupAsync(int groupId);
 }

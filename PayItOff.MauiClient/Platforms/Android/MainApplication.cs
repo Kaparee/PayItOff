@@ -1,7 +1,7 @@
 using Android.App;
 using Android.Runtime;
 
-namespace PayItOff.MauiClient
+namespace PayItOff.MauiClient.Platforms.Android
 {
 #if DEBUG
     [Application(UsesCleartextTraffic = true)]

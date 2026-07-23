@@ -269,7 +269,10 @@ public class FriendService : IFriendService
             friend = await _userRepository.GetUserByPhoneNumberAsync(formattedPhone!);
         }
 
-        if (friend is null) return null;
+        if (friend is null)
+        {
+            return null;
+        }
 
         var baseUrl = _configuration["AppUrls:BackendUrl"];
         return new SearchUserResponse

@@ -24,7 +24,7 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
     [ObservableProperty]
     public partial string NewItemName { get; set; } = string.Empty;
 
-    public ObservableCollection<ReceiptPhotoItem> ReceiptPhotos { get; } = new();
+    public ObservableCollection<ReceiptPhotoItem> ReceiptPhotos { get; } = [];
 
     [ObservableProperty]
     public partial ReceiptPhotoItem? SelectedPhoto { get; set; }
@@ -45,14 +45,19 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
 
     [ObservableProperty]
     public partial bool IsMissingMembersPopupVisible { get; set; }
-    public ObservableCollection<ReceiptItem> BufferItems { get; } = new();
-    public ObservableCollection<ReceiptItem> UncategorizedItems { get; } = new();
-    public ObservableCollection<ReceiptCategory> Categories { get; } = new();
-    public ObservableCollection<DisplayGroupMember> GroupMembers { get; } = new();
-    public ObservableCollection<DisplayGroupMember> MissingGroupMembers { get; } = new();
+    public ObservableCollection<ReceiptItem> BufferItems { get; } = [];
+    public ObservableCollection<ReceiptItem> UncategorizedItems { get; } = [];
+    public ObservableCollection<ReceiptCategory> Categories { get; } = [];
+    public ObservableCollection<DisplayGroupMember> GroupMembers { get; } = [];
+    public ObservableCollection<DisplayGroupMember> MissingGroupMembers { get; } = [];
 
     private int _currentUserId;
     private DisplayGroupMember? _defaultPayer;
+
+    [ObservableProperty]
+    public partial ObservableCollection<string> ExistingGroupCategories { get; set; } = new();
+    [ObservableProperty]
+    public partial ObservableCollection<string> FilteredGroupCategories { get; set; } = new();
 
     public AddExpenseViewModel(
         GroupService groupService,
@@ -76,7 +81,10 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        if (!query.TryGetValue("groupId", out var raw)) return;
+        if (!query.TryGetValue("groupId", out var raw))
+        {
+            return;
+        }
 
         var id = raw switch
         {
@@ -87,7 +95,9 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
         };
 
         if (id > 0)
+        {
             GroupId = id;
+        }
     }
 
     partial void OnGroupIdChanged(int value)
@@ -141,7 +151,9 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
                 }
 
                 if (_currentUserId > 0)
+                {
                     _defaultPayer = GroupMembers.FirstOrDefault(m => m.UserId == _currentUserId);
+                }
             }
             else
             {
@@ -186,11 +198,38 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
     }
 
     [RelayCommand]
-    private void ShowAddCategoryPopup()
+    private async Task ShowAddCategoryPopup()
     {
         NewCategoryName = string.Empty;
+
+        var categories = await _expenseService.GetGroupCategoriesAsync(GroupId);
+
+        ExistingGroupCategories.Clear();
+        FilteredGroupCategories.Clear();
+
+        foreach (var c in categories.OrderBy(x => x, StringComparer.CurrentCultureIgnoreCase))
+        {
+            ExistingGroupCategories.Add(c);
+            FilteredGroupCategories.Add(c);
+        }
+
         IsAddCategoryPopupVisible = true;
     }
+
+    partial void OnNewCategoryNameChanged(string value)
+    {
+        FilteredGroupCategories.Clear();
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            foreach (var c in ExistingGroupCategories) FilteredGroupCategories.Add(c);
+            return;
+        }
+        foreach (var c in ExistingGroupCategories.Where(c => c.Contains(value, StringComparison.OrdinalIgnoreCase)))
+            FilteredGroupCategories.Add(c);
+    }
+
+    [RelayCommand]
+    private void SelectExistingCategory(string name) => NewCategoryName = name;
 
     [RelayCommand]
     private void CloseAddCategoryPopup() => IsAddCategoryPopupVisible = false;
@@ -258,12 +297,18 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
 
     public async Task GroupItemsAsync(ReceiptItem source, ReceiptItem target)
     {
-        if (source == target) return;
+        if (source == target)
+        {
+            return;
+        }
 
         if (string.IsNullOrEmpty(target.ItemGroupId))
         {
             var groupName = await PromptForGroupNameAsync();
-            if (string.IsNullOrWhiteSpace(groupName)) return;
+            if (string.IsNullOrWhiteSpace(groupName))
+            {
+                return;
+            }
 
             target.ItemGroupId = Guid.NewGuid().ToString();
             target.ItemGroupName = groupName.Trim();
@@ -508,7 +553,10 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
             };
 
             var photos = await FilePicker.Default.PickMultipleAsync(options);
-            if (photos == null || !photos.Any()) return;
+            if (photos == null || !photos.Any())
+            {
+                return;
+            }
 
             ReceiptPhotoItem? lastItem = null;
 
@@ -529,7 +577,9 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
             }
 
             if (lastItem != null)
+            {
                 SelectedPhoto = lastItem;
+            }
 
             // Upload w tle
             IsBusy = true;
@@ -558,7 +608,10 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
     [RelayCommand]
     private async Task SubmitExpenseAsync()
     {
-        if (GroupId <= 0) return;
+        if (GroupId <= 0)
+        {
+            return;
+        }
 
         var allItems = Categories.SelectMany(c => c.Items).ToList();
         allItems.AddRange(UncategorizedItems);
@@ -604,13 +657,13 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
                     Name = $"Rozliczenie z paragonu - " + DateTime.Now.ToString("dd.MM.yyyy"),
                     PurchasedAt = DateTime.UtcNow,
                     ReceiptImageUrls = ReceiptPhotos.Select(p => p.UploadedFileName).ToList(),
-                    Items = new List<ExpenseItemDto>()
+                    Items = []
                 };
 
                 var singleItems = group.Where(i => string.IsNullOrEmpty(i.ItemGroupId)).ToList();
                 var groupedItems = group.Where(i => !string.IsNullOrEmpty(i.ItemGroupId)).GroupBy(i => i.ItemGroupId);
 
-                subExpense.Groups = new List<ExpenseGroupDto>();
+                subExpense.Groups = [];
 
                 foreach (var item in singleItems)
                 {
@@ -636,13 +689,16 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
                     {
                         Name = firstItem.ItemGroupName ?? "Grupa produktów",
                         ParticipantIds = allParticipants,
-                        Items = new List<ExpenseItemDto>()
+                        Items = []
                     };
 
                     foreach (var item in g)
                     {
                         var itemRemainder = item.AssignedMembers.FirstOrDefault(m => m.IsRemainderRecipient)?.MemberId;
-                        if (itemRemainder != null) expGroup.RemainderRecipientId = itemRemainder;
+                        if (itemRemainder != null)
+                        {
+                            expGroup.RemainderRecipientId = itemRemainder;
+                        }
 
                         expGroup.Items.Add(new ExpenseItemDto
                         {
@@ -702,7 +758,11 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
     [RelayCommand]
     private void SwipeLeft()
     {
-        if (ReceiptPhotos.Count <= 1 || SelectedPhoto == null) return;
+        if (ReceiptPhotos.Count <= 1 || SelectedPhoto == null)
+        {
+            return;
+        }
+
         int currentIndex = ReceiptPhotos.IndexOf(SelectedPhoto);
         if (currentIndex < ReceiptPhotos.Count - 1)
         {
@@ -713,7 +773,11 @@ public partial class AddExpenseViewModel : PopupViewModelBase, IQueryAttributabl
     [RelayCommand]
     private void SwipeRight()
     {
-        if (ReceiptPhotos.Count <= 1 || SelectedPhoto == null) return;
+        if (ReceiptPhotos.Count <= 1 || SelectedPhoto == null)
+        {
+            return;
+        }
+
         int currentIndex = ReceiptPhotos.IndexOf(SelectedPhoto);
         if (currentIndex > 0)
         {

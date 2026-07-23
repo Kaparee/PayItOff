@@ -5,8 +5,8 @@ public class GroupDetailsResponse
     public int GroupId { get; set; }
     public string GroupName { get; set; } = string.Empty;
     public string UserRole { get; set; } = string.Empty;
-    public List<GroupMemberBalanceDto> Members { get; set; } = new();
-    public List<ExpenseSummaryDto> Expenses { get; set; } = new();
+    public List<GroupMemberBalanceDto> Members { get; set; } = [];
+    public List<ExpenseSummaryDto> Expenses { get; set; } = [];
     public bool IsArchived { get; set; }
 }
 
@@ -37,9 +37,9 @@ public class GroupMemberBalanceDto
     public decimal OverallBalance { get; set; }
     public bool IsCurrentUser { get; set; }
     public bool IsCreditorToCurrentUser { get; set; }
-    public List<GroupMemberDebtLineDto> Lines { get; set; } = new();
+    public List<GroupMemberDebtLineDto> Lines { get; set; } = [];
     public decimal LinesTotal { get; set; }
-    public List<MemberExpenseLineDto> Expenses { get; set; } = new();
+    public List<MemberExpenseLineDto> Expenses { get; set; } = [];
     public decimal ExpensesTotal { get; set; }
     public bool IsOnline { get; set; }
 }

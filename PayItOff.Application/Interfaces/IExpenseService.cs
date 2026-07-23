@@ -10,5 +10,6 @@ namespace PayItOff.Application.Interfaces
         Task UpdateExpenseItemAsync(int userId, int expenseId, int itemId, UpdateExpenseItemRequest request);
         Task DeleteExpenseAsync(int userId, int expenseId);
         Task DeleteExpenseItemAsync(int userId, int expenseId, int itemId);
+        Task<List<string>> GetDistinctCategoriesByGroupAsync(int groupId);
     }
 }

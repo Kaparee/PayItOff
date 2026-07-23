@@ -15,25 +15,22 @@ namespace PayItOff.Domain.Entities
         public DateTime CreatedAt { get; private set; }
         public DateTime UpdatedAt { get; private set; }
         public DateTime? DeletedAt { get; private set; }
-        private readonly List<ExpenseItem> _items = new();
+        private readonly List<ExpenseItem> _items = [];
         public IReadOnlyCollection<ExpenseItem> Items => _items.AsReadOnly();
-        private readonly List<ExpenseGroup> _groups = new();
+        private readonly List<ExpenseGroup> _groups = [];
         public IReadOnlyCollection<ExpenseGroup> Groups => _groups.AsReadOnly();
-        private readonly List<ExpensePhoto> _photos = new();
+        private readonly List<ExpensePhoto> _photos = [];
         public IReadOnlyCollection<ExpensePhoto> Photos => _photos.AsReadOnly();
 
         protected Expense() { }
 
         private Expense(Group group, User creator, User payer, string name, DateTime purchasedAt)
         {
-            if (group == null) { throw new ArgumentNullException(nameof(group), "Error przy group"); }
-            if (creator == null) { throw new ArgumentNullException(nameof(creator), "Error przy creator"); }
-            if (payer == null) { throw new ArgumentNullException(nameof(payer), "Error przy payer"); }
             if (string.IsNullOrWhiteSpace(name)) { throw new ArgumentException(nameof(name)); }
 
-            Group = group;
-            Creator = creator;
-            Payer = payer;
+            Group = group ?? throw new ArgumentNullException(nameof(group), "Error przy group");
+            Creator = creator ?? throw new ArgumentNullException(nameof(creator), "Error przy creator");
+            Payer = payer ?? throw new ArgumentNullException(nameof(payer), "Error przy payer");
             GroupId = group.Id;
             CreatorId = creator.Id;
             PayerId = payer.Id;

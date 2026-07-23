@@ -1,6 +1,4 @@
-﻿using PayItOff.Domain.Enums;
-
-namespace PayItOff.Shared.Responses
+﻿namespace PayItOff.Shared.Responses
 {
 
     public class AllGroupPendingInvitationResponse

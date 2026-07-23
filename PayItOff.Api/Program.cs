@@ -1,12 +1,12 @@
-using Scalar.AspNetCore;
 using FluentValidation;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
+using PayItOff.Api.Hubs;
 using PayItOff.Api.Middleware;
+using PayItOff.Api.Services;
 using PayItOff.Application.Interfaces;
 using PayItOff.Application.Services;
 using PayItOff.Application.Validators;
@@ -16,9 +16,8 @@ using PayItOff.Infrastructure.Persistence;
 using PayItOff.Infrastructure.Repositories;
 using PayItOff.Infrastructure.Services;
 using PayItOff.Shared.Requests;
+using Scalar.AspNetCore;
 using System.Text;
-using PayItOff.Api.Hubs;
-using PayItOff.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

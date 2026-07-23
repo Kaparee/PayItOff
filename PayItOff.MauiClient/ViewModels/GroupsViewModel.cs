@@ -12,9 +12,9 @@ public partial class GroupsViewModel : PopupViewModelBase
     private readonly GroupService _groupService;
     private readonly GroupMemberService _groupMemberService;
     private readonly SignalRService _signalRService;
-    private List<GroupInfoResponse> _allGroups = new();
+    private List<GroupInfoResponse> _allGroups = [];
 
-    private List<GroupPendingInvitationResponse> _allInvitations = new();
+    private List<GroupPendingInvitationResponse> _allInvitations = [];
 
     [ObservableProperty]
     public partial ObservableCollection<GroupInfoResponse> Groups { get; set; }
@@ -52,8 +52,8 @@ public partial class GroupsViewModel : PopupViewModelBase
         _groupService = groupService;
         _groupMemberService = groupMemberService;
         _signalRService = signalRService;
-        Groups = new ObservableCollection<GroupInfoResponse>();
-        Invites = new ObservableCollection<GroupPendingInvitationResponse>();
+        Groups = [];
+        Invites = [];
         IsCustomAlertSupported = true;
         _ = LoadGroupsAsync();
     }
@@ -140,10 +140,11 @@ public partial class GroupsViewModel : PopupViewModelBase
     {
         var invites = await _groupMemberService.GetPendingInvitationsAsync();
 
-        if(invites != null && invites.Count() > 0)
+        if (invites != null && invites.Count() > 0)
         {
             IsInviteListButtonVisible = true;
-        } else
+        }
+        else
         {
             IsInviteListButtonVisible = false;
         }
@@ -259,8 +260,15 @@ public partial class GroupsViewModel : PopupViewModelBase
     [RelayCommand]
     private async Task ConfirmCreateGroup()
     {
-        if (string.IsNullOrWhiteSpace(NewGroupName)) return;
-        if (_tempAvatarStream != null) _tempAvatarStream.Position = 0;
+        if (string.IsNullOrWhiteSpace(NewGroupName))
+        {
+            return;
+        }
+
+        if (_tempAvatarStream != null)
+        {
+            _tempAvatarStream.Position = 0;
+        }
 
         var isSuccess = await _groupService.CreateGroup(NewGroupName, _tempAvatarStream, _tempFileName);
 
@@ -278,7 +286,10 @@ public partial class GroupsViewModel : PopupViewModelBase
     [RelayCommand]
     private async Task ToggleFavorite(GroupInfoResponse group)
     {
-        if (group == null) return;
+        if (group == null)
+        {
+            return;
+        }
 
         var isSuccess = await _groupService.SetGroupFavorite(group.Id);
 
@@ -295,7 +306,11 @@ public partial class GroupsViewModel : PopupViewModelBase
 
     public ICommand NavigateToGroupDetailsCommand => new Command<GroupInfoResponse>(async (group) =>
     {
-        if (group == null) return;
+        if (group == null)
+        {
+            return;
+        }
+
         await Shell.Current.GoToAsync($"//GroupDetailsPage?groupId={group.Id}");
     });
 }

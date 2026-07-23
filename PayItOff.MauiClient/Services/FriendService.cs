@@ -20,7 +20,7 @@ public class FriendService
             var response = await _httpClient.GetAsync("Friend/friends-list");
             if (response.IsSuccessStatusCode)
             {
-                return await response.Content.ReadFromJsonAsync<List<FriendListResponse>>() ?? new();
+                return await response.Content.ReadFromJsonAsync<List<FriendListResponse>>() ?? [];
             }
         }
         catch (Exception ex)
@@ -28,7 +28,7 @@ public class FriendService
             Console.WriteLine($"Błąd pobierania listy znajomych: {ex.Message}");
         }
 
-        return new List<FriendListResponse>();
+        return [];
     }
 
     public async Task<List<FriendPendingInvitationResponse>> GetPendingInvitationsAsync()
@@ -38,7 +38,7 @@ public class FriendService
             var response = await _httpClient.GetAsync("Friend/all-pending-invitation");
             if (response.IsSuccessStatusCode)
             {
-                return await response.Content.ReadFromJsonAsync<List<FriendPendingInvitationResponse>>() ?? new();
+                return await response.Content.ReadFromJsonAsync<List<FriendPendingInvitationResponse>>() ?? [];
             }
         }
         catch (Exception ex)
@@ -46,7 +46,7 @@ public class FriendService
             Console.WriteLine($"Błąd pobierania oczekujących zaproszeń: {ex.Message}");
         }
 
-        return new List<FriendPendingInvitationResponse>();
+        return [];
     }
 
     public async Task<bool> InviteAsync(FriendInviteRequest request)

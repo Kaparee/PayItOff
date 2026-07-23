@@ -39,7 +39,9 @@ public class UserService
     {
         var response = await _httpClient.PatchAsJsonAsync("User/profile", request);
         if (response.IsSuccessStatusCode)
+        {
             return true;
+        }
 
         var error = await response.Content.ReadAsStringAsync();
         throw new Exception(ExtractErrorMessage(error, "Nie udało się zaktualizować danych."));
@@ -49,7 +51,9 @@ public class UserService
     {
         var response = await _httpClient.PatchAsJsonAsync("User/modify-password", request);
         if (response.IsSuccessStatusCode)
+        {
             return true;
+        }
 
         var error = await response.Content.ReadAsStringAsync();
         throw new Exception(ExtractErrorMessage(error, "Nie udało się zmienić hasła."));
@@ -60,7 +64,9 @@ public class UserService
         var request = new EmailRequest { NewEmail = newEmail };
         var response = await _httpClient.PostAsJsonAsync("User/request-email-change", request);
         if (response.IsSuccessStatusCode)
+        {
             return true;
+        }
 
         var error = await response.Content.ReadAsStringAsync();
         throw new Exception(ExtractErrorMessage(error, "Nie udało się wysłać żądania zmiany email."));

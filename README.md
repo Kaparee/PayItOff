@@ -18,7 +18,7 @@
 
 - [x] **Naprawa zdjęć:** Możliwość usunięcia dodanego zdjęcia w rejestracji - ustawianie na default 
 - [x] **Usunięcie wysłanego zaproszenia** Możliwość usunięcia wysłanego zaproszenia do grupy przez Ownera/Admina
-- [ ] **Naprawa głównego widoku** Naprawienie wyświetlania kategorii płatności w głównym widoku - wyświetla wszystkie kategorie, powinno wyśweitlać tylko te nieopłacone
+- [x] **Naprawa głównego widoku** Naprawienie wyświetlania kategorii płatności w głównym widoku - wyświetla wszystkie kategorie, powinno wyśweitlać tylko te nieopłacone
 - [x] **Zapamiętaj mnie** Dodanie opcji automatycznego logowania po odpaleniu aplikacji, wyłącza się po wylogowaniu
 - [x] **Naprawa tokenów** Naprawa błędu z tokenami, które nie wylogowują użytkownika po wygaśnięciu
 - [x] **Naprawa wskaźnika dostępności** Naprawa błędu z niepoprawnym wyświetlaniem aktywności użytkownika w grupie po wyjsciu w inny sposób niż strzałką wstecz

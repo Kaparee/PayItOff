@@ -12,7 +12,9 @@
             var debts = new List<CalculatedDebt>();
 
             if (participantIds == null || !participantIds.Any() || totalAmount <= 0)
+            {
                 return new ExpenseCalculationResult(splits, debts);
+            }
 
             int participantsCount = participantIds.Count;
 

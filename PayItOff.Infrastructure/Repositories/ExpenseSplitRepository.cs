@@ -87,8 +87,8 @@ public class ExpenseSplitRepository : IExpenseSplitRepository
             return (new List<ExpenseSplit>(), new List<Settlement>(), 0);
         }
 
-        List<int> expenseIdsList = new List<int>();
-        List<int> settlementIdsList = new List<int>();
+        List<int> expenseIdsList = [];
+        List<int> settlementIdsList = [];
         foreach (var key in pageOfKeys)
         {
             if (key.IsSettlement == false)
@@ -101,7 +101,7 @@ public class ExpenseSplitRepository : IExpenseSplitRepository
             }
         }
 
-        List<ExpenseSplit> splitsResult = new List<ExpenseSplit>();
+        List<ExpenseSplit> splitsResult = [];
         if (expenseIdsList.Count > 0)
         {
             splitsResult = await _context.ExpenseSplits
@@ -113,7 +113,7 @@ public class ExpenseSplitRepository : IExpenseSplitRepository
                 .ToListAsync();
         }
 
-        List<Settlement> settlementsResult = new List<Settlement>();
+        List<Settlement> settlementsResult = [];
         if (settlementIdsList.Count > 0)
         {
             settlementsResult = await _context.Settlements
@@ -173,6 +173,36 @@ public class ExpenseSplitRepository : IExpenseSplitRepository
         int total = incomes + expenses;
 
         return (total, incomes, expenses);
+    }
+
+    public async Task DistributePaymentAsync(int debtorId, int creditorId, int groupId, decimal amount)
+    {
+        if (amount <= 0)
+        {
+            return;
+        }
+
+        var splits = await _context.ExpenseSplits
+            .Include(s => s.ExpenseItem).ThenInclude(ei => ei.Expense)
+            .Where(s => s.UserId == debtorId
+                     && s.ExpenseItem.Expense.PayerId == creditorId
+                     && s.ExpenseItem.Expense.GroupId == groupId
+                     && (s.OwedAmount - s.PaidAmount) > 0)
+            .OrderBy(s => s.ExpenseItem.Expense.PurchasedAt)
+            .ToListAsync();
+
+        decimal remaining = amount;
+        foreach (var split in splits)
+        {
+            if (remaining <= 0)
+            {
+                break;
+            }
+
+            remaining = split.ApplyPayment(remaining);
+        }
+
+        _context.ExpenseSplits.UpdateRange(splits);
     }
 }
 

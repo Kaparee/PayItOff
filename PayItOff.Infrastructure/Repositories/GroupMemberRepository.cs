@@ -3,7 +3,6 @@ using PayItOff.Domain.Entities;
 using PayItOff.Domain.Enums;
 using PayItOff.Domain.Interfaces;
 using PayItOff.Infrastructure.Persistence;
-using System.Diagnostics.CodeAnalysis;
 
 namespace PayItOff.Infrastructure.Repositories;
 

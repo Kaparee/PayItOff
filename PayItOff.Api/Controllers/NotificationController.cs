@@ -20,8 +20,15 @@ public class NotificationController : ControllerBase
     public async Task<ActionResult<NotificationResponse>> GetAllUserNotifications([FromQuery] string? type1 = null, string? type2 = null)
     {
         var filters = new List<string>();
-        if (!string.IsNullOrEmpty(type1)) filters.Add(type1);
-        if (!string.IsNullOrEmpty(type2)) filters.Add(type2);
+        if (!string.IsNullOrEmpty(type1))
+        {
+            filters.Add(type1);
+        }
+
+        if (!string.IsNullOrEmpty(type2))
+        {
+            filters.Add(type2);
+        }
 
         var result = await _notificationService.GetUserNotificationAsync(GetUserId(), filters);
         return Ok(result);

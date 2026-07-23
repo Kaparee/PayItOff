@@ -64,7 +64,9 @@ public class AuthService
         var refreshToken = await SecureStorage.Default.GetAsync("refresh_token");
 
         if (string.IsNullOrEmpty(oldAccessToken) || string.IsNullOrEmpty(refreshToken))
+        {
             return false;
+        }
 
         var request = new RefreshRequest
         {

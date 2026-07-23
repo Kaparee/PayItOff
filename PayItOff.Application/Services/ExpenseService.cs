@@ -136,7 +136,11 @@ namespace PayItOff.Application.Services
 
                     foreach (var debt in globalDebts)
                     {
-                        if (debt.Key.DebtorId == debt.Key.CreditorId) continue;
+                        if (debt.Key.DebtorId == debt.Key.CreditorId)
+                        {
+                            continue;
+                        }
+
                         if (!usersDict.ContainsKey(debt.Key.DebtorId)) { throw new UserNotFoundException(); }
                         var debtor = usersDict[debt.Key.DebtorId];
                         if (!usersDict.ContainsKey(debt.Key.CreditorId)) { throw new UserNotFoundException(); }
@@ -166,10 +170,16 @@ namespace PayItOff.Application.Services
         public async Task DeleteExpenseAsync(int userId, int expenseId)
         {
             var expense = await _expenseRepository.GetExpenseWithSplitsAsync(expenseId);
-            if (expense == null) throw new ExpenseNotFoundException();
+            if (expense == null)
+            {
+                throw new ExpenseNotFoundException();
+            }
 
             var group = await _groupRepository.GetGroupInfoByIdAsync(expense.GroupId);
-            if (group == null) throw new GroupNotFoundException();
+            if (group == null)
+            {
+                throw new GroupNotFoundException();
+            }
 
             var member = await _groupMemberRepository.GetMemberAsync(expense.GroupId, userId);
             if (member == null || (member.Role != GroupMemberRole.Owner && member.Role != GroupMemberRole.Admin))
@@ -179,7 +189,10 @@ namespace PayItOff.Application.Services
 
             var debtsToRevert = expense.CalculateDebts();
             var payer = await _userRepository.GetUserByIdAsync(expense.PayerId);
-            if (payer == null) throw new UserNotFoundException();
+            if (payer == null)
+            {
+                throw new UserNotFoundException();
+            }
 
             await _unitOfWork.BeginTransactionAsync();
             try
@@ -217,10 +230,16 @@ namespace PayItOff.Application.Services
         public async Task DeleteExpenseItemAsync(int userId, int expenseId, int itemId)
         {
             var expense = await _expenseRepository.GetExpenseWithSplitsAsync(expenseId);
-            if (expense == null) throw new ExpenseNotFoundException();
+            if (expense == null)
+            {
+                throw new ExpenseNotFoundException();
+            }
 
             var group = await _groupRepository.GetGroupInfoByIdAsync(expense.GroupId);
-            if (group == null) throw new GroupNotFoundException();
+            if (group == null)
+            {
+                throw new GroupNotFoundException();
+            }
 
             var member = await _groupMemberRepository.GetMemberAsync(expense.GroupId, userId);
             if (member == null || (member.Role != GroupMemberRole.Owner && member.Role != GroupMemberRole.Admin))
@@ -230,19 +249,30 @@ namespace PayItOff.Application.Services
 
             var item = expense.Items.FirstOrDefault(i => i.Id == itemId)
                 ?? expense.Groups.SelectMany(g => g.Items).FirstOrDefault(i => i.Id == itemId);
-            if (item == null) throw new Exception("Nie znaleziono pozycji na paragonie");
+            if (item == null)
+            {
+                throw new Exception("Nie znaleziono pozycji na paragonie");
+            }
 
             var payer = await _userRepository.GetUserByIdAsync(expense.PayerId);
-            if (payer == null) throw new UserNotFoundException();
-
+            if (payer == null)
+            {
+                throw new UserNotFoundException();
+            }
 
             var debtsToRevert = new Dictionary<int, decimal>();
             foreach (var split in item.Splits)
             {
                 if (split.UserId != payer.Id)
                 {
-                    if (debtsToRevert.ContainsKey(split.UserId)) debtsToRevert[split.UserId] += split.OwedAmount;
-                    else debtsToRevert[split.UserId] = split.OwedAmount;
+                    if (debtsToRevert.ContainsKey(split.UserId))
+                    {
+                        debtsToRevert[split.UserId] += split.OwedAmount;
+                    }
+                    else
+                    {
+                        debtsToRevert[split.UserId] = split.OwedAmount;
+                    }
                 }
             }
 
@@ -295,14 +325,23 @@ namespace PayItOff.Application.Services
         private void AggregateDebt(Dictionary<(int, int), decimal> dict, int debtorId, int creditorId, decimal amount)
         {
             var key = (debtorId, creditorId);
-            if (dict.ContainsKey(key)) dict[key] += amount;
-            else dict[key] = amount;
+            if (dict.ContainsKey(key))
+            {
+                dict[key] += amount;
+            }
+            else
+            {
+                dict[key] = amount;
+            }
         }
 
         public async Task<PayItOff.Shared.Responses.ExpenseDetailsResponse> GetExpenseDetailsAsync(int userId, int expenseId)
         {
             var expense = await _expenseRepository.GetExpenseWithSplitsAsync(expenseId);
-            if (expense == null) throw new ExpenseNotFoundException();
+            if (expense == null)
+            {
+                throw new ExpenseNotFoundException();
+            }
 
             var groupMember = await _groupMemberRepository.GetMemberAsync(expense.GroupId, userId);
             if (groupMember == null) { throw new InvalidUserRoleException(); }
@@ -341,7 +380,11 @@ namespace PayItOff.Application.Services
 
             foreach (var item in expense.Items)
             {
-                if (item.ExpenseGroupId != null) continue;
+                if (item.ExpenseGroupId != null)
+                {
+                    continue;
+                }
+
                 categories.Add(item.Category);
                 foreach (var split in item.Splits)
                 {
@@ -373,11 +416,17 @@ namespace PayItOff.Application.Services
         public async Task<PayItOff.Shared.Responses.ExpenseDetailsResponse> GetExpenseItemDetailsAsync(int userId, int expenseId, int itemId)
         {
             var expense = await _expenseRepository.GetExpenseWithSplitsAsync(expenseId);
-            if (expense == null) throw new ExpenseNotFoundException();
+            if (expense == null)
+            {
+                throw new ExpenseNotFoundException();
+            }
 
             var item = expense.Items.FirstOrDefault(i => i.Id == itemId)
                        ?? expense.Groups.SelectMany(g => g.Items).FirstOrDefault(i => i.Id == itemId);
-            if (item == null) throw new ExpenseNotFoundException();
+            if (item == null)
+            {
+                throw new ExpenseNotFoundException();
+            }
 
             var groupMember = await _groupMemberRepository.GetMemberAsync(expense.GroupId, userId);
             if (groupMember == null) { throw new InvalidUserRoleException(); }
@@ -425,7 +474,10 @@ namespace PayItOff.Application.Services
         public async Task UpdateExpenseItemAsync(int userId, int expenseId, int itemId, UpdateExpenseItemRequest request)
         {
             var expense = await _expenseRepository.GetExpenseWithSplitsAsync(expenseId);
-            if (expense == null) throw new ExpenseNotFoundException();
+            if (expense == null)
+            {
+                throw new ExpenseNotFoundException();
+            }
 
             var item = expense.Items.FirstOrDefault(i => i.Id == itemId);
             ExpenseGroup? parentGroup = null;
@@ -441,12 +493,17 @@ namespace PayItOff.Application.Services
                     }
                 }
             }
-            if (item == null) throw new Exception("Expense item not found");
+            if (item == null)
+            {
+                throw new Exception("Expense item not found");
+            }
 
             var isOwner = await _groupMemberRepository.IsUserOwner(userId, expense.GroupId);
             var member = await _groupMemberRepository.GetMemberAsync(expense.GroupId, userId);
             if (!isOwner && member?.Role != GroupMemberRole.Admin && expense.CreatorId != userId)
+            {
                 throw new InvalidUserRoleException();
+            }
 
             var oldName = item.Name;
             var oldSplits = item.Splits.ToList();
@@ -455,7 +512,10 @@ namespace PayItOff.Application.Services
             try
             {
                 var group = await _groupRepository.GetGroupInfoByIdAsync(expense.GroupId);
-                if (group == null) throw new GroupNotFoundException();
+                if (group == null)
+                {
+                    throw new GroupNotFoundException();
+                }
 
                 var allUserIds = item.Splits.Select(s => s.UserId).Concat(new[] { expense.PayerId }).Distinct().ToList();
                 if (request.Splits != null && request.Splits.Any())
@@ -469,7 +529,11 @@ namespace PayItOff.Application.Services
                 {
                     foreach (var split in item.Splits)
                     {
-                        if (split.UserId == payer.Id) continue;
+                        if (split.UserId == payer.Id)
+                        {
+                            continue;
+                        }
+
                         var debtor = usersDict[split.UserId];
                         await _groupDebtRepository.ApplyDebtChangeAsync(group, debtor, payer, -split.OwedAmount);
                     }
@@ -481,7 +545,11 @@ namespace PayItOff.Application.Services
                         var newSplitEntity = ExpenseSplit.Create(item, usersDict[newSplit.UserId], newSplit.Amount);
                         item.AddSplit(newSplitEntity);
 
-                        if (newSplit.UserId == payer.Id) continue;
+                        if (newSplit.UserId == payer.Id)
+                        {
+                            continue;
+                        }
+
                         var debtor = usersDict[newSplit.UserId];
                         await _groupDebtRepository.ApplyDebtChangeAsync(group, debtor, payer, newSplit.Amount);
                     }
@@ -501,13 +569,20 @@ namespace PayItOff.Application.Services
                 await _realTimeNotificationService.SendExpenseUpdateEventAsync(group.Id);
 
                 var affectedUserIds = oldSplits.Select(s => s.UserId).ToList();
-                if (request.Splits != null) affectedUserIds.AddRange(request.Splits.Select(s => s.UserId));
+                if (request.Splits != null)
+                {
+                    affectedUserIds.AddRange(request.Splits.Select(s => s.UserId));
+                }
+
                 affectedUserIds = affectedUserIds.Distinct().Where(id => id != userId).ToList();
 
                 foreach (var id in affectedUserIds)
                 {
                     string notificationBody = $"Użytkownik zaktualizował wydatek \"{oldName}\" w grupie {group.Name}.";
-                    if (oldName != request.Name) notificationBody += $" Nowa nazwa to \"{request.Name}\".";
+                    if (oldName != request.Name)
+                    {
+                        notificationBody += $" Nowa nazwa to \"{request.Name}\".";
+                    }
 
                     await _notificationService.CreateNotificationAsync(id, userId, NotificationType.Normal, notificationBody, expense.Id, EntityType.Expenses);
                 }
@@ -517,6 +592,14 @@ namespace PayItOff.Application.Services
                 await _unitOfWork.RollbackAsync();
                 throw;
             }
+        }
+
+        public async Task<List<string>> GetDistinctCategoriesByGroupAsync(int groupId)
+        {
+            var groupCategories = await _expenseRepository.GetDistinctCategoriesByGroupAsync(groupId);
+            if (groupCategories is null) { throw new NullReferenceException(); }
+
+            return groupCategories;
         }
     }
 }

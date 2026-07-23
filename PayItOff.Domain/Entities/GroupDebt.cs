@@ -15,13 +15,12 @@ namespace PayItOff.Domain.Entities
 
         private GroupDebt(Group group, User debtor, User creditor, decimal amount)
         {
-            if (group == null) { throw new ArgumentNullException(nameof(group), "Error przy group"); }
             if (debtor == null) { throw new ArgumentNullException(nameof(debtor), "Error przy debtor"); }
             if (creditor == null) { throw new ArgumentNullException(nameof(creditor), "Error przy creditor"); }
             if (debtor.Id == creditor.Id) { throw new InvalidOperationException("Nie można być winnym pieniędzy samemu sobie"); }
             if (amount < 0) { throw new InvalidOperationException("Nie można mieć długu mniejszego od 0"); }
 
-            Group = group;
+            Group = group ?? throw new ArgumentNullException(nameof(group), "Error przy group");
             Debtor = debtor;
             Creditor = creditor;
             GroupId = group.Id;
@@ -51,7 +50,10 @@ namespace PayItOff.Domain.Entities
         public void ChangeAmount(decimal delta)
         {
             Amount += delta;
-            if (Amount < 0) Amount = 0;
+            if (Amount < 0)
+            {
+                Amount = 0;
+            }
         }
     }
 }

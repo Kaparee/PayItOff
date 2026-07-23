@@ -65,7 +65,11 @@ public partial class AccountsViewModel : PopupViewModelBase
 
     public async Task LoadProfileAsync()
     {
-        if (IsBusy) return;
+        if (IsBusy)
+        {
+            return;
+        }
+
         IsBusy = true;
 
         try
@@ -114,7 +118,11 @@ public partial class AccountsViewModel : PopupViewModelBase
 
     private void TriggerNotificationUpdate()
     {
-        if (!_isInitialized || _suppressNotificationUpdate) return;
+        if (!_isInitialized || _suppressNotificationUpdate)
+        {
+            return;
+        }
+
         UpdateNotificationsCommand.Execute(null);
     }
 

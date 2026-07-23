@@ -101,7 +101,11 @@ public partial class NotificationsViewModel : PopupViewModelBase
 
     private async Task LoadNotificationsAsync(bool updateCounts)
     {
-        if (IsBusy) return;
+        if (IsBusy)
+        {
+            return;
+        }
+
         IsBusy = true;
 
         try
@@ -127,7 +131,10 @@ public partial class NotificationsViewModel : PopupViewModelBase
             Notifications.Clear();
             if (data != null)
             {
-                foreach (var n in data) Notifications.Add(NotificationDisplayItem.FromResponse(n));
+                foreach (var n in data)
+                {
+                    Notifications.Add(NotificationDisplayItem.FromResponse(n));
+                }
             }
         }
         catch (Exception ex)
@@ -143,7 +150,10 @@ public partial class NotificationsViewModel : PopupViewModelBase
     [RelayCommand]
     public async Task HandleNotificationTappedAsync(NotificationDisplayItem item)
     {
-        if (item == null) return;
+        if (item == null)
+        {
+            return;
+        }
 
         if (item.IsDailySummary)
         {
@@ -174,7 +184,10 @@ public partial class NotificationsViewModel : PopupViewModelBase
     [RelayCommand]
     public async Task MarkAsReadAsync(NotificationDisplayItem item)
     {
-        if (item == null || item.IsRead) return;
+        if (item == null || item.IsRead)
+        {
+            return;
+        }
 
         try
         {
@@ -190,11 +203,17 @@ public partial class NotificationsViewModel : PopupViewModelBase
     [RelayCommand]
     public async Task AcceptActionAsync(NotificationDisplayItem item)
     {
-        if (item == null || !item.IsActionRequired) return;
+        if (item == null || !item.IsActionRequired)
+        {
+            return;
+        }
 
         bool confirm = await ShowAlertAsync("Akceptacja", "Czy na pewno chcesz zaakceptować tę akcję?", "Tak", "Nie");
 
-        if (!confirm) return;
+        if (!confirm)
+        {
+            return;
+        }
 
         try
         {
@@ -202,11 +221,11 @@ public partial class NotificationsViewModel : PopupViewModelBase
             {
                 await _friendService.AcceptInviteAsync(new UpdateInviteRequest { InviteId = item.EntityId });
             }
-            else if (item.EntityType == EntityType.Groups || item.EntityType == EntityType.GroupMembers)
+            else if (item.EntityType is EntityType.Groups or EntityType.GroupMembers)
             {
                 await _groupMemberService.AcceptInviteAsync(item.EntityId);
             }
-            else if (item.EntityType == EntityType.Settlements || item.EntityType == EntityType.GroupDebts)
+            else if (item.EntityType is EntityType.Settlements or EntityType.GroupDebts)
             {
                 await _settlementService.AcceptSettlementAsync(item.EntityId);
             }
@@ -226,11 +245,17 @@ public partial class NotificationsViewModel : PopupViewModelBase
     [RelayCommand]
     public async Task DeclineActionAsync(NotificationDisplayItem item)
     {
-        if (item == null || !item.IsActionRequired) return;
+        if (item == null || !item.IsActionRequired)
+        {
+            return;
+        }
 
         bool confirm = await ShowAlertAsync("Odrzucenie", "Czy na pewno chcesz odrzucić tę akcję?", "Tak", "Nie");
 
-        if (!confirm) return;
+        if (!confirm)
+        {
+            return;
+        }
 
         try
         {
@@ -238,11 +263,11 @@ public partial class NotificationsViewModel : PopupViewModelBase
             {
                 await _friendService.DeclineInviteAsync(new UpdateInviteRequest { InviteId = item.EntityId });
             }
-            else if (item.EntityType == EntityType.Groups || item.EntityType == EntityType.GroupMembers)
+            else if (item.EntityType is EntityType.Groups or EntityType.GroupMembers)
             {
                 await _groupMemberService.DeclineInviteAsync(item.EntityId);
             }
-            else if (item.EntityType == EntityType.Settlements || item.EntityType == EntityType.GroupDebts)
+            else if (item.EntityType is EntityType.Settlements or EntityType.GroupDebts)
             {
                 await _settlementService.RejectSettlementAsync(item.EntityId);
             }
@@ -262,7 +287,11 @@ public partial class NotificationsViewModel : PopupViewModelBase
     [RelayCommand]
     public async Task DeleteNotificationAsync(NotificationDisplayItem item)
     {
-        if (item == null) return;
+        if (item == null)
+        {
+            return;
+        }
+
         try
         {
             await _notificationService.DeleteNotificationAsync(item.NotificationId);
@@ -308,14 +337,14 @@ public partial class NotificationsViewModel : PopupViewModelBase
     [ObservableProperty]
     public partial string SummaryPopupContent { get; set; } = string.Empty;
 
-    public List<string> SummaryLines { get; private set; } = new();
+    public List<string> SummaryLines { get; private set; } = [];
 
     [RelayCommand]
     public void CloseSummaryPopup()
     {
         IsSummaryPopupVisible = false;
         SummaryPopupContent = string.Empty;
-        SummaryLines = new();
+        SummaryLines = [];
         OnPropertyChanged(nameof(SummaryLines));
     }
 

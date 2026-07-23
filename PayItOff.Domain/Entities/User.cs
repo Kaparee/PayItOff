@@ -70,9 +70,7 @@ namespace PayItOff.Domain.Entities
 
         public void UpdateNotifications(NotificationsSettings newSettings)
         {
-            if (newSettings == null) { throw new ArgumentNullException(nameof(newSettings)); }
-
-            NotificationsSettings = newSettings;
+            NotificationsSettings = newSettings ?? throw new ArgumentNullException(nameof(newSettings));
             UpdatedAt = DateTime.UtcNow;
         }
 

@@ -29,9 +29,18 @@ public class NotificationService
     public async Task<List<NotificationResponse>> GetAllNotifications(string? type1 = null, string? type2 = null)
     {
         var query = "Notification/get-all-notifications";
-        if (!string.IsNullOrEmpty(type1) && !string.IsNullOrEmpty(type2)) query += $"?type1={type1}&type2={type2}";
-        else if (!string.IsNullOrEmpty(type1)) query += $"?type1={type1}";
-        else if (!string.IsNullOrEmpty(type2)) query += $"?type1={type2}";
+        if (!string.IsNullOrEmpty(type1) && !string.IsNullOrEmpty(type2))
+        {
+            query += $"?type1={type1}&type2={type2}";
+        }
+        else if (!string.IsNullOrEmpty(type1))
+        {
+            query += $"?type1={type1}";
+        }
+        else if (!string.IsNullOrEmpty(type2))
+        {
+            query += $"?type1={type2}";
+        }
 
         var response = await _httpClient.GetAsync(query);
         return response.IsSuccessStatusCode

@@ -10,7 +10,10 @@ public static class JwtHelper
         try
         {
             var parts = token.Split('.');
-            if (parts.Length < 2) return null;
+            if (parts.Length < 2)
+            {
+                return null;
+            }
 
             var payload = parts[1];
             // Fix Base64 padding

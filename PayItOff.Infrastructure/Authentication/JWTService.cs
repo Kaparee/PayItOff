@@ -20,9 +20,9 @@ namespace PayItOff.Infrastructure.Authentication
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email!),
-                new Claim(ClaimTypes.Name, user.Nickname!),
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ClaimTypes.Email, user.Email!),
+                new(ClaimTypes.Name, user.Nickname!),
             };
 
             var secretKey = _configuration["JwtSettings:Secret"];

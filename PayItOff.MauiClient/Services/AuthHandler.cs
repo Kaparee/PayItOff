@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using PayItOff.Shared.Requests;
 
 namespace PayItOff.MauiClient.Services;
 

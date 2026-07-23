@@ -53,4 +53,15 @@ public class ExpenseService
         var response = await _httpClient.DeleteAsync($"Expense/{expenseId}/item/{itemId}");
         response.EnsureSuccessStatusCode();
     }
+
+    public async Task<List<string>> GetGroupCategoriesAsync(int groupId)
+    {
+        var response = await _httpClient.GetAsync($"Expense/{groupId}/categories");
+        if (!response.IsSuccessStatusCode)
+        {
+            return [];
+        }
+
+        return await response.Content.ReadFromJsonAsync<List<string>>() ?? [];
+    }
 }

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace PayItOff.Application.Interfaces
 {
     public interface IRealTimeNotificationService

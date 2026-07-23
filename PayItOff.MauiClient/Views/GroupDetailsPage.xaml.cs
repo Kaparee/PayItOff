@@ -13,7 +13,9 @@ public partial class GroupDetailsPage : ContentPage, IQueryAttributable
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (BindingContext is GroupDetailsViewModel vm)
+        {
             vm.ApplyQueryAttributes(query);
+        }
     }
 
     protected override void OnNavigatedTo(NavigatedToEventArgs args)

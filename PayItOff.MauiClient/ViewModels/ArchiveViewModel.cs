@@ -8,7 +8,7 @@ namespace PayItOff.MauiClient.ViewModels;
 public partial class ArchiveViewModel : PopupViewModelBase
 {
     private readonly GroupService _groupService;
-    public ObservableCollection<GroupInfoResponse> ArchivedGroups { get; } = new();
+    public ObservableCollection<GroupInfoResponse> ArchivedGroups { get; } = [];
 
     public ArchiveViewModel(GroupService groupService)
     {
@@ -41,7 +41,10 @@ public partial class ArchiveViewModel : PopupViewModelBase
     [RelayCommand]
     private async Task GroupTapped(GroupInfoResponse group)
     {
-        if (group == null) return;
+        if (group == null)
+        {
+            return;
+        }
 
         await Shell.Current.GoToAsync($"//GroupDetailsPage?groupId={group.Id}");
     }

@@ -63,7 +63,11 @@ public class FriendController : ControllerBase
     public async Task<ActionResult<SearchUserResponse>> SearchUser([FromQuery] string? nickname, [FromQuery] string? email, [FromQuery] string? phoneNumber)
     {
         var result = await _friendService.SearchUserAsync(nickname, email, phoneNumber);
-        if (result == null) return NotFound("Nie znaleziono użytkownika o podanych kryteriach.");
+        if (result == null)
+        {
+            return NotFound("Nie znaleziono użytkownika o podanych kryteriach.");
+        }
+
         return Ok(result);
     }
 }

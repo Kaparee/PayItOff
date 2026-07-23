@@ -98,12 +98,12 @@ public partial class ReceiptItem : ObservableObject
 
     public bool HasNoPayer => Payer == null;
 
-    public ObservableCollection<ReceiptMemberShare> AssignedMembers { get; } = new();
+    public ObservableCollection<ReceiptMemberShare> AssignedMembers { get; } = [];
 
     protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
-        if (e.PropertyName == nameof(Quantity) || e.PropertyName == nameof(UnitPrice))
+        if (e.PropertyName is (nameof(Quantity)) or (nameof(UnitPrice)))
         {
             OnPropertyChanged(nameof(TotalPrice));
             RecalculateShares();
@@ -144,7 +144,10 @@ public partial class ReceiptItem : ObservableObject
 
     public void RecalculateShares()
     {
-        if (AssignedMembers.Count == 0) return;
+        if (AssignedMembers.Count == 0)
+        {
+            return;
+        }
 
         int count = AssignedMembers.Count;
         decimal baseAmount = Math.Floor((TotalPrice / count) * 100) / 100;
@@ -164,7 +167,10 @@ public partial class ReceiptItem : ObservableObject
         for (int i = 0; i < penniesToDistribute && i < count; i++)
         {
             distributionList[i].OwedAmount += 0.01m;
-            if (i == 0) distributionList[i].IsRemainderRecipient = true;
+            if (i == 0)
+            {
+                distributionList[i].IsRemainderRecipient = true;
+            }
         }
     }
 }
@@ -176,7 +182,7 @@ public partial class ReceiptCategory : ObservableObject
     [ObservableProperty]
     public partial string Name { get; set; } = string.Empty;
 
-    public ObservableCollection<ReceiptItem> Items { get; } = new();
+    public ObservableCollection<ReceiptItem> Items { get; } = [];
 }
 
 public partial class DisplayGroupMember : ObservableObject
@@ -193,7 +199,7 @@ public partial class DisplayGroupMember : ObservableObject
     [ObservableProperty]
     public partial bool IsVisible { get; set; } = true;
 
-    public ObservableCollection<ReceiptMemberShare> AssignedShares { get; } = new();
+    public ObservableCollection<ReceiptMemberShare> AssignedShares { get; } = [];
 
     public DisplayGroupMember()
     {

@@ -12,7 +12,10 @@ public class ExpensePhoto
 
     public ExpensePhoto(int expenseId, string photoUrl)
     {
-        if (string.IsNullOrWhiteSpace(photoUrl)) throw new ArgumentException("PhotoUrl cannot be empty", nameof(photoUrl));
+        if (string.IsNullOrWhiteSpace(photoUrl))
+        {
+            throw new ArgumentException("PhotoUrl cannot be empty", nameof(photoUrl));
+        }
 
         ExpenseId = expenseId;
         PhotoUrl = photoUrl;

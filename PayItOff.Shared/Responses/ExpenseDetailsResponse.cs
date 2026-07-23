@@ -14,8 +14,8 @@ public class ExpenseDetailsResponse
     public string? PayerPhoneNumber { get; set; }
     public string? PayerIBAN { get; set; }
 
-    public List<ExpenseParticipantDto> Participants { get; set; } = new();
-    public List<string> ReceiptPhotos { get; set; } = new();
+    public List<ExpenseParticipantDto> Participants { get; set; } = [];
+    public List<string> ReceiptPhotos { get; set; } = [];
 }
 
 public class ExpenseParticipantDto

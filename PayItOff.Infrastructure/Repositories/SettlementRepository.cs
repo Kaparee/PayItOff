@@ -44,7 +44,9 @@ public class SettlementRepository : ISettlementRepository
         IReadOnlyCollection<int> groupIds)
     {
         if (groupIds.Count == 0)
-            return new HashSet<(int SenderId, int ReceiverId, int GroupId)>();
+        {
+            return [];
+        }
 
         var rows = await _context.Settlements
             .AsNoTracking()

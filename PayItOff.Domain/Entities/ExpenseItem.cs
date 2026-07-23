@@ -12,20 +12,19 @@ namespace PayItOff.Domain.Entities
         public decimal Quantity { get; private set; }
         public decimal UnitPrice { get; private set; }
         public decimal TotalPrice { get; private set; }
-        private readonly List<ExpenseSplit> _splits = new();
+        private readonly List<ExpenseSplit> _splits = [];
         public IReadOnlyCollection<ExpenseSplit> Splits => _splits.AsReadOnly();
 
         protected ExpenseItem() { }
 
         private ExpenseItem(Expense expense, ExpenseGroup? expenseGroup, string name, string category, decimal quantity, decimal unitPrice)
         {
-            if (expense == null) { throw new ArgumentNullException(nameof(expense), "Nie może być null"); }
             if (string.IsNullOrWhiteSpace(name)) { throw new ArgumentException("Name cannot be empty", nameof(name)); }
             if (string.IsNullOrWhiteSpace(category)) { throw new ArgumentException("Category cannot be empty", nameof(category)); }
             if (quantity <= 0) { throw new InvalidOperationException("Nie można kupić mniej niż 0 rzeczy"); }
             if (unitPrice < 0) { throw new InvalidOperationException("Nie można kupić za mniej niż 0"); }
 
-            Expense = expense;
+            Expense = expense ?? throw new ArgumentNullException(nameof(expense), "Nie może być null");
             ExpenseId = expense.Id;
             ExpenseGroup = expenseGroup;
             ExpenseGroupId = (expenseGroup == null) ? null : expenseGroup.Id;

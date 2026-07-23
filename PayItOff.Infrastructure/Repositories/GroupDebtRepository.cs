@@ -42,25 +42,37 @@ public class GroupDebtRepository : IGroupDebtRepository
 
     public void ApplyDirectDebtReduction(GroupDebt debt, decimal reduction)
     {
-        if (reduction <= 0) return;
+        if (reduction <= 0)
+        {
+            return;
+        }
 
         debt.DecreaseAmount(reduction);
 
         if (debt.Amount <= 0)
+        {
             _context.GroupDebts.Remove(debt);
+        }
         else
+        {
             _context.GroupDebts.Update(debt);
+        }
     }
 
     public async Task ApplyDebtChangeAsync(Group group, User debtor, User creditor, decimal amountChange)
     {
-        if (amountChange == 0) return;
+        if (amountChange == 0)
+        {
+            return;
+        }
 
         if (amountChange < 0)
         {
             var forward = await GetDebtAsync(group.Id, debtor.Id, creditor.Id);
             if (forward is null || forward.Amount + amountChange < 0)
+            {
                 throw new InvalidOperationException("Niewystarczające saldo długu do zmniejszenia (kwota większa niż zapisany dług).");
+            }
         }
 
         var directDebt = await GetDebtAsync(group.Id, debtor.Id, creditor.Id);
@@ -70,9 +82,13 @@ public class GroupDebtRepository : IGroupDebtRepository
             directDebt.ChangeAmount(amountChange);
 
             if (directDebt.Amount <= 0)
+            {
                 _context.GroupDebts.Remove(directDebt);
+            }
             else
+            {
                 _context.GroupDebts.Update(directDebt);
+            }
 
             return;
         }
@@ -175,12 +191,13 @@ public class GroupDebtRepository : IGroupDebtRepository
         foreach (var item in balances)
         {
             var metadata = await _context.ExpenseSplits
-                .Where(s => (s.UserId == userId && s.ExpenseItem.Expense.PayerId == item.User.Id) ||
-                            (s.UserId == item.User.Id && s.ExpenseItem.Expense.PayerId == userId))
-                .OrderByDescending(s => s.ExpenseItem.Expense.PurchasedAt)
-                .Select(s => new { s.ExpenseItem.Category, s.ExpenseItem.Expense.PurchasedAt })
-                .Take(5)
-                .ToListAsync();
+                 .Where(s => (s.UserId == userId && s.ExpenseItem.Expense.PayerId == item.User.Id) ||
+                             (s.UserId == item.User.Id && s.ExpenseItem.Expense.PayerId == userId))
+                 .Where(s => (s.OwedAmount - s.PaidAmount) > 0)
+                 .OrderByDescending(s => s.ExpenseItem.Expense.PurchasedAt)
+                 .Select(s => new { s.ExpenseItem.Category, s.ExpenseItem.Expense.PurchasedAt })
+                 .Take(5)
+                 .ToListAsync();
 
             result.Add((
                 item.User.Id,

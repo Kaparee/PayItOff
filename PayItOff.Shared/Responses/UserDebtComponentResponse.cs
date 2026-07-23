@@ -12,7 +12,7 @@ public class UserDebtComponentResponse
     public string OtherName { get; set; } = string.Empty;
     public string OtherSurname { get; set; } = string.Empty;
     public string? OtherAvatarUrl { get; set; }
-    public List<string> Categories { get; set; } = new();
+    public List<string> Categories { get; set; } = [];
     public bool IsSettlement { get; set; }
     public string Status { get; set; } = string.Empty;
     public string TransferReference { get; set; } = string.Empty;

@@ -39,19 +39,31 @@ public class UserService : IUserService
     public async Task RegisterAsync(RegisterRequest request, IFormFile? avatar)
     {
         var validationResult = await _validator.ValidateAsync(request);
-        if (!validationResult.IsValid) throw new ValidationException(validationResult.Errors);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationException(validationResult.Errors);
+        }
 
         var existingUser = await _userRepository.GetUserByEmailAsync(request.Email);
-        if (existingUser != null) throw new UserAlreadyExistsException("Email", request.Email);
+        if (existingUser != null)
+        {
+            throw new UserAlreadyExistsException("Email", request.Email);
+        }
 
         var existingNickname = await _userRepository.GetUserByNicknameAsync(request.Nickname);
-        if (existingNickname != null) throw new UserAlreadyExistsException("Nickname", request.Nickname);
+        if (existingNickname != null)
+        {
+            throw new UserAlreadyExistsException("Nickname", request.Nickname);
+        }
 
         if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
         {
             request.PhoneNumber = PhoneNumberHelper.FormatPhoneNumber(request.PhoneNumber)!;
             var existingPhone = await _userRepository.GetUserByPhoneNumberAsync(request.PhoneNumber);
-            if (existingPhone != null) throw new UserAlreadyExistsException("PhoneNumber", request.PhoneNumber);
+            if (existingPhone != null)
+            {
+                throw new UserAlreadyExistsException("PhoneNumber", request.PhoneNumber);
+            }
         }
 
         string passwordHash = _passwordHasher.Hash(request.Password);
@@ -109,7 +121,9 @@ public class UserService : IUserService
         var user = await _userRepository.GetUserByVerificationTokenAsync(token);
 
         if (user == null)
+        {
             throw new Exception("Nieprawidłowy lub wygasły token weryfikacyjny.");
+        }
 
         user.ConfirmVerification(token);
 
@@ -174,7 +188,10 @@ public class UserService : IUserService
         if (request.Nickname != user.Nickname)
         {
             var existingNickname = await _userRepository.GetUserByNicknameAsync(request.Nickname);
-            if (existingNickname != null) throw new UserAlreadyExistsException("Nickname", request.Nickname);
+            if (existingNickname != null)
+            {
+                throw new UserAlreadyExistsException("Nickname", request.Nickname);
+            }
         }
 
         if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
@@ -183,7 +200,10 @@ public class UserService : IUserService
             if (request.PhoneNumber != user.PhoneNumber)
             {
                 var existingPhone = await _userRepository.GetUserByPhoneNumberAsync(request.PhoneNumber);
-                if (existingPhone != null) throw new UserAlreadyExistsException("PhoneNumber", request.PhoneNumber);
+                if (existingPhone != null)
+                {
+                    throw new UserAlreadyExistsException("PhoneNumber", request.PhoneNumber);
+                }
             }
         }
 
@@ -375,7 +395,7 @@ public class UserService : IUserService
         var user = await _userRepository.GetUserByIdAsync(userId);
         if (user is null) { throw new UserNotFoundException(); }
 
-        if(user.RefreshToken != request.RefreshToken ||  user.RefreshTokenExpiryTime < DateTime.UtcNow) { throw new UnauthorizedAccessException("Nieprawidłowy token odświeżający."); }
+        if (user.RefreshToken != request.RefreshToken || user.RefreshTokenExpiryTime < DateTime.UtcNow) { throw new UnauthorizedAccessException("Nieprawidłowy token odświeżający."); }
 
         var newToken = _jwtService.GenerateToken(user);
 

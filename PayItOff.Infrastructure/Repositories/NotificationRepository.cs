@@ -86,6 +86,13 @@ public class NotificationRepository : INotificationRepository
             .FirstOrDefaultAsync();
     }
 
+    public async Task<List<Notification>> GetActionNotificationsAsync(int userId, int entityId, EntityType entityType)
+    {
+        return await _context.Notifications
+            .Where(n => n.UserId == userId && n.EntityId == entityId && n.EntityType == entityType && n.Type == NotificationType.NeedAction && n.DeletedAt == null)
+            .ToListAsync();
+    }
+
     public async Task<List<Notification>> GetHiddenNotificationsFromTodayAsync(int userId)
     {
         var today = DateTime.UtcNow.Date;

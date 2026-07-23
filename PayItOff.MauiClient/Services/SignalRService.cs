@@ -1,9 +1,4 @@
-using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
-using PayItOff.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PayItOff.MauiClient.Services
 {
@@ -11,7 +6,7 @@ namespace PayItOff.MauiClient.Services
     {
         private readonly HubConnection _connection;
 
-        readonly string baseUrl = DeviceInfo.Platform == DevicePlatform.Android
+        private readonly string baseUrl = DeviceInfo.Platform == DevicePlatform.Android
                ? "http://192.168.0.89:5180/hubs/notifications"
                : "http://localhost:5180/hubs/notifications";
 

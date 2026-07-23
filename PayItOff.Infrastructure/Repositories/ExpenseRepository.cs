@@ -67,4 +67,13 @@ public class ExpenseRepository : IExpenseRepository
             .OrderByDescending(e => e.PurchasedAt)
             .ToListAsync();
     }
+
+    public async Task<List<string>> GetDistinctCategoriesByGroupAsync(int groupId)
+    {
+        return await _context.ExpenseItems
+            .Where(x => x.Expense.GroupId == groupId && !string.IsNullOrEmpty(x.Category))
+            .Select(x => x.Category)
+            .Distinct()
+            .ToListAsync();
+    }
 }

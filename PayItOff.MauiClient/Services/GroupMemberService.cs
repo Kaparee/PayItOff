@@ -1,4 +1,3 @@
-using PayItOff.Domain.Entities;
 using PayItOff.Shared.Requests;
 using PayItOff.Shared.Responses;
 using System.Net.Http.Json;
@@ -42,7 +41,9 @@ public class GroupMemberService
     {
         var response = await _httpClient.PostAsJsonAsync("GroupMember/invite", request);
         if (response.IsSuccessStatusCode)
+        {
             return (true, string.Empty);
+        }
 
         var error = await response.Content.ReadAsStringAsync();
         return (false, string.IsNullOrWhiteSpace(error) ? "Nie udało się wysłać zaproszenia." : error);

@@ -38,10 +38,14 @@ public partial class WalletPersonUiModel : ObservableObject
         get
         {
             if (!IsSettlement)
+            {
                 return Microsoft.Maui.Controls.Brush.Transparent;
+            }
 
             if (Status == "Rejected")
+            {
                 return new Microsoft.Maui.Controls.SolidColorBrush(Microsoft.Maui.Graphics.Colors.Black);
+            }
 
             return IsIncome
                 ? new Microsoft.Maui.Controls.SolidColorBrush(Microsoft.Maui.Graphics.Color.FromArgb("#10B981"))
@@ -75,9 +79,9 @@ public partial class WalletViewModel : PopupViewModelBase
 
     private int _loadId = 0;
     private CancellationTokenSource? _searchCts;
-    private List<WalletPersonUiModel> _allTransactions = new();
-    private List<PayableDebtOptionResponse> _allDebtOptions = new();
-    private List<DebtDisplayItem> _allNetPayCreditors = new();
+    private List<WalletPersonUiModel> _allTransactions = [];
+    private List<PayableDebtOptionResponse> _allDebtOptions = [];
+    private List<DebtDisplayItem> _allNetPayCreditors = [];
 
 
     [ObservableProperty]
@@ -173,7 +177,11 @@ public partial class WalletViewModel : PopupViewModelBase
     [RelayCommand]
     private void ChangeFilter(string filter)
     {
-        if (FilterType == filter) return;
+        if (FilterType == filter)
+        {
+            return;
+        }
+
         FilterType = filter;
     }
 
@@ -210,7 +218,10 @@ public partial class WalletViewModel : PopupViewModelBase
 
             var response = await _settlementService.GetHistoryAsync(CurrentPage, apiType, targetId);
 
-            if (currentLoadId != _loadId) return;
+            if (currentLoadId != _loadId)
+            {
+                return;
+            }
 
             if (response != null && response.Items != null)
             {
@@ -258,12 +269,16 @@ public partial class WalletViewModel : PopupViewModelBase
         catch (Exception ex)
         {
             if (currentLoadId == _loadId)
+            {
                 await ShowAlertAsync("Błąd", ex.Message, "OK");
+            }
         }
         finally
         {
             if (currentLoadId == _loadId)
+            {
                 IsBusy = false;
+            }
         }
     }
 
@@ -291,7 +306,11 @@ public partial class WalletViewModel : PopupViewModelBase
         if (string.IsNullOrWhiteSpace(SearchText))
         {
             Transactions.Clear();
-            foreach (var t in _allTransactions) Transactions.Add(t);
+            foreach (var t in _allTransactions)
+            {
+                Transactions.Add(t);
+            }
+
             return;
         }
 
@@ -302,7 +321,10 @@ public partial class WalletViewModel : PopupViewModelBase
             t.Amount.ToString().Contains(lowerValue)).ToList();
 
         Transactions.Clear();
-        foreach (var f in filtered) Transactions.Add(f);
+        foreach (var f in filtered)
+        {
+            Transactions.Add(f);
+        }
     }
 
     [RelayCommand]
@@ -332,17 +354,25 @@ public partial class WalletViewModel : PopupViewModelBase
         {
             SelectedPayableDebtOption = null;
             ApplyNetPaySearchFilter();
-            if (SelectedNetPayCreditor != null)
-                PaymentAmountText = SelectedNetPayCreditor.Amount.ToString("F2", CultureInfo.InvariantCulture);
+            PaymentAmountText = string.Empty;
+            Application.Current?.Dispatcher.Dispatch(async () =>
+            {
+                await Task.Delay(50);
+                SelectedNetPayCreditor = null;
+                PaymentAmountText = string.Empty;
+            });
         }
         else
         {
             SelectedNetPayCreditor = null;
             RefreshPayableDebtSearchFilter();
-            if (SelectedPayableDebtOption != null)
-                PaymentAmountText = SelectedPayableDebtOption.Amount.ToString("F2", CultureInfo.InvariantCulture);
-            else
+            PaymentAmountText = string.Empty;
+            Application.Current?.Dispatcher.Dispatch(async () =>
+            {
+                await Task.Delay(50);
+                SelectedPayableDebtOption = null;
                 PaymentAmountText = string.Empty;
+            });
         }
     }
 
@@ -396,7 +426,9 @@ public partial class WalletViewModel : PopupViewModelBase
                     await LoadDataAsync();
                 }
                 else
+                {
                     PaymentFormHint = err ?? "Nie udało się utworzyć spłaty netto.";
+                }
             }
             finally
             {
@@ -437,7 +469,9 @@ public partial class WalletViewModel : PopupViewModelBase
                 await LoadDataAsync();
             }
             else
+            {
                 PaymentFormHint = err ?? "Nie udało się utworzyć spłaty.";
+            }
         }
         finally
         {
@@ -448,7 +482,10 @@ public partial class WalletViewModel : PopupViewModelBase
     [RelayCommand]
     private async Task AcceptSettlement(WalletPersonUiModel item)
     {
-        if (item == null || !item.IsSettlement) return;
+        if (item == null || !item.IsSettlement)
+        {
+            return;
+        }
 
         var confirm = await ShowAlertAsync(
             "Akceptacja spłaty",
@@ -457,7 +494,9 @@ public partial class WalletViewModel : PopupViewModelBase
             "Nie");
 
         if (!confirm)
+        {
             return;
+        }
 
         IsBusy = true;
 
@@ -471,7 +510,9 @@ public partial class WalletViewModel : PopupViewModelBase
                 await LoadDataAsync();
             }
             else
+            {
                 await ShowAlertAsync("Błąd", "Nie udało się zatwierdzić spłaty.", "OK");
+            }
         }
         finally
         {
@@ -480,9 +521,12 @@ public partial class WalletViewModel : PopupViewModelBase
     }
 
     [RelayCommand]
-    private async Task DeclineSettlement(WalletPersonUiModel item)
+    private async Task RejectSettlement(WalletPersonUiModel item)
     {
-        if (item == null || !item.IsSettlement) return;
+        if (item == null || !item.IsSettlement)
+        {
+            return;
+        }
 
         var confirm = await ShowAlertAsync(
             "Odrzucenie spłaty",
@@ -491,7 +535,9 @@ public partial class WalletViewModel : PopupViewModelBase
             "Anuluj");
 
         if (!confirm)
+        {
             return;
+        }
 
         IsBusy = true;
 
@@ -505,7 +551,9 @@ public partial class WalletViewModel : PopupViewModelBase
                 await LoadDataAsync();
             }
             else
+            {
                 await ShowAlertAsync("Błąd", "Wystąpił problem przy odrzucaniu.", "OK");
+            }
         }
         finally
         {
@@ -516,7 +564,10 @@ public partial class WalletViewModel : PopupViewModelBase
     [RelayCommand]
     private async Task ShowTransactionDetails(WalletPersonUiModel item)
     {
-        if (item == null) return;
+        if (item == null)
+        {
+            return;
+        }
 
         SelectedTransactionDetails = item;
         SelectedExpenseDetails = null;
@@ -560,7 +611,11 @@ public partial class WalletViewModel : PopupViewModelBase
     [RelayCommand]
     private async Task RemindDebt(WalletPersonUiModel item)
     {
-        if (item == null || item.GroupId == 0) return;
+        if (item == null || item.GroupId == 0)
+        {
+            return;
+        }
+
         IsBusy = true;
 
         var req = new RemindDebtRequest { GroupId = item.GroupId, DebtorUserId = item.OtherUserId };
@@ -572,7 +627,9 @@ public partial class WalletViewModel : PopupViewModelBase
             await LoadDataAsync();
         }
         else
+        {
             await ShowAlertAsync("Błąd", err ?? "Nie udało się wysłać przypomnienia.", "OK");
+        }
 
         IsBusy = false;
     }
@@ -597,7 +654,10 @@ public partial class WalletViewModel : PopupViewModelBase
 
             var action = await ShowActionSheetAsync("Z kim chcesz uprościć długi?", actionSheetButtons);
 
-            if (action == "Anuluj" || string.IsNullOrEmpty(action)) return;
+            if (action == "Anuluj" || string.IsNullOrEmpty(action))
+            {
+                return;
+            }
 
             var selectedUser = uniqueCreditors.FirstOrDefault(c => $"{c.CreditorName} {c.CreditorSurname}" == action);
             if (selectedUser != null)
@@ -612,7 +672,9 @@ public partial class WalletViewModel : PopupViewModelBase
                     await LoadDataAsync();
                 }
                 else
+                {
                     await ShowAlertAsync("Błąd", err ?? "Nie udało się skompensować długów.", "OK");
+                }
             }
         }
         catch (Exception)
@@ -638,7 +700,11 @@ public partial class WalletViewModel : PopupViewModelBase
         if (string.IsNullOrWhiteSpace(SearchDebtText))
         {
             FilteredPayableDebtOptions.Clear();
-            foreach (var o in _allDebtOptions) FilteredPayableDebtOptions.Add(o);
+            foreach (var o in _allDebtOptions)
+            {
+                FilteredPayableDebtOptions.Add(o);
+            }
+
             return;
         }
 
@@ -658,7 +724,11 @@ public partial class WalletViewModel : PopupViewModelBase
         if (string.IsNullOrWhiteSpace(SearchDebtText))
         {
             FilteredNetPayCreditors.Clear();
-            foreach (var c in _allNetPayCreditors) FilteredNetPayCreditors.Add(c);
+            foreach (var c in _allNetPayCreditors)
+            {
+                FilteredNetPayCreditors.Add(c);
+            }
+
             return;
         }
 
@@ -678,7 +748,7 @@ public partial class WalletViewModel : PopupViewModelBase
             UserId = e.UserId,
             FullName = $"{e.Name} {e.Surname}",
             AvatarUrl = e.AvatarUrl,
-            Number = e.Number,
+            Number = e.Number!,
             CategoriesDisplay = e.Categories != null && e.Categories.Count > 0 ? string.Join(", ", e.Categories) : "—",
             Date = e.Date,
             Amount = e.Amount
@@ -699,9 +769,12 @@ public partial class WalletViewModel : PopupViewModelBase
         try
         {
             var options = await _settlementService.GetPayableDebtOptionsAsync();
-            _allDebtOptions = options ?? new List<PayableDebtOptionResponse>();
+            _allDebtOptions = options ?? [];
             FilteredPayableDebtOptions.Clear();
-            foreach (var o in _allDebtOptions) FilteredPayableDebtOptions.Add(o);
+            foreach (var o in _allDebtOptions)
+            {
+                FilteredPayableDebtOptions.Add(o);
+            }
 
             await LoadNetPayCreditorsAsync();
 
@@ -723,10 +796,27 @@ public partial class WalletViewModel : PopupViewModelBase
                 if (match != null)
                 {
                     IsNetPayMode = true;
-                    SelectedNetPayCreditor = match;
                     ApplyNetPaySearchFilter();
-                    PaymentAmountText = match.Amount.ToString("F2", CultureInfo.InvariantCulture);
+                    Application.Current?.Dispatcher.Dispatch(async () =>
+                    {
+                        await Task.Delay(100);
+                        SelectedNetPayCreditor = match;
+                        PaymentAmountText = match.Amount.ToString("F2", CultureInfo.InvariantCulture);
+                    });
                 }
+            }
+            else
+            {
+                SelectedPayableDebtOption = null;
+                PaymentAmountText = string.Empty;
+
+                Application.Current?.Dispatcher.Dispatch(async () =>
+                {
+                    await Task.Delay(50);
+                    SelectedNetPayCreditor = null;
+                    SelectedPayableDebtOption = null;
+                    PaymentAmountText = string.Empty;
+                });
             }
 
             IsPaymentOverlayVisible = true;
@@ -794,12 +884,18 @@ public partial class WalletViewModel : PopupViewModelBase
     private void ShowExpensePhotos()
     {
         if (SelectedExpenseDetails?.ReceiptPhotos == null || SelectedExpenseDetails.ReceiptPhotos.Count == 0)
+        {
             return;
+        }
 
         ExpensePhotosToView.Clear();
         foreach (var url in SelectedExpenseDetails.ReceiptPhotos)
         {
-            if (string.IsNullOrEmpty(url)) continue;
+            if (string.IsNullOrEmpty(url))
+            {
+                continue;
+            }
+
             ExpensePhotosToView.Add(url);
         }
 
@@ -819,7 +915,11 @@ public partial class WalletViewModel : PopupViewModelBase
     [RelayCommand]
     private void PhotoSwipeLeft()
     {
-        if (ExpensePhotosToView.Count == 0) return;
+        if (ExpensePhotosToView.Count == 0)
+        {
+            return;
+        }
+
         SelectedPhotoIndex = (SelectedPhotoIndex + 1) % ExpensePhotosToView.Count;
         SelectedExpensePhotoUrl = ExpensePhotosToView[SelectedPhotoIndex];
         OnPropertyChanged(nameof(PhotoViewerTitle));
@@ -828,7 +928,11 @@ public partial class WalletViewModel : PopupViewModelBase
     [RelayCommand]
     private void PhotoSwipeRight()
     {
-        if (ExpensePhotosToView.Count == 0) return;
+        if (ExpensePhotosToView.Count == 0)
+        {
+            return;
+        }
+
         SelectedPhotoIndex = (SelectedPhotoIndex - 1 + ExpensePhotosToView.Count) % ExpensePhotosToView.Count;
         SelectedExpensePhotoUrl = ExpensePhotosToView[SelectedPhotoIndex];
         OnPropertyChanged(nameof(PhotoViewerTitle));
@@ -837,7 +941,11 @@ public partial class WalletViewModel : PopupViewModelBase
     [RelayCommand]
     private void SelectPhotoThumbnail(string url)
     {
-        if (string.IsNullOrEmpty(url)) return;
+        if (string.IsNullOrEmpty(url))
+        {
+            return;
+        }
+
         var idx = ExpensePhotosToView.IndexOf(url);
         if (idx >= 0)
         {
